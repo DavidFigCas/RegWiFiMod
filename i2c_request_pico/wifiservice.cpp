@@ -6,7 +6,7 @@ boolean isSaved = false;
 bool ALLOWONDEMAND   = true; // enable on demand
 bool WMISBLOCKING    = true;
 //WiFiManager wifiManager;
-WiFiManager_RP2040W wifiManager;
+//WiFiManager_RP2040W wifiManager;
 //std::vector<WiFiManagerParameter*> customParams;
 
 
@@ -15,14 +15,16 @@ void wifi_init()
 
   if (obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED))
   {
-    /*WiFi.mode(WIFI_STA);
-      String auxssid = obj["ssid"].as<String>();
-      String auxpass = obj["pass"].as<String>();
+    WiFi.mode(WIFI_STA);
+    const char* auxssid = obj["ssid"].as<String>().c_str();
+    const char* auxpass = obj["pass"].as<String>().c_str();
 
-      WiFi.begin(obj["ssid"].as<const char*>(), obj["pass"].as<const char*>());
-      Serial.print("{\"wifi\":{\"ssid\":\"");
-      Serial.print(obj["ssid"].as<const char*>());
-      Serial.println("\"}}");*/
+    WiFi.begin(obj["ssid"].as<const char*>(), obj["pass"].as<const char*>());
+    Serial.print("{\"wifi\":{\"ssid\":\"");
+    Serial.print(obj["ssid"].as<const char*>());
+    Serial.println("\"}}");
+
+    // WiFi.begin(auxssid, auxpass);
 
     Serial.println("{\"wifi\":\"init\"}");
 
@@ -49,9 +51,9 @@ void wifi_init()
 
     //set config save notify callback
     //    wifiManager.setSaveParamsCallback(saveConfigCallback);
-    wifiManager.setSaveConfigCallback(saveWifiCallback);
+    //wifiManager.setSaveConfigCallback(saveWifiCallback);
     //wifiManager.setWebServerCallback(bindServerCallback);
-    wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
+    //wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
 
     //set static ip
     //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
@@ -72,14 +74,14 @@ void wifi_init()
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
-    if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
-      Serial.println("failed to connect previous network and hit timeout");
-      delay(3000);
-      //reset and try again, or maybe put it to deep sleep
-      //ESP.restart();
-      //delay(5000);
-    }
-    else
+    //if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
+    //Serial.println("failed to connect previous network and hit timeout");
+    //delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    //ESP.restart();
+    //delay(5000);
+    //}
+    //else
     {
       //if you get here you have connected to the WiFi
       Serial.println("{\"wifi\":\"first connection\"}");
@@ -114,14 +116,14 @@ bool wifi_check()
   //  Serial.println("{\"wifi\":\"manager process\"}");
   //wifiManager.process();
   //}
-  
+
   // is configuration portal requested?
-  if (ALLOWONDEMAND && digitalRead(ONDDEMANDPIN) == LOW )
+  //if (ALLOWONDEMAND && digitalRead(ONDDEMANDPIN) == LOW )
   {
-    delay(100);
-    if ( digitalRead(ONDDEMANDPIN) == LOW )
+    //delay(100);
+    //if ( digitalRead(ONDDEMANDPIN) == LOW )
     {
-      Serial.println("BUTTON PRESSED");
+      // Serial.println("BUTTON PRESSED");
 
       // button reset/reboot
       // wm.resetSettings();
@@ -131,25 +133,25 @@ bool wifi_check()
 
 
       //wifiManager.setSaveParamsCallback(saveConfigCallback);
-      wifiManager.setSaveConfigCallback(saveWifiCallback);
+      //wifiManager.setSaveConfigCallback(saveWifiCallback);
       //wifiManager.setWebServerCallback(bindServerCallback);
-      wifiManager.setConfigPortalTimeout(140);
-      wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
+      //wifiManager.setConfigPortalTimeout(140);
+      //wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
       //wifiManager.setParamsPage(true); // move params to seperate page, not wifi, do not combine with setmenu!
 
       // disable captive portal redirection
       // wm.setCaptivePortalEnable(false);
 
-      if (!wifiManager.startConfigPortal("OnDemandAP", "12345678"))
+      //if (!wifiManager.startConfigPortal("OnDemandAP", "12345678"))
       {
-        Serial.println("failed to connect on demand and hit timeout");
+        //Serial.println("failed to connect on demand and hit timeout");
         //delay(3000);
       }
     }
-    else
+    //else
     {
       //if you get here you have connected to the WiFi
-      Serial.println("{\"new_wifi\":\"connected\"}");
+      //Serial.println("{\"new_wifi\":\"connected\"}");
       //getTime();
     }
   }
@@ -176,6 +178,9 @@ bool wifi_check()
       if (WiFi.status() == WL_CONNECTED)
       {
         Serial.println("{\"check_wifi\":\"connected\"}");
+        Serial.print("{\"ip\":\"");
+        Serial.print(WiFi.localIP());
+        Serial.println("\"}");
         //if (obj["enable_rtc"].as<bool>())
         //  update_clock();
 
@@ -194,7 +199,7 @@ bool wifi_check()
 
   }
   //else
-    return flag;
+  return flag;
 }
 
 

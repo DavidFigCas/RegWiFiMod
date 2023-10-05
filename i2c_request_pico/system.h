@@ -6,9 +6,9 @@
 //#include <vector>
 //#include <PubSubClient.h>
 #include <WiFi.h>
-//#include <WiFiManager_RP2040W.h>  
 #include <LittleFS.h>
 #include <Wire.h>
+//#include <WiFiManager_RP2040W.h>  
 
 #include "version.h"
 #include "wifiservice.h"

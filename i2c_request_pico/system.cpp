@@ -1,6 +1,7 @@
 #include "system.h"
 
 #define   PRESS   LOW
+//pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
 bool factory_press = false;
 unsigned long factory_time = 0;
@@ -34,6 +35,7 @@ void system_init()
     //connectFirebase();
   }
   //pins_init();
+  //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change

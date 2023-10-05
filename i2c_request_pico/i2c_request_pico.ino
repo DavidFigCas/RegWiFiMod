@@ -19,7 +19,7 @@ void loop()
     mainRefresh = millis();
     Serial.println("Runing");
 
-    /*
+    
 
 
     // ----------------------------------------- check internet
@@ -28,8 +28,9 @@ void loop()
     {
       //if ( mqtt_check())
       //mqtt_send();
+      Serial.println("Connected");
     }
-    */
+    
 
   }
 
