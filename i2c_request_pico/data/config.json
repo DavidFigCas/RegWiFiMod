@@ -1,0 +1,19 @@
+{
+  "enable_mqtt":true,
+  "mqtt_server": "inventoteca.com",
+  "mqtt_port": 1883,
+  "test": true,
+  "total":78021,
+  "init_bag": 78014,
+  "gift": 0,
+  "id": "18",
+  "enable_wifi": true,
+  "ssid": "Inventoteca_2G",
+  "pass": "science_7425",
+  "mainTime": 10000,
+  "key": "AIzaSyCmmaQlAfQW3ob_rD3SE8prNWRrPB_EUfM",
+  "email": "esp_gas1@gas.com",
+  "firepass": "Homerosim",
+  "url": "gasdb1-default-rtdb.firebaseio.com"
+  
+}

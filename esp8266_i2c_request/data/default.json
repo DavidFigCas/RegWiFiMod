@@ -1,0 +1,14 @@
+{
+  "mqtt_server": "www.inventoteca.com",
+  "mqtt_port": 1883,
+  "test": true,
+  "total":78014,
+  "init_bag": 78014,
+  "gift": 0,
+  "id": "18",
+  "enable_wifi": true,
+  "ssid": "Inventoteca_2G",
+  "pass": "science_7425",
+  "mainTime": 10000,
+  "api_token": "AIzaSyAOfGOjdpVQZtnhwTjmNRy8mApY993zHfc"
+}
