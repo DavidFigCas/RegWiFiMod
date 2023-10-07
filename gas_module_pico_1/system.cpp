@@ -32,8 +32,7 @@ void system_init()
     loadConfig();       // Load and update behaivor of system
     wifi_init();
     mqtt_init();
-    //I2C_Init();
-    //connectFirebase();
+    I2C_Init();
   }
   //pins_init();
   //pinMode(ONDDEMANDPIN, INPUT_PULLUP);

@@ -7,7 +7,10 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <LittleFS.h>
-#include <Wire.h>
+//#include <Wire.h>
+#include "i2c_fifo.h"
+#include "i2c_slave.h"
+#include "pico/stdlib.h"
 //#include <WiFiManager_RP2040W.h>  
 
 #include "version.h"
@@ -15,7 +18,7 @@
 //#include "pins.h"
 #include "filespiffs.h"
 #include "mqttservice.h"
-//#include "wireservice.h"
+#include "wireservice.h"
 
 
 //15 seconds WDT

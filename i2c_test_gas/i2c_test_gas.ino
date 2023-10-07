@@ -34,14 +34,20 @@ void loop() {
   // Отправляем байт 0x03 и читаем 4 байта
  
   Wire.beginTransmission(SENSOR_ADDRESS);
-  Wire.write(0x07);
+  Wire.write(0x03);
   Wire.endTransmission(false); // Не закрывать сессию передачи
-  Wire.requestFrom(SENSOR_ADDRESS, 42);
+  Wire.write(0x29);
+  Wire.write(0x30);
+  Wire.write(0x31);
+  Wire.write(0x32);
+  
+  /*Wire.requestFrom(SENSOR_ADDRESS, 42);
   Serial.print("Read 42 bytes: ");
   while (Wire.available()) {
     readValue = Wire.read();
     Serial.print(char (readValue));
-  }
+  }*/
+  
   Wire.endTransmission();
   Serial.println();
 
