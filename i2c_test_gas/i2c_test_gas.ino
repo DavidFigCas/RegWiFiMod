@@ -30,7 +30,7 @@ void loop() {
  // }
   //delay(1000);
   Wire.endTransmission();
-  delay(1000);
+  delay(5000);
   // Отправляем байт 0x03 и читаем 4 байта
  
   Wire.beginTransmission(SENSOR_ADDRESS);

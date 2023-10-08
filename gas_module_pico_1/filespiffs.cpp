@@ -4,7 +4,7 @@
 JsonObject obj;
 StaticJsonDocument<FILE_SIZE> doc;
 
-JsonObject obj_list;
+JsonArray obj_list;
 StaticJsonDocument<FILE_SIZE> doc_list;
 
 const char* filename = "/config.json";
@@ -37,7 +37,7 @@ bool spiffs_init()
   // open file to load config
 
   obj = getJSonFromFile(&doc, filename);
-  obj_list = getJSonFromFile(&doc_list, filelist);
+  obj_list = getJSonArrayFromFile(&doc_list, filelist);
 
 
   if (obj.size() == 0)
@@ -155,7 +155,88 @@ void saveConfigData()
 // ------------------------------------------------------------------------------------------- saveListData
 void saveListData()
 {
-  Serial.println(saveJSonToAFile(&obj_list, filelist) ? "{\"list_update_spiffs\":true}" : "{\"list_update_spiffs\":false}");
+  Serial.println(saveJSonArrayToAFile(&obj_list, filelist) ? "{\"list_update_spiffs\":true}" : "{\"list_update_spiffs\":false}");
   if (obj["test"].as<bool>())
-    serializeJson(doc_list, Serial);
+    serializeJson(obj_list, Serial);
+}
+
+
+// ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
+
+JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *dev_doc, String filename, bool forceCleanONJsonError)
+{
+  // open the file for reading:
+  file = LittleFS.open(filename,"r");
+  if (file)
+  {
+    //Serial.println("Opening File");
+
+    size_t size = file.size();
+    //Serial.println(size);
+
+    if (size > FILE_SIZE)
+    {
+      //Serial.println("Too large file");
+      //return false;
+    }
+
+    DeserializationError error = deserializeJson(*dev_doc, file);
+    if (error)
+    {
+      // if the file didn't open, print an error:
+      //Serial.print(F("Error parsing JSON "));
+      //Serial.println(error.c_str());
+
+      if (forceCleanONJsonError)
+      {
+        return dev_doc->to<JsonArray>();
+      }
+    }
+
+    // close the file:
+    file.close();
+
+    return dev_doc->as<JsonArray>();
+  } else {
+    // if the file didn't open, print an error:
+    //Serial.print(F("Error opening (or file not exists) "));
+    //Serial.println(filename);
+
+    //Serial.println(F("Empty json created"));
+    return dev_doc->to<JsonArray>();
+  }
+
+}
+
+
+// --------------------------------------------------------------------------------------------------- saveJSonArrayToAFile
+bool saveJSonArrayToAFile(JsonArray * dev_doc, String filename)
+{
+  //SD.remove(filename);
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  //Serial.println(F("Open file in write mode"));
+  file = LittleFS.open(filename, "w");
+  if (file) {
+    //Serial.print(F("Filename --> "));
+    //Serial.println(filename);
+
+    //Serial.print(F("Start write..."));
+
+    serializeJson(*dev_doc, file);
+
+    //Serial.print(F("..."));
+    // close the file:
+    file.close();
+    //Serial.println(F("done."));
+
+    return true;
+  } else {
+    // if the file didn't open, print an error:
+    //Serial.print(F("Error opening "));
+    //Serial.println(filename);
+
+    return false;
+  }
 }

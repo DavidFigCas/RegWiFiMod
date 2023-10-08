@@ -6,6 +6,7 @@ WiFiClient client_http;
 
 const char* publish_topic = "/out";
 const char* subcribe_topic = "/in";
+const char* add_topic = "/add";
 char buffer_union_publish[30];
 char buffer_union_subcribe[30];
 char buffer_msg[30];
@@ -58,16 +59,83 @@ void mqtt_send()
 //--------------------------------------------------- callback
 void callback(char* topic, byte* payload, unsigned int length)
 {
-  //strcat(strcpy(buffer_union_publish, client_id), publish_topic);
-  //strcat(strcpy(buffer_union_publish, obj["id"].as<const char*>()), publish_topic);
+  char jsonPayload[length + 1]; // +1 para el carácter nulo
+  memcpy(jsonPayload, payload, length);
+  jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
+
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+  Serial.println(jsonPayload); // Imprime el payload como cadena
+
+
+
+  if (strcmp(topic, strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic)) == 0)
+  {
+    // Parsear el payload a un array de objetos JSON
+    DynamicJsonDocument doc_m(FILE_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    DeserializationError error = deserializeJson(doc_m, jsonPayload);
+
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    // Verificar que el payload sea un array
+    if (!doc_m.is<JsonArray>()) {
+      Serial.println("El payload no es un array JSON.");
+      return;
+    }
+
+    // Iterar sobre los elementos del array
+    obj_list = doc_m.as<JsonArray>();
+    for (JsonObject jsonObject : obj_list) {
+      const char* nombre = jsonObject["nombre"];
+      int cliente = jsonObject["cliente"];
+      float lat = jsonObject["lat"];
+      float lon = jsonObject["lon"];
+      int litros = jsonObject["litros"];
+      float precio = jsonObject["precio"];
+      float factor = jsonObject["factor"];
+
+      Serial.print("Nombre: ");
+      Serial.println(nombre);
+      Serial.print("Cliente: ");
+      Serial.println(cliente);
+      Serial.print("Latitud: ");
+      Serial.println(lat, 6); // Imprimir con 6 decimales de precisión
+      Serial.print("Longitud: ");
+      Serial.println(lon, 6); // Imprimir con 6 decimales de precisión
+      Serial.print("Litros: ");
+      Serial.println(litros);
+      Serial.print("Precio: ");
+      Serial.println(precio);
+      Serial.print("Factor: ");
+      Serial.println(factor);
+    }
+
+    saveListData();
+
   }
-  Serial.println();
+  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic),add_topic)) == 0)
+  {
+    Serial.println("Adding");
+    DynamicJsonDocument doc_m_add(FILE_SIZE/10); // Tamaño máximo del JSON, ajusta según tus necesidades
+    DeserializationError error = deserializeJson(doc_m_add, jsonPayload);
+
+    // Verificar que el payload sea un object
+    if (!doc_m_add.is<JsonObject>()) {
+      Serial.println("El payload no es un JSON.");
+      return;
+    }
+
+    // Iterar sobre los elementos del array
+    obj_list.add(doc_m_add.as<JsonObject>());
+    saveListData();
+  }
 }
+
 
 
 //--------------------------------------------------- reconnect
@@ -85,6 +153,11 @@ bool reconnect()
     {
       Serial.println("connected");
       Mclient.subscribe(buffer_union_subcribe);
+      char newTopic[strlen(buffer_union_subcribe) + strlen(add_topic) + 1];
+      strcpy(newTopic, buffer_union_subcribe);
+      strcat(newTopic, add_topic);
+      Serial.println(newTopic);
+      Mclient.subscribe(newTopic);
       recsta =  true;
     }
     else

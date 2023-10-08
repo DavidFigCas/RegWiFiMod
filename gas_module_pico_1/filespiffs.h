@@ -9,7 +9,7 @@
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
-extern JsonObject obj_list;
+extern JsonArray obj_list;
 extern StaticJsonDocument<FILE_SIZE> doc_list;
 
 extern const char *filename;
@@ -25,5 +25,7 @@ bool saveJSonToAFile(JsonObject * doc, String filename);
 void saveConfigData();
 void saveListData();
 bool spiffs_init();
+bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
+JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
 
 #endif  // FILESPIFFS_H
