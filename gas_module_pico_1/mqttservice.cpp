@@ -80,7 +80,7 @@ void callback(char* topic, byte* payload, unsigned int length)
   if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic)) == 0)
   {
     // Parsear el payload a un array de objetos JSON
-    DynamicJsonDocument doc_m(FILE_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    DynamicJsonDocument doc_m(LIST_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
     DeserializationError error = deserializeJson(doc_m, jsonPayload);
 
     if (error) {
@@ -130,8 +130,9 @@ void callback(char* topic, byte* payload, unsigned int length)
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
   {
     Serial.println("Adding");
-    DynamicJsonDocument doc_m(length*2); // Tamaño máximo del JSON, ajusta según tus necesidades
-   // DynamicJsonDocument doc_m(FILE_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    const int len = length+10;
+    //StaticJsonDocument<len> doc_m; // Tamaño máximo del JSON, ajusta según tus necesidades
+    DynamicJsonDocument doc_m(len); // Tamaño máximo del JSON, ajusta según tus necesidades
     DeserializationError error = deserializeJson(doc_m, jsonPayload);
 
     // Verificar que el payload sea un object

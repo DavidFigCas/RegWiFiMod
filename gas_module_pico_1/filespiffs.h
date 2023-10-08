@@ -5,12 +5,15 @@
 //#include <LittleFS.h>
 
 
-#define FILE_SIZE   1024
+#define FILE_SIZE   512
+#define LIST_SIZE   512
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
+//extern DynamicJsonDocument doc(FILE_SIZE);
 extern JsonArray obj_list;
 extern StaticJsonDocument<FILE_SIZE> doc_list;
+//extern DynamicJsonDocument doc_list;
 
 extern const char *filename;
 extern const char *filedefault;
@@ -26,6 +29,7 @@ void saveConfigData();
 void saveListData();
 bool spiffs_init();
 bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
-JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
+JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
+//JsonArray getJSonArrayFromFile(DynamicJsonDocument* doc_list, String filename,bool forceCleanONJsonError = true);
 
 #endif  // FILESPIFFS_H

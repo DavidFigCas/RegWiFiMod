@@ -1,11 +1,12 @@
 #include "filespiffs.h"
-//#include <LittleFS.h>
 
 JsonObject obj;
 StaticJsonDocument<FILE_SIZE> doc;
+//DynamicJsonDocument doc(FILE_SIZE);
 
 JsonArray obj_list;
-StaticJsonDocument<FILE_SIZE> doc_list;
+StaticJsonDocument<LIST_SIZE> doc_list;
+//DynamicJsonDocument doc_list(LIST_SIZE);
 
 
 const char* filename = "/config.json";
@@ -169,7 +170,9 @@ void saveListData()
 
 // ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
 
-JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename, bool forceCleanONJsonError)
+//JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename, bool forceCleanONJsonError)
+JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, bool forceCleanONJsonError)
+
 {
   // open the file for reading:
   file = LittleFS.open(filename, "r");
@@ -180,7 +183,7 @@ JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String f
     size_t size = file.size();
     //Serial.println(size);
 
-    if (size > FILE_SIZE)
+    if (size > LIST_SIZE)
     {
       //Serial.println("Too large file");
       //return false;

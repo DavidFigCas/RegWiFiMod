@@ -1,5 +1,5 @@
 {
-  "mqtt_server": "www.inventoteca.com",
+  "mqtt_server": "inventoteca.com",
   "mqtt_port": 1883,
   "test": true,
   "total":78014,
