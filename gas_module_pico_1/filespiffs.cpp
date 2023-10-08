@@ -7,6 +7,7 @@ StaticJsonDocument<FILE_SIZE> doc;
 JsonArray obj_list;
 StaticJsonDocument<FILE_SIZE> doc_list;
 
+
 const char* filename = "/config.json";
 const char *filedefault = "/default.json";
 const char *filelist = "/list.json";
@@ -38,6 +39,11 @@ bool spiffs_init()
 
   obj = getJSonFromFile(&doc, filename);
   obj_list = getJSonArrayFromFile(&doc_list, filelist);
+  if (obj_list.isNull())
+  {
+    Serial.println("Rehaciendo null");
+    obj_list = doc_list.to<JsonArray>();
+  }
 
 
   if (obj.size() == 0)
@@ -98,7 +104,7 @@ bool saveJSonToAFile(JsonObject * doc, String filename) {
 JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError)
 {
   // open the file for reading:
-  file = LittleFS.open(filename,"r");
+  file = LittleFS.open(filename, "r");
   if (file)
   {
     //Serial.println("Opening File");
@@ -163,10 +169,10 @@ void saveListData()
 
 // ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
 
-JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *dev_doc, String filename, bool forceCleanONJsonError)
+JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename, bool forceCleanONJsonError)
 {
   // open the file for reading:
-  file = LittleFS.open(filename,"r");
+  file = LittleFS.open(filename, "r");
   if (file)
   {
     //Serial.println("Opening File");
@@ -180,7 +186,7 @@ JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *dev_doc, String fi
       //return false;
     }
 
-    DeserializationError error = deserializeJson(*dev_doc, file);
+    DeserializationError error = deserializeJson(*doc_list, file);
     if (error)
     {
       // if the file didn't open, print an error:
@@ -189,28 +195,28 @@ JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *dev_doc, String fi
 
       if (forceCleanONJsonError)
       {
-        return dev_doc->to<JsonArray>();
+        return doc_list->to<JsonArray>();
       }
     }
 
     // close the file:
     file.close();
 
-    return dev_doc->as<JsonArray>();
+    return doc_list->as<JsonArray>();
   } else {
     // if the file didn't open, print an error:
     //Serial.print(F("Error opening (or file not exists) "));
     //Serial.println(filename);
 
     //Serial.println(F("Empty json created"));
-    return dev_doc->to<JsonArray>();
+    return doc_list->to<JsonArray>();
   }
 
 }
 
 
 // --------------------------------------------------------------------------------------------------- saveJSonArrayToAFile
-bool saveJSonArrayToAFile(JsonArray * dev_doc, String filename)
+bool saveJSonArrayToAFile(JsonArray * doc_list, String filename)
 {
   //SD.remove(filename);
 
@@ -224,7 +230,7 @@ bool saveJSonArrayToAFile(JsonArray * dev_doc, String filename)
 
     //Serial.print(F("Start write..."));
 
-    serializeJson(*dev_doc, file);
+    serializeJson(*doc_list, file);
 
     //Serial.print(F("..."));
     // close the file:

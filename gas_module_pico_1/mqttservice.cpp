@@ -6,7 +6,10 @@ WiFiClient client_http;
 
 const char* publish_topic = "/out";
 const char* subcribe_topic = "/in";
+const char* list_topic = "/list";
 const char* add_topic = "/add";
+const char* config_topic = "/config";
+const char* wild_topic = "/#";
 char buffer_union_publish[30];
 char buffer_union_subcribe[30];
 char buffer_msg[30];
@@ -62,15 +65,19 @@ void callback(char* topic, byte* payload, unsigned int length)
   char jsonPayload[length + 1]; // +1 para el carácter nulo
   memcpy(jsonPayload, payload, length);
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
+  Serial.print("Message arrived: ");
 
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  Serial.println(jsonPayload); // Imprime el payload como cadena
+  if (obj["test"].as<bool>())
+  {
+    Serial.print(topic);
+    Serial.print("<-- ");
+    Serial.print(jsonPayload); // Imprime el payload como cadena
+  }
+  Serial.println();
 
 
 
-  if (strcmp(topic, strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic)) == 0)
+  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic)) == 0)
   {
     // Parsear el payload a un array de objetos JSON
     DynamicJsonDocument doc_m(FILE_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
@@ -99,6 +106,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       float precio = jsonObject["precio"];
       float factor = jsonObject["factor"];
 
+      Serial.println();
       Serial.print("Nombre: ");
       Serial.println(nombre);
       Serial.print("Cliente: ");
@@ -113,26 +121,35 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println(precio);
       Serial.print("Factor: ");
       Serial.println(factor);
+      Serial.println();
     }
 
     saveListData();
 
   }
-  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic),add_topic)) == 0)
+  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
   {
     Serial.println("Adding");
-    DynamicJsonDocument doc_m_add(FILE_SIZE/10); // Tamaño máximo del JSON, ajusta según tus necesidades
-    DeserializationError error = deserializeJson(doc_m_add, jsonPayload);
+    //DynamicJsonDocument doc_m_add(length*2); // Tamaño máximo del JSON, ajusta según tus necesidades
+   // DynamicJsonDocument doc_m(FILE_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    //DeserializationError error = deserializeJson(doc_m, jsonPayload);
 
     // Verificar que el payload sea un object
-    if (!doc_m_add.is<JsonObject>()) {
-      Serial.println("El payload no es un JSON.");
-      return;
-    }
+    //if (!doc_m.is<JsonObject>()) {
+      //Serial.println("El payload no es un JSON.");
+      //return;
+    //}
 
     // Iterar sobre los elementos del array
-    obj_list.add(doc_m_add.as<JsonObject>());
+    //obj["new"] = "new new";
+    //doc_list.add(obj["new"]);
+    //obj_list.add(obj["new"].as<JsonObject>());
+    //doc_list.add(doc_m_add.as<JsonObject>());
     saveListData();
+  }
+  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
+  {
+    Serial.println("Config");
   }
 }
 
@@ -152,12 +169,11 @@ bool reconnect()
     if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
     {
       Serial.println("connected");
-      Mclient.subscribe(buffer_union_subcribe);
-      char newTopic[strlen(buffer_union_subcribe) + strlen(add_topic) + 1];
-      strcpy(newTopic, buffer_union_subcribe);
-      strcat(newTopic, add_topic);
-      Serial.println(newTopic);
-      Mclient.subscribe(newTopic);
+      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
+      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic));
+      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic));
+      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic));
+      
       recsta =  true;
     }
     else

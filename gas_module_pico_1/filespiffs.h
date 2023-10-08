@@ -5,7 +5,7 @@
 //#include <LittleFS.h>
 
 
-#define FILE_SIZE   1750
+#define FILE_SIZE   1024
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
