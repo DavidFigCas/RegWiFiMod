@@ -115,7 +115,7 @@ JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_
 
     if (size > FILE_SIZE)
     {
-      //Serial.println("Too large file");
+      Serial.println("Too large file");
 
     }
 
@@ -170,8 +170,8 @@ void saveListData()
 
 // ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
 
-//JsonArray getJSonArrayFromFile(StaticJsonDocument<FILE_SIZE> *doc_list, String filename, bool forceCleanONJsonError)
-JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, bool forceCleanONJsonError)
+JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename)
+//JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, bool forceCleanONJsonError)
 
 {
   // open the file for reading:
@@ -185,7 +185,7 @@ JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, b
 
     if (size > LIST_SIZE)
     {
-      //Serial.println("Too large file");
+      Serial.println("Too large LIST");
       //return false;
     }
 
@@ -196,7 +196,7 @@ JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, b
       //Serial.print(F("Error parsing JSON "));
       //Serial.println(error.c_str());
 
-      if (forceCleanONJsonError)
+      //if (forceCleanONJsonError)
       {
         return doc_list->to<JsonArray>();
       }

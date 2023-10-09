@@ -30,8 +30,8 @@ void system_init()
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system
-    wifi_init();
     mqtt_init();
+    wifi_init();
     I2C_Init();
   }
   //pins_init();

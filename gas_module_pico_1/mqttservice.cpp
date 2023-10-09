@@ -18,10 +18,10 @@ char buffer_msg[30];
 // -------------------------------------------------- mqtt_init
 void mqtt_init()
 {
-  if (obj["enable_mqtt"].as<bool>())
+  //if (obj["enable_mqtt"].as<bool>())
   {
 
-    Serial.println("{\"mqtt\":\"init\"}"); Mclient.setBufferSize(1024);
+    Serial.println("{\"mqtt\":\"init\"}"); Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     //client.setServer(obj["mqtt"]["broker"].as<const char*>(),1883);
     //client.setServer("inventoteca.com", 1883);
@@ -80,7 +80,9 @@ void callback(char* topic, byte* payload, unsigned int length)
   if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic)) == 0)
   {
     // Parsear el payload a un array de objetos JSON
-    DynamicJsonDocument doc_m(LIST_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    //DynamicJsonDocument doc_m(LIST_SIZE); // Tamaño máximo del JSON, ajusta según tus necesidades
+    StaticJsonDocument<LIST_SIZE> doc_m;
+
     DeserializationError error = deserializeJson(doc_m, jsonPayload);
 
     if (error) {
@@ -130,15 +132,16 @@ void callback(char* topic, byte* payload, unsigned int length)
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
   {
     Serial.println("Adding");
-    const int len = length+10;
-    //StaticJsonDocument<len> doc_m; // Tamaño máximo del JSON, ajusta según tus necesidades
-    DynamicJsonDocument doc_m(len); // Tamaño máximo del JSON, ajusta según tus necesidades
+    // const size_t len = (length+10);
+    const size_t len = 128;
+    StaticJsonDocument<len> doc_m; // Tamaño máximo del JSON, ajusta según tus necesidades
+    //DynamicJsonDocument doc_m(len); // Tamaño máximo del JSON, ajusta según tus necesidades
     DeserializationError error = deserializeJson(doc_m, jsonPayload);
 
     // Verificar que el payload sea un object
     //if (!doc_m.is<JsonObject>()) {
-      //Serial.println("El payload no es un JSON.");
-      //return;
+    //Serial.println("El payload no es un JSON.");
+    //return;
     //}
 
     // Iterar sobre los elementos del array
@@ -164,18 +167,25 @@ bool reconnect()
 
   //strcat(strcpy(buffer_union_subcribe, client_id), subcribe_topic);
   strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic);
+  const char* macAddress = "pico2w";
+  //const char* macAddress = getMACAddress();
 
   if (!Mclient.connected())
   {
     Serial.print("Attempting MQTT connection...");
-    if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+
+    if(Mclient.connect(clientId.c_str()))
+    //if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
+   // if (Mclient.connect(macAddress))
     {
       Serial.println("connected");
-      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
-      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic));
-      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic));
-      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic));
-      
+      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
+      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic));
+      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic));
+      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic));
+
       recsta =  true;
     }
     else

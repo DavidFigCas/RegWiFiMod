@@ -181,6 +181,8 @@ bool wifi_check()
         Serial.print("{\"ip\":\"");
         Serial.print(WiFi.localIP());
         Serial.println("\"}");
+
+        
         //if (obj["enable_rtc"].as<bool>())
         //  update_clock();
 

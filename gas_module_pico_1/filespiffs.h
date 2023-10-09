@@ -6,13 +6,13 @@
 
 
 #define FILE_SIZE   512
-#define LIST_SIZE   512
+#define LIST_SIZE   2048
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
 //extern DynamicJsonDocument doc(FILE_SIZE);
 extern JsonArray obj_list;
-extern StaticJsonDocument<FILE_SIZE> doc_list;
+extern StaticJsonDocument<LIST_SIZE> doc_list;
 //extern DynamicJsonDocument doc_list;
 
 extern const char *filename;
@@ -29,7 +29,8 @@ void saveConfigData();
 void saveListData();
 bool spiffs_init();
 bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
-JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
-//JsonArray getJSonArrayFromFile(DynamicJsonDocument* doc_list, String filename,bool forceCleanONJsonError = true);
+//JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
+JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename);
+
 
 #endif  // FILESPIFFS_H
