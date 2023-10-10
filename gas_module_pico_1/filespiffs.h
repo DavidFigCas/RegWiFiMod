@@ -2,11 +2,10 @@
 #define FILESPIFFS_H
 
 #include "system.h"
-//#include <LittleFS.h>
 
 
 #define FILE_SIZE   512
-#define LIST_SIZE   2048
+#define LIST_SIZE   6048
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;

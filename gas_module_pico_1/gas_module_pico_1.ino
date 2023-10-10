@@ -1,9 +1,6 @@
 #include "system.h"
 
 
-
-
-
 // ------------------------------------------------------ (CONFIG) setup
 void setup()
 {
@@ -25,9 +22,21 @@ void loop()
     // ----------------------------------------- check internet
     if (wifi_check())
     {
+      update_clock();
+      read_clock();
       if ( mqtt_check())
         mqtt_send();
 
+    }
+
+    // put your main code here, to run repeatedly:
+    //if (new_litros == 1) 
+    {
+      for (int i = 0; i < 4; i++) 
+      {
+        Serial.println(nclient_data[i]);
+      }
+      //new_litros = 0;
     }
 
 

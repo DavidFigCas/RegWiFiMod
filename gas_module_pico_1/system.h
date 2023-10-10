@@ -11,6 +11,12 @@
 #include "i2c_fifo.h"
 #include "i2c_slave.h"
 #include "pico/stdlib.h"
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+#include "time.h"
+#include "RTClib.h"
+#include <Wire.h>
+
 //#include <WiFiManager_RP2040W.h>  
 
 #include "version.h"
@@ -19,6 +25,7 @@
 #include "filespiffs.h"
 #include "mqttservice.h"
 #include "wireservice.h"
+#include "clock.h"
 
 
 //15 seconds WDT

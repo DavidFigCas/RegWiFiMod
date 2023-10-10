@@ -5,8 +5,8 @@
 
 
 #define ADDRESS 0x5E
-#define SDA_MAIN    4
-#define SCL_MAIN    5
+#define SDA_MAIN    2
+#define SCL_MAIN    3
 
 
 extern byte RxByte;

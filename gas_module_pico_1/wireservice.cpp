@@ -30,15 +30,15 @@ void I2C_Init()
   // configure I2C0 for slave mode
   //STATE = 1;
   STATE |= (1 << 7);
-  i2c_init(i2c0, 100 * 1000);
-  i2c_slave_init(i2c0, ADDRESS, &i2c_slave_handler);
+  i2c_init(i2c1, 100 * 1000);
+  i2c_slave_init(i2c1, ADDRESS, &i2c_slave_handler);
   gpio_init(SDA_MAIN);
   gpio_init(SCL_MAIN);
   gpio_set_function(SDA_MAIN, GPIO_FUNC_I2C);
   gpio_set_function(SCL_MAIN, GPIO_FUNC_I2C);
   gpio_pull_up(SDA_MAIN);
   gpio_pull_up(SCL_MAIN);
-  Serial.println("i2c_Init");
+  Serial.println("i2c1_Init");
   
 
 }
@@ -48,31 +48,31 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
   switch (event) {
 
     case I2C_SLAVE_RECEIVE: // master has written some data
-      Serial.println("i2c_REC");
-      Serial.print("mem_address_written: ");
-      Serial.println(mem_address_written);
       if (!mem_address_written)
       {
         // writes always start with the memory address
-
         mem_address = i2c_read_byte(i2c);
-        //mem_address_written = true;
-        Serial.print("mem_address_written: ");
-        Serial.println(mem_address_written);
-
-
-        Serial.print("Get from addres: ");
-        Serial.println(mem_address);
 
         if (mem_address == 0x01) {
           ask_state = true;
-          Serial.println("ask state");
         }
-        else if (mem_address == 0x05) {
+        else if (mem_address == 0x03) {
+          ask_nclient = true;
+        }
+        else if (mem_address == 0x04) {
           ask_litros = true;
         }
+        else if (mem_address == 0x05) {
+          ask_price = true;
+        }
         else if (mem_address == 0x06) {
-          ask_peso = true;
+          ask_factor = true;
+        }
+        else if (mem_address == 0x07) {
+          ask_name = true;
+        }
+         else if (mem_address == 0x08) {
+          ask_data = true;
         }
 
         mem_address_written = true;
@@ -82,23 +82,15 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
       else
       {
         // save into memory
-        Serial.print("Save to addres: ");
-        Serial.println(mem_address);
-
         if (mem_address == 0x02) {
-          Serial.print("ToDo:");
           todo_byte = i2c_read_byte(i2c);
-          Serial.println(todo_byte);
           newcommand = true;
         }
         if (mem_address == 0x03) {
-          Serial.print("# client:");
           nclient_data[j] = i2c_read_byte(i2c);
-          Serial.println(nclient_data[j]);
           j++;
           if (j > 4) {
             j = 0;
-            Serial.println();
           }
         }
         if (mem_address == 0x04) {
@@ -112,13 +104,13 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
       break;
 
     case I2C_SLAVE_REQUEST: // master is requesting data
-      Serial.println("i2c_RQT");
+      //Serial.println("i2c_RQT");
       // load from memory
       if (ask_state == true) {
         i2c_write_byte(i2c, STATE);
         ask_state = false;
-        Serial.print("send state: ");
-        Serial.println(STATE, BIN);
+        //Serial.print("send state: ");
+        //Serial.println(STATE, BIN);
       }
       else if (ask_litros == true) {
         i2c_write_byte(i2c, ltr_data[j]);
@@ -139,10 +131,10 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
       else i2c_write_byte(i2c, 0);
       break;
     case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
-      Serial.println("i2c_FIN");
+      //Serial.println("i2c_FIN");
       mem_address_written = false;
-      Serial.print("mem_address_written: ");
-      Serial.println(mem_address_written);
+      //Serial.print("mem_address_written: ");
+      //Serial.println(mem_address_written);
       j = 0;
       newData = 1;
       //i2c_write_byte(i2c, 0);

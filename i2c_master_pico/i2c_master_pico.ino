@@ -11,9 +11,9 @@ uint32_t nclient = 10000001;
 uint8_t todo = 0b11000000;
 //uint8_t readValue;
 const uint8_t STATE = 1;
-const uint8_t CLIENT = 3;
-#define SDA_MAIN    4
-#define SCL_MAIN    5
+const uint8_t CLIENT = 4;
+#define SDA_MAIN    16
+#define SCL_MAIN    17
 
 void setup() {
   //Wire.setClock(50000);
@@ -21,10 +21,10 @@ void setup() {
   //Wire.begin(); // Инициализация I2C
   //i2c_begin();
   i2c_init(i2c0, 100 * 1000);
-  gpio_set_function(4, GPIO_FUNC_I2C);
-  gpio_set_function(5, GPIO_FUNC_I2C);
-  gpio_pull_up(4);
-  gpio_pull_up(5);
+  gpio_set_function(SDA_MAIN, GPIO_FUNC_I2C);
+  gpio_set_function(SCL_MAIN, GPIO_FUNC_I2C);
+  gpio_pull_up(SDA_MAIN);
+  gpio_pull_up(SCL_MAIN);
   Serial.begin(115200); // Инициализация Serial
   delay(5000); // Пауза для устойчивости
   Serial.println("Setup");
@@ -48,7 +48,7 @@ void loop()
    delay(2000);*/
 
   Serial.println("CLIENT--->: ");
-  i2c_write_blocking(i2c0, 0x5E, client_data, 1, true);
+  i2c_write_blocking(i2c0, 0x5E, &CLIENT, 1, true);
   i2c_write_blocking(i2c0, 0x5E, client_data, 4, false);
   for (int i = 0; i < 4; i++)
     Serial.println(client_data[i]);
@@ -56,6 +56,6 @@ void loop()
   Serial.println();
   digitalWrite(LED_BUILTIN, LOW);
   readValue[0] = 0b11111111;
-  delay(10000);
+  delay(1000);
 
 }

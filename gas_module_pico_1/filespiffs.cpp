@@ -59,7 +59,7 @@ bool spiffs_init()
     // Comment for production
     serializeJson(obj, Serial);
     Serial.println();
-    serializeJson(obj_list, Serial);
+    serializeJsonPretty(obj_list, Serial);
     Serial.println();
   }
 

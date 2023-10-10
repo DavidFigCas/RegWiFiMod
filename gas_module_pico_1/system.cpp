@@ -32,7 +32,10 @@ void system_init()
     loadConfig();       // Load and update behaivor of system
     mqtt_init();
     wifi_init();
-    I2C_Init();
+    I2C_Init();          // Slave mode 
+    rtcUpdated = false;
+    ntpConnected = false;
+    init_clock();        // I2C for clock
   }
   //pins_init();
   //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
@@ -145,19 +148,19 @@ void loadConfig()
 {
   // ----------- Load Counters
   Serial.println("{\"loadConfig\":true}");
-  
+
 
 
   //--------------- LOAD REGISTERS
   String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
   size_t length = email.length();
 
- /* if (length <= sizeof(name_data)) {
-    strncpy((char*)name_data, email.c_str(), sizeof(name_data));
-    name_data[sizeof(name_data) - 1] = '\0'; // Asegura que la cadena esté terminada correctamente
-  } else {
-    Serial.println("La longitud del correo electrónico es demasiado larga para name_data");
-  }*/
+  /* if (length <= sizeof(name_data)) {
+     strncpy((char*)name_data, email.c_str(), sizeof(name_data));
+     name_data[sizeof(name_data) - 1] = '\0'; // Asegura que la cadena esté terminada correctamente
+    } else {
+     Serial.println("La longitud del correo electrónico es demasiado larga para name_data");
+    }*/
 
 
   // ------------- ID

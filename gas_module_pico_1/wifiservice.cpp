@@ -24,7 +24,11 @@ void wifi_init()
     Serial.print(obj["ssid"].as<const char*>());
     Serial.println("\"}}");
 
-    // WiFi.begin(auxssid, auxpass);
+
+    // ---------------------------- Time NTP 
+    WiFiUDP ntpUDP;
+    NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
+
 
     Serial.println("{\"wifi\":\"init\"}");
 
@@ -182,7 +186,7 @@ bool wifi_check()
         Serial.print(WiFi.localIP());
         Serial.println("\"}");
 
-        
+
         //if (obj["enable_rtc"].as<bool>())
         //  update_clock();
 
@@ -206,7 +210,7 @@ bool wifi_check()
 
   }
   //else
-  
+
   return flag;
 }
 
