@@ -27,8 +27,11 @@ NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
 // ---------------------------------- init_clock
 void init_clock()
 {
-  Wire.begin();
-  if (!rtc.begin(&Wire))
+  Wire1.setSDA(2);
+  Wire1.setSCL(3);
+  Wire1.begin();
+  delay(100);
+  if (!rtc.begin(&Wire1))
   {
     Serial.println("{\"rtc_init\":false}");
     rtc_ready = false;

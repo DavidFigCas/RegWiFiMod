@@ -29,17 +29,41 @@ void loop()
 
     }
 
-    // put your main code here, to run repeatedly:
-    //if (new_litros == 1) 
+
+  }
+
+
+  if (newcommand)
+  {
+    Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
+    //nclient |= nclient_data[0] << 24; // Byte más significativo
+    //nclient |= nclient_data[1] << 16;
+    //nclient |= nclient_data[2] << 8;
+    //nclient |= nclient_data[3];
+    Serial.print("Client: ");
+    Serial.println(nclient);
+    for (int i = 0; i < 4; i++)
     {
-      for (int i = 0; i < 4; i++) 
-      {
-        Serial.println(nclient_data[i]);
-      }
-      //new_litros = 0;
+      Serial.println(nclient_data[i]);
     }
+    newcommand = 0;
+    todo_byte = 0;
+  }
 
-
+  if (new_litros)
+  {
+    //Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
+    //nclient |= nclient_data[0] << 24; // Byte más significativo
+    //nclient |= nclient_data[1] << 16;
+    //nclient |= nclient_data[2] << 8;
+    //nclient |= nclient_data[3];
+    Serial.println("NEW Litros: ");
+    //Serial.println(nclient);
+    for (int i = 0; i < 4; i++)
+    {
+      Serial.println(litros_num[i]);
+    }
+    new_litros = 0;
   }
 
 

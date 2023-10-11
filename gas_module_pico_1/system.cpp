@@ -32,7 +32,7 @@ void system_init()
     loadConfig();       // Load and update behaivor of system
     mqtt_init();
     wifi_init();
-    I2C_Init();          // Slave mode 
+    I2C_Init();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock

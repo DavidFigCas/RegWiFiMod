@@ -5,13 +5,16 @@
 volatile uint8_t REG_TODO = 1;
 
 uint8_t SENSOR_ADDRESS = 0x5E; // Адрес датчика на шине I2C
-const uint8_t client_data[5] = {110,110, 111, 112, 113};
+uint8_t client_data[4] = {110, 110, 111, 112};
+uint32_t valor = 10032;
+
 uint8_t readValue[4];
 uint32_t nclient = 10000001;
 uint8_t todo = 0b11000000;
 //uint8_t readValue;
 const uint8_t STATE = 1;
-const uint8_t CLIENT = 4;
+const uint8_t CLIENT = 0x03;
+const uint8_t TODO = 2;
 #define SDA_MAIN    16
 #define SCL_MAIN    17
 
@@ -29,7 +32,10 @@ void setup() {
   delay(5000); // Пауза для устойчивости
   Serial.println("Setup");
 
+  // ASK STATE
+  digitalWrite(LED_BUILTIN, HIGH);
 
+  
 
   // Отправляем байт 0x01 и читаем один байт
 
@@ -39,23 +45,34 @@ void setup() {
 void loop()
 {
 
-  // ASK STATE
-  /*digitalWrite(LED_BUILTIN, HIGH);
-  Serial.print("STATE<---: ");
-  i2c_write_blocking(i2c0, 0x5E, &STATE, 1, true);
-  i2c_read_blocking(i2c0, 0x5E, readValue, 1, false);
-  Serial.println(readValue[0],BIN);
-   delay(2000);*/
+  //10032
+  digitalWrite(LED_BUILTIN, HIGH);
+  client_data[0] = (valor >> 24) & 0xFF; // Byte más significativo
+  client_data[1] = (valor >> 16) & 0xFF;
+  client_data[2] = (valor >> 8) & 0xFF;
+  client_data[3] = valor & 0xFF;        // Byte menos significativo
 
-  Serial.println("CLIENT--->: ");
+
+  Serial.print("nClient--->: "); Serial.println(valor);
   i2c_write_blocking(i2c0, 0x5E, &CLIENT, 1, true);
   i2c_write_blocking(i2c0, 0x5E, client_data, 4, false);
   for (int i = 0; i < 4; i++)
     Serial.println(client_data[i]);
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.println("endC");
+  Serial.println();
+  delay(5000);
+  valor++;
+
+  /*digitalWrite(LED_BUILTIN, HIGH);
+  Serial.println("ToDo--->: ");
+  i2c_write_blocking(i2c0, 0x5E, &TODO, 1, true);
+  i2c_write_blocking(i2c0, 0x5E, &todo, 1, false);
+  Serial.println(todo, BIN);
 
   Serial.println();
   digitalWrite(LED_BUILTIN, LOW);
   readValue[0] = 0b11111111;
-  delay(1000);
+  delay(5000);*/
 
 }
