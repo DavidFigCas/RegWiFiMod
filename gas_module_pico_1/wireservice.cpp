@@ -5,7 +5,8 @@ volatile uint32_t nclient;
 uint8_t mem_address = 0, STATE = 5;
 volatile uint8_t todo_byte = 0b10001001, state_byte = 0b10010101, error_byte = 0, j = 0;
 boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0;
-boolean ask_nclient = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0, newcommand = 0, new_litros = 0;
+boolean ask_nclient = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0;
+boolean newcommand = 0, new_litros = 0, new_nclient = 0;
 volatile uint8_t nclient_data[4], ltr_data[4], pes_data[4], uprice_data[2], litros_num[4], pesos_num[4], client_num[4], time_num[4];
 
 
@@ -57,17 +58,15 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
           todo_byte = i2c_read_byte(i2c);
           newcommand = true;
         }
-        if (mem_address == 0x04) {
-          //newcommand = true;
-          //new_litros = true;
+        if (mem_address == 0x03) {
           nclient_data[j] = i2c_read_byte(i2c);
+          new_nclient = true;
           j++;
-          //nclient = 4321;
           if (j > 4) {
             j = 0;
           }
         }
-        if (mem_address == 0x03) {
+        if (mem_address == 0x04) {
           new_litros = true;
           litros_num[j] = i2c_read_byte(i2c);
           j++;
