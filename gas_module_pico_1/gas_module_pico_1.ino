@@ -9,6 +9,7 @@ void setup()
 {
   system_init();
   search_nclient();
+  Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 }
 
 
@@ -60,6 +61,13 @@ void loop()
     }
     new_litros = 0;
   }
+
+  // ------------------------------- gps
+   while (Serial1.available()) {  // Mientras haya datos disponibles desde el GPS
+        char c = Serial1.read();  // Lee un carácter desde el GPS
+        Serial.print(c);  // Imprime el carácter en el puerto serie
+    }
+    //Serial.println();
 
 
 
