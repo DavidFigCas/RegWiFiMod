@@ -19,6 +19,81 @@ unsigned long  s_timestamp;
 //volatile uint32_t nclient_data; // nclient_data[4]
 //volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
 
+void register_client()
+{ // Guarda todos los datos de ese cliente en los registros correspondientes
+
+
+  //serializeJson(obj_in["nombre"], Serial);
+
+
+  uint32_t litros = obj_in["litros"];
+  const char* client_name = obj_in["nombre"].as<const char*>();
+  int len = strlen(client_name);
+
+  Serial.println();
+  Serial.print("NAME: ");
+  for (int i = 0; i < len && i < 42; i++) {
+    name_data[i] = (uint8_t)client_name[i];
+  }
+
+  // Si la longitud de la cadena es menor que 42, rellena el resto del array con 0s
+  for (int i = len; i < 42; i++) {
+    name_data[i] = 0;
+  }
+
+  //Serial.print("NAME2: ");
+  for (int i = 0; i < 42; i++) {
+    Serial.print(char(name_data[i]));
+  }
+  Serial.println();
+
+  Serial.print("Litros: ");
+  Serial.println(litros);
+  litros = litros *100;
+  for (int i = 0; i < 4; i++) {
+    litros_num[i] = (litros >> (8 * i)) & 0xFF;
+    Serial.println(litros_num[i]);
+  }
+  Serial.println();
+
+}
+
+// -------------------------------------------------------------- search_nclient
+void search_nclient()
+{
+  //for (int i = 0; i < 4; i++) {
+  //  Serial.println(nclient_data[i]);
+  //}
+  nclient = 0;
+  nclient |= (uint32_t)nclient_data[0] << 24; // Byte más significativo
+  nclient |= (uint32_t)nclient_data[1] << 16;
+  nclient |= (uint32_t)nclient_data[2] << 8;
+  nclient |= (uint32_t)nclient_data[3];
+
+  Serial.print("Ask Client: ");
+  Serial.println(nclient);
+  new_nclient = 0;
+
+  // Buscar el valor de nclient en el array
+  for (JsonArray::iterator it = obj_list.begin(); it != obj_list.end(); ++it) {
+    obj_in = *it;
+    //Serial.println(obj_in["nombre"].as<String>());
+    if (obj_in["cliente"].as<uint32_t>() == nclient) { //-------------------- Cliente encontrado
+      Serial.println("{\"client_found\": true}");
+      serializeJson(obj_in, Serial);
+      register_client();
+
+      //strcat(strcpy(buffer_union_publish, obj_in["nombre"].as<const char*>()), publish_topic);
+      //strcat(strcpy(buffer_union_publish, obj["id"].as<const char*>()), publish_topic);
+      //snprintf(buffer_msg, sizeof(buffer_msg), "%ld", STATE);
+
+      //if ( mqtt_check())
+      //  mqtt_send();
+      break;  // Rompe el bucle una vez que encuentres una coincidencia
+    }
+  }
+}
+
 // ----------------------------------------------------------- init
 void system_init()
 {
@@ -32,6 +107,7 @@ void system_init()
     loadConfig();       // Load and update behaivor of system
     mqtt_init();
     wifi_init();
+    mqtt_check();
     I2C_Init();
     rtcUpdated = false;
     ntpConnected = false;

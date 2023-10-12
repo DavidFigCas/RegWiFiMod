@@ -5,6 +5,7 @@ StaticJsonDocument<FILE_SIZE> doc;
 //DynamicJsonDocument doc(FILE_SIZE);
 
 JsonArray obj_list;
+JsonObject obj_in;
 StaticJsonDocument<LIST_SIZE> doc_list;
 //DynamicJsonDocument doc_list(LIST_SIZE);
 

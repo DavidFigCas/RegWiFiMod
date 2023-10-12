@@ -1,10 +1,14 @@
 #include "system.h"
 
 
+
+
+
 // ------------------------------------------------------ (CONFIG) setup
 void setup()
 {
   system_init();
+  search_nclient();
 }
 
 
@@ -17,16 +21,12 @@ void loop()
     Serial.println("Runing");
 
 
-
-
     // ----------------------------------------- check internet
     if (wifi_check())
     {
       update_clock();
       read_clock();
-      if ( mqtt_check())
-        mqtt_send();
-
+      mqtt_check();
     }
 
 
@@ -36,15 +36,15 @@ void loop()
   if (newcommand)
   {
     Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
-    //nclient |= nclient_data[0] << 24; // Byte más significativo
-    //nclient |= nclient_data[1] << 16;
-    //nclient |= nclient_data[2] << 8;
-    //nclient |= nclient_data[3];
-    Serial.print("Client: ");
-    Serial.println(nclient);
-    for (int i = 0; i < 4; i++)
-    {
-      Serial.println(nclient_data[i]);
+    
+
+    if (todo_byte & (1 << 6)) {  // Verifica si el bit 6 está en alto
+      //new_nclient = true;
+      //if (new_nclient)
+      //{
+      search_nclient();
+      todo_byte &= ~(1 << 6);  // Reset ToDo
+      //}
     }
     newcommand = 0;
     todo_byte = 0;
@@ -62,36 +62,7 @@ void loop()
   }
 
 
-  if (new_nclient)
-  {
-    nclient = 0;
-    Serial.print("NEW Client: ");
-    Serial.println(nclient);
-    nclient |= (uint32_t)nclient_data[0] << 24; // Byte más significativo
-    nclient |= (uint32_t)nclient_data[1] << 16;
-    nclient |= (uint32_t)nclient_data[2] << 8;
-    nclient |= (uint32_t)nclient_data[3];
-    for (int i = 0; i < 4; i++)
-    {
-      Serial.println(nclient_data[i]);
-      //nclient |= (uint32_t)nclient_data[i] << (24 - 8 * i);
 
-    }
-    Serial.print("NEW Client: ");
-    Serial.println(nclient);
-    new_nclient = 0;
-
-    // Buscar el valor de nclient en el array
-    for (JsonArray::iterator it = obj_list.begin(); it != obj_list.end(); ++it) {
-      JsonObject obj_in = *it;
-      //Serial.println(obj_in["nombre"].as<String>());
-      if (obj_in["cliente"].as<uint32_t>() == nclient) {
-        Serial.print("¡Coincidencia encontrada!");
-        Serial.println(obj_in["nombre"].as<String>());
-        break;  // Rompe el bucle una vez que encuentres una coincidencia
-      }
-    }
-  }
 
 
 

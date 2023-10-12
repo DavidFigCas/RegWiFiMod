@@ -11,6 +11,7 @@ extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
 //extern DynamicJsonDocument doc(FILE_SIZE);
 extern JsonArray obj_list;
+extern JsonObject obj_in;
 extern StaticJsonDocument<LIST_SIZE> doc_list;
 //extern DynamicJsonDocument doc_list;
 

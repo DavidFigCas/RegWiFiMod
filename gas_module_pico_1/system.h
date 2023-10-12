@@ -51,5 +51,7 @@ bool strToBool(String str);
 float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
 void loadConfig();
 void system_init();
+void search_nclient();
+void register_client();
 
 #endif

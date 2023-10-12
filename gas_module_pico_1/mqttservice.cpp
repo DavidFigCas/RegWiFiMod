@@ -12,7 +12,7 @@ const char* config_topic = "/config";
 const char* wild_topic = "/#";
 char buffer_union_publish[30];
 char buffer_union_subcribe[30];
-char buffer_msg[30];
+char buffer_msg[1024];
 //const char* client_id = "maquina00018";
 
 // -------------------------------------------------- mqtt_init
@@ -30,6 +30,8 @@ void mqtt_init()
     // client_id = obj["id"].as<String>();
 
   }
+
+  
 }
 
 // ------------------------------------------------- mqtt_check
@@ -54,8 +56,6 @@ bool mqtt_check()
 //---------------------------------------------------- mqtt_send
 void mqtt_send()
 {
-  strcat(strcpy(buffer_union_publish, obj["id"].as<const char*>()), publish_topic);
-  snprintf(buffer_msg, sizeof(buffer_msg), "%ld", STATE);
   Mclient.publish(buffer_union_publish, buffer_msg);
 }
 
@@ -185,6 +185,7 @@ bool reconnect()
       //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic));
       //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic));
       //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic));
+
 
       recsta =  true;
     }
