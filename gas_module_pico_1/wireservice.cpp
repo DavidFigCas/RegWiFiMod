@@ -2,11 +2,11 @@
 
 volatile uint32_t nclient;
 
-uint8_t volatile mem_address = 0, STATE = 0;
+volatile uint8_t mem_address = 0, STATE = 0;
 volatile uint8_t todo_byte = 0b10001001, state_byte = 0b10010101, error_byte = 0, j = 0;
-boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0;
-boolean ask_name = 0, ask_factor = 0, ask_nclient = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0;
-boolean newcommand = 0, new_litros = 0, new_nclient = 0;
+volatile boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0;
+volatile boolean ask_name = 0, ask_factor = 0, ask_nclient = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0;
+volatile boolean newcommand = 0, new_litros = 0, new_nclient = 0;
 volatile uint8_t name_data[42], factor_data[2], nclient_data[4], uprice_data[2], litros_num[4], pesos_num[4], client_num[4], time_num[4];
 
 
@@ -62,6 +62,7 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
         mem_address_written = true;
       } else {
         // ---------------------------------------------- save into memory
+        mem_address_written = false;
         if (mem_address == 0x08) {
           error_status = true;
           error_byte = i2c_read_byte(i2c);
@@ -109,6 +110,7 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
       }
       break;
     case I2C_SLAVE_REQUEST: // ------------------------ master is requesting data
+      mem_address_written = false;
       // load from memory
       if (ask_state == true) {
         i2c_write_byte(i2c, STATE);            // --------- state
@@ -153,7 +155,7 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
       else i2c_write_byte(i2c, 0);
       break;
     case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
-      mem_address_written = false;
+      //mem_address_written = false;
       //ask_data = false;
       //ask_state = false;
       j = 0;

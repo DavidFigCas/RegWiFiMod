@@ -21,7 +21,6 @@ void loop()
   {
     mainRefresh = millis();
     gps_update();
-    saveNewlog();
 
     // ----------------------------------------- check internet
     if (wifi_check())
@@ -34,6 +33,8 @@ void loop()
         {
           Serial.println("mqtt sending");
 
+          saveNewlog();
+          
           strcpy(buffer_union_publish, obj["id"].as<const char*>());
           strcat(buffer_union_publish, publish_topic);
           strcat(buffer_union_publish, log_topic);

@@ -24,8 +24,12 @@ File file;
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {
-  //obj_log.add(now);
-  obj_log.add(DateTimeToString(now));
+  JsonObject newLogEntry = obj_log.createNestedObject();
+  //newLogEntry["timestamp"] = DateTimeToString(now);
+  newLogEntry["timestamp"] = now.unixtime(); 
+  newLogEntry["lat"] = obj["gps"]["lat"];
+  newLogEntry["lon"] = obj["gps"]["lon"];
+
   serializeJsonPretty(obj_log, Serial);
   Serial.println();
 }
