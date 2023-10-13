@@ -100,17 +100,16 @@ void search_nclient()
 void system_init()
 {
   Serial.begin(115200);
-  delay(5000);
+  I2C_Init(); Serial.println("i2c0_Init");// Slave mode
   Serial.println("gps-test");
   Serial.print("Version:"); Serial.println(VERSION);
 
   if (spiffs_init())
   {
-    loadConfig();       // Load and update behaivor of system
+    loadConfig();       // Load and update behaivor of system    
     mqtt_init();
     wifi_init();
-    mqtt_check();
-    I2C_Init(); Serial.println("i2c0_Init");// Slave mode
+    mqtt_check();   
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock

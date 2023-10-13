@@ -17,14 +17,16 @@ void I2C_Init()
 
   // configure I2C0 for slave mode
   STATE |= (1 << 7);                  // Module is alaive
-  i2c_init(i2c0, 100 * 1000);
-  i2c_slave_init(i2c0, ADDRESS, &i2c_slave_handler);
   gpio_init(SDA_MAIN);
   gpio_init(SCL_MAIN);
   gpio_set_function(SDA_MAIN, GPIO_FUNC_I2C);
   gpio_set_function(SCL_MAIN, GPIO_FUNC_I2C);
   gpio_pull_up(SDA_MAIN);
   gpio_pull_up(SCL_MAIN);
+  i2c_init(i2c0, 100 * 1000);
+  // configure I2C0 for slave mode
+  i2c_slave_init(i2c0, ADDRESS, &i2c_slave_handler);
+  delay(3000);
 
 }
 
@@ -82,28 +84,28 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
           if (j > 4) {
             j = 0;
           }
-        }
-        if (mem_address == 0x09) {
+          }
+          if (mem_address == 0x09) {
           client_num[j] = i2c_read_byte(i2c);
           j++;
           if (j > 4) {
             j = 0;
           }
-        }
-        if (mem_address == 0x10) {
+          }
+          if (mem_address == 0x10) {
           time_num[j] = i2c_read_byte(i2c);
           j++;
           if (j > 4) {
             j = 0;
           }
-        }
-        if (mem_address == 0x05) {
+          }
+          if (mem_address == 0x05) {
           litros_num[j] = i2c_read_byte(i2c);
           j++;
           if (j > 4) {
             j = 0;
           }
-        }*/
+          }*/
       }
       break;
     case I2C_SLAVE_REQUEST: // ------------------------ master is requesting data

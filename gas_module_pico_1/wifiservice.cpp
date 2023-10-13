@@ -16,16 +16,21 @@ void wifi_init()
   if (obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED))
   {
     WiFi.mode(WIFI_STA);
-    const char* auxssid = obj["ssid"].as<String>().c_str();
-    const char* auxpass = obj["pass"].as<String>().c_str();
+    //const char* auxssid = obj["ssid"].as<String>().c_str();
+    //const char* auxpass = obj["pass"].as<String>().c_str();
 
-    WiFi.begin(obj["ssid"].as<const char*>(), obj["pass"].as<const char*>());
+    String auxssid = obj["ssid"].as<String>();
+    String auxpass = obj["pass"].as<String>();
+
+    WiFi.begin(auxssid.c_str(), auxpass.c_str());  
+    //WiFi.begin("4G-MIFI-C91","1234567890");
+    
     Serial.print("{\"wifi\":{\"ssid\":\"");
-    Serial.print(obj["ssid"].as<const char*>());
+    Serial.print(auxssid);
     Serial.println("\"}}");
 
 
-    // ---------------------------- Time NTP 
+    // ---------------------------- Time NTP
     WiFiUDP ntpUDP;
     NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
 

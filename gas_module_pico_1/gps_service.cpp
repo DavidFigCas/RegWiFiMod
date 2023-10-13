@@ -14,68 +14,51 @@ void gps_init()
 void gps_update()
 {
 
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, gps_topic);
+
+  JsonObject gpsObject = obj["gps"].as<JsonObject>();
 
   smartDelay(mainTime);
 
   if ((millis() > 1000 && gps.charsProcessed() < 10))
   {
     STATE &= ~(1 << 5);                 // GPS error
-    Serial.println(F("{\"gps_status\": \"error\"}"));
+    STATE &= ~(1 << 1);                 // GPS error
+    Serial.println(F("{\"gps_status\": \"error_last_seen\"}"));
+    obj["gps"]["status"] = "error_last_seen";
+
   }
   else if ((gps.hdop.isValid()) && (gps.location.isValid()))
   {
+    //printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
+    //printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
+    //printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
+    //printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
+    //printInt(gps.location.age(), gps.location.isValid(), 5);
+    //printDateTime(gps.date, gps.time);
+    //printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+    //printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
+
     int hdopValue = int(gps.hdop.hdop());
     if (hdopValue >= 10)
     {
       // Send Previous GPS
-
+      STATE |= (1 << 5);                  // GPS connected
+      STATE &= ~(1 << 1);                 // GPS not ready
       obj["gps"]["status"] = "heating up";
-      
-      strcpy(buffer_union_publish, obj["id"].as<const char*>());
-      strcat(buffer_union_publish, publish_topic);
-      strcat(buffer_union_publish, gps_topic);
-
-      JsonObject gpsObject = obj["gps"].as<JsonObject>();
-      gpsObject["state"]=STATE;
-      size_t serializedLength = measureJson(gpsObject) + 1;
-      char tempBuffer[serializedLength];
-      serializeJson(gpsObject, tempBuffer, serializedLength);
-      strcpy(buffer_msg, tempBuffer);
-
-      Mclient.publish(buffer_union_publish, buffer_msg);
       Serial.println(F("{\"gps_status\": \"heating up\"}"));
-      STATE &= ~(1 << 5);                 // GPS error
+
     }
     else
     {
-      STATE |= (1 << 5);                  // GPS state OK
-      printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
-      printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
-      printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
-      printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
-      //printInt(gps.location.age(), gps.location.isValid(), 5);
-      //printDateTime(gps.date, gps.time);
-      //printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
-      printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
-
-      //printInt(gps.failedChecksum(), true, 9);
+      STATE |= (1 << 5);                  // GPS connected
+      STATE |= (1 << 1);                  // GPS state OK
 
       obj["gps"]["status"] = "ready";
       obj["gps"]["lat"] = gps.location.lat();
       obj["gps"]["lon"] = gps.location.lng();
-
-      strcpy(buffer_union_publish, obj["id"].as<const char*>());
-      strcat(buffer_union_publish, publish_topic);
-      strcat(buffer_union_publish, gps_topic);
-
-      JsonObject gpsObject = obj["gps"].as<JsonObject>();
-      gpsObject["state"]=STATE;
-      size_t serializedLength = measureJson(gpsObject) + 1;
-      char tempBuffer[serializedLength];
-      serializeJson(gpsObject, tempBuffer, serializedLength);
-      strcpy(buffer_msg, tempBuffer);
-
-      Mclient.publish(buffer_union_publish, buffer_msg);
 
       saveConfig = true;
       Serial.println();
@@ -85,23 +68,23 @@ void gps_update()
   {
     // Send Previous GPS
     obj["gps"]["status"] = "calculating";
-    strcpy(buffer_union_publish, obj["id"].as<const char*>());
-    strcat(buffer_union_publish, publish_topic);
-    strcat(buffer_union_publish, gps_topic);
-
-    JsonObject gpsObject = obj["gps"].as<JsonObject>();
-    gpsObject["state"]=STATE;
-    size_t serializedLength = measureJson(gpsObject) + 1;
-    char tempBuffer[serializedLength];
-    serializeJson(gpsObject, tempBuffer, serializedLength);
-    strcpy(buffer_msg, tempBuffer);
-
-    Mclient.publish(buffer_union_publish, buffer_msg);
     Serial.println(F("{\"gps_status\": \"calculating\"}"));
-    STATE &= ~(1 << 5);                 // GPS error
+    STATE |= (1 << 5);                  // GPS connected
+    STATE &= ~(1 << 1);                 // GPS not ready
   }
 
+  serializeJson(obj["gps"], Serial);
+  Serial.println();
 
+  gpsObject = obj["gps"].as<JsonObject>();
+  gpsObject["state"] = STATE;
+
+  size_t serializedLength = measureJson(gpsObject) + 1;
+  char tempBuffer[serializedLength];
+  serializeJson(gpsObject, tempBuffer, serializedLength);
+  strcpy(buffer_msg, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg);
 }
 
 // This custom version of delay() ensures that the gps object
