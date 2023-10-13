@@ -78,6 +78,9 @@ void gps_update()
 
   gpsObject = obj["gps"].as<JsonObject>();
   gpsObject["state"] = STATE;
+  gpsObject["percentage"] = obj["percentage"];
+  gpsObject["capacity"] = obj["capacity"];
+  //gpsObject["time"] = now;
 
   size_t serializedLength = measureJson(gpsObject) + 1;
   char tempBuffer[serializedLength];
