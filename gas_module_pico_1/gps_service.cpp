@@ -27,6 +27,22 @@ void gps_update()
     int hdopValue = int(gps.hdop.hdop());
     if (hdopValue >= 10)
     {
+      // Send Previous GPS
+
+      obj["gps"]["status"] = "heating up";
+      
+      strcpy(buffer_union_publish, obj["id"].as<const char*>());
+      strcat(buffer_union_publish, publish_topic);
+      strcat(buffer_union_publish, gps_topic);
+
+      JsonObject gpsObject = obj["gps"].as<JsonObject>();
+      gpsObject["state"]=STATE;
+      size_t serializedLength = measureJson(gpsObject) + 1;
+      char tempBuffer[serializedLength];
+      serializeJson(gpsObject, tempBuffer, serializedLength);
+      strcpy(buffer_msg, tempBuffer);
+
+      Mclient.publish(buffer_union_publish, buffer_msg);
       Serial.println(F("{\"gps_status\": \"heating up\"}"));
       STATE &= ~(1 << 5);                 // GPS error
     }
@@ -44,6 +60,7 @@ void gps_update()
 
       //printInt(gps.failedChecksum(), true, 9);
 
+      obj["gps"]["status"] = "ready";
       obj["gps"]["lat"] = gps.location.lat();
       obj["gps"]["lon"] = gps.location.lng();
 
@@ -52,6 +69,7 @@ void gps_update()
       strcat(buffer_union_publish, gps_topic);
 
       JsonObject gpsObject = obj["gps"].as<JsonObject>();
+      gpsObject["state"]=STATE;
       size_t serializedLength = measureJson(gpsObject) + 1;
       char tempBuffer[serializedLength];
       serializeJson(gpsObject, tempBuffer, serializedLength);
@@ -65,6 +83,20 @@ void gps_update()
   }
   else
   {
+    // Send Previous GPS
+    obj["gps"]["status"] = "calculating";
+    strcpy(buffer_union_publish, obj["id"].as<const char*>());
+    strcat(buffer_union_publish, publish_topic);
+    strcat(buffer_union_publish, gps_topic);
+
+    JsonObject gpsObject = obj["gps"].as<JsonObject>();
+    gpsObject["state"]=STATE;
+    size_t serializedLength = measureJson(gpsObject) + 1;
+    char tempBuffer[serializedLength];
+    serializeJson(gpsObject, tempBuffer, serializedLength);
+    strcpy(buffer_msg, tempBuffer);
+
+    Mclient.publish(buffer_union_publish, buffer_msg);
     Serial.println(F("{\"gps_status\": \"calculating\"}"));
     STATE &= ~(1 << 5);                 // GPS error
   }
