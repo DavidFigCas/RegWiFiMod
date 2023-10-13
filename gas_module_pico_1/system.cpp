@@ -19,6 +19,8 @@ unsigned long  s_timestamp;
 //volatile uint32_t nclient_data; // nclient_data[4]
 //volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
 
+
+// ------------------------------------------------------------ register_client
 void register_client()
 { // Guarda todos los datos de ese cliente en los registros correspondientes
 
@@ -70,8 +72,8 @@ void search_nclient()
   nclient |= (uint32_t)nclient_data[2] << 8;
   nclient |= (uint32_t)nclient_data[3];
 
-  Serial.print("Ask Client: ");
-  Serial.println(nclient);
+  Serial.print("{\"search_client\":");Serial.print(nclient);Serial.print("}");
+  
   new_nclient = 0;
 
   // Buscar el valor de nclient en el array
@@ -108,13 +110,12 @@ void system_init()
     mqtt_init();
     wifi_init();
     mqtt_check();
-    I2C_Init();
+    I2C_Init(); Serial.println("i2c0_Init");// Slave mode
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
-  //pins_init();
-  //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
+  gps_init();
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change

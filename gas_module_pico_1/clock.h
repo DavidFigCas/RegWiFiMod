@@ -30,5 +30,6 @@ extern NTPClient timeClient;
 void update_clock();
 void read_clock();
 void init_clock();
+String DateTimeToString(const DateTime& now);
 
 #endif

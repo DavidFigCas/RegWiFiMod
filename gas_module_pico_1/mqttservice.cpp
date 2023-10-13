@@ -9,11 +9,14 @@ const char* subcribe_topic = "/in";
 const char* list_topic = "/list";
 const char* add_topic = "/add";
 const char* config_topic = "/config";
+const char* log_topic = "/log";
+const char* gps_topic = "/gps";
 const char* wild_topic = "/#";
 char buffer_union_publish[30];
 char buffer_union_subcribe[30];
 char buffer_msg[1024];
 //const char* client_id = "maquina00018";
+volatile boolean send_log = false;
 
 // -------------------------------------------------- mqtt_init
 void mqtt_init()
@@ -31,7 +34,7 @@ void mqtt_init()
 
   }
 
-  
+
 }
 
 // ------------------------------------------------- mqtt_check
@@ -127,6 +130,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     }
 
     saveListData();
+    STATE |= (1 << 4);                  // NEW LIST
 
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
@@ -156,6 +160,15 @@ void callback(char* topic, byte* payload, unsigned int length)
   {
     Serial.println("Config");
   }
+  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
+  {
+    if (strcmp(jsonPayload, "delete") == 0) {
+      obj_log.clear();
+    } else if (strcmp(jsonPayload, "get") == 0) {
+      send_log = true;
+      Serial.println("prepare send");
+    }
+  }
 }
 
 
@@ -176,17 +189,13 @@ bool reconnect()
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
 
-    if(Mclient.connect(clientId.c_str()))
-    //if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
-   // if (Mclient.connect(macAddress))
+    if (Mclient.connect(clientId.c_str()))
+      //if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
+      // if (Mclient.connect(macAddress))
     {
       Serial.println("connected");
       Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
-      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), list_topic));
-      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic));
-      //Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic));
-
-
+      STATE |= (1 << 0);                  // MQTT state OK
       recsta =  true;
     }
     else
@@ -194,6 +203,7 @@ bool reconnect()
       Serial.print("failed, rc=");
       Serial.print(Mclient.state());
       Serial.println(" try in the next");
+      STATE &= ~(1 << 0);                 // MQTT error
       recsta =  false;
     }
   }

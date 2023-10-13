@@ -231,6 +231,14 @@ void read_clock()
   }
 }
 
+String DateTimeToString(const DateTime& now) {
+    char buffer[20];
+    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d", 
+             now.year(), now.month(), now.day(), 
+             now.hour(), now.minute(), now.second());
+    return String(buffer);
+}
+
 
 //
 //// Local time

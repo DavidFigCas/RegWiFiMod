@@ -2,7 +2,7 @@
 
 volatile uint32_t nclient;
 
-uint8_t mem_address = 0, STATE = 5;
+uint8_t mem_address = 0, STATE = 0;
 volatile uint8_t todo_byte = 0b10001001, state_byte = 0b10010101, error_byte = 0, j = 0;
 boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0;
 boolean ask_name = 0, ask_factor = 0, ask_nclient = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0;
@@ -25,7 +25,6 @@ void I2C_Init()
   gpio_set_function(SCL_MAIN, GPIO_FUNC_I2C);
   gpio_pull_up(SDA_MAIN);
   gpio_pull_up(SCL_MAIN);
-  Serial.println("i2c0_Init");// Slave mode
 
 }
 

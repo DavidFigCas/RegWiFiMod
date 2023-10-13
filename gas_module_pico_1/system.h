@@ -16,6 +16,7 @@
 #include "time.h"
 #include "RTClib.h"
 #include <Wire.h>
+#include <TinyGPSPlus.h>
 
 //#include <WiFiManager_RP2040W.h>  
 
@@ -26,6 +27,7 @@
 #include "mqttservice.h"
 #include "wireservice.h"
 #include "clock.h"
+#include "gps_service.h"
 
 
 //15 seconds WDT
@@ -53,5 +55,4 @@ void loadConfig();
 void system_init();
 void search_nclient();
 void register_client();
-
 #endif

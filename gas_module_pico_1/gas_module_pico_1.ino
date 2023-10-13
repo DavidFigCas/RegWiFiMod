@@ -9,6 +9,7 @@ void setup()
 {
   system_init();
   search_nclient();
+  saveNewlog();
   Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 }
 
@@ -19,32 +20,61 @@ void loop()
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
-    Serial.println("Runing");
-
+    gps_update();
+    saveNewlog();
 
     // ----------------------------------------- check internet
     if (wifi_check())
     {
       update_clock();
       read_clock();
-      mqtt_check();
+      if (mqtt_check())
+      {
+        if (send_log == true)
+        {
+          Serial.println("mqtt sending");
+
+          strcpy(buffer_union_publish, obj["id"].as<const char*>());
+          strcat(buffer_union_publish, publish_topic);
+          strcat(buffer_union_publish, log_topic);
+
+          JsonArray logObject = obj_log;
+          size_t serializedLength = measureJson(logObject) + 1;
+          char tempBuffer[serializedLength];
+          serializeJson(logObject, tempBuffer, serializedLength);
+          strcpy(buffer_msg, tempBuffer);
+
+          Mclient.publish(buffer_union_publish, buffer_msg);
+          send_log = false;
+        }
+      }
     }
 
-
+    Serial.print("STATE: ");
+    Serial.println(STATE, BIN);
   }
 
 
   if (newcommand)
   {
     Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
-    
 
-    if (todo_byte & (1 << 6)) {  // Verifica si el bit 6 está en alto
+
+    if (todo_byte & (1 << 6)) {  // Find Client
       //new_nclient = true;
       //if (new_nclient)
       //{
       search_nclient();
-      todo_byte &= ~(1 << 6);  // Reset ToDo
+      todo_byte &= ~(1 << 6);  // Reset ToDo bit
+      //}
+    }
+
+    if (todo_byte & (1 << 5)) {  // New LOG
+      //new_nclient = true;
+      //if (new_nclient)
+      //{
+      saveNewlog();
+      todo_byte &= ~(1 << 5);  // Reset ToDo bit
       //}
     }
     newcommand = 0;
@@ -63,11 +93,7 @@ void loop()
   }
 
   // ------------------------------- gps
-   while (Serial1.available()) {  // Mientras haya datos disponibles desde el GPS
-        char c = Serial1.read();  // Lee un carácter desde el GPS
-        Serial.print(c);  // Imprime el carácter en el puerto serie
-    }
-    //Serial.println();
+
 
 
 

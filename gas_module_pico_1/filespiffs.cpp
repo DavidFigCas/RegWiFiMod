@@ -7,16 +7,28 @@ StaticJsonDocument<FILE_SIZE> doc;
 JsonArray obj_list;
 JsonObject obj_in;
 StaticJsonDocument<LIST_SIZE> doc_list;
-//DynamicJsonDocument doc_list(LIST_SIZE);
+
+JsonArray obj_log;
+StaticJsonDocument<LOG_SIZE> doc_log;
 
 
 const char* filename = "/config.json";
 const char *filedefault = "/default.json";
 const char *filelist = "/list.json";
+const char *filelog = "/log.json";
 volatile bool saveConfig = false;
 
 File file;
 
+
+// -------------------------------------------------------------- save_newlog
+void saveNewlog()
+{
+  //obj_log.add(now);
+  obj_log.add(DateTimeToString(now));
+  serializeJsonPretty(obj_log, Serial);
+  Serial.println();
+}
 
 // ------------------------------------------------------------------------------------- spiffs_init
 bool spiffs_init()
@@ -41,6 +53,9 @@ bool spiffs_init()
 
   obj = getJSonFromFile(&doc, filename);
   obj_list = getJSonArrayFromFile(&doc_list, filelist);
+  obj_log = getJSonArrayFromFile(&doc_log, filelog);
+
+
   if (obj_list.isNull())
   {
     Serial.println("Rehaciendo null");
@@ -61,6 +76,9 @@ bool spiffs_init()
     serializeJson(obj, Serial);
     Serial.println();
     serializeJsonPretty(obj_list, Serial);
+    Serial.println();
+
+    serializeJsonPretty(obj_log, Serial);
     Serial.println();
   }
 
