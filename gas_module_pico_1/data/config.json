@@ -3,7 +3,7 @@
   "mqtt_server": "inventoteca.com",
   "mqtt_port": 1883,
   "test": true,
-  "id": "19",
+  "id": "18",
   "enable_wifi": true,
   "ssid": "4G-MIFI-C91",
   "pass": "1234567890",

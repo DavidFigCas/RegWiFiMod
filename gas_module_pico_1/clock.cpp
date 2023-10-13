@@ -35,12 +35,12 @@ void init_clock()
   {
     Serial.println("{\"rtc_init\":false}");
     rtc_ready = false;
-    delay(1000);
+    delay(10);
   }
   else
   {
     Serial.println("{\"rtc_init\":true}");
-    delay(1000);
+    delay(10);
     gmtOffset_sec = obj["gmtOff"].as<long>();
     daylightOffset_sec = obj["dayOff"].as<int>();
     rtc_ready = true;

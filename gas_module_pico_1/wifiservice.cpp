@@ -23,7 +23,6 @@ void wifi_init()
     String auxpass = obj["pass"].as<String>();
 
     WiFi.begin(auxssid.c_str(), auxpass.c_str());  
-    //WiFi.begin("4G-MIFI-C91","1234567890");
     
     Serial.print("{\"wifi\":{\"ssid\":\"");
     Serial.print(auxssid);

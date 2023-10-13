@@ -10,7 +10,7 @@
 #define SCL_MAIN    17
 
 extern volatile uint32_t nclient;
-extern uint8_t mem_address, STATE;
+extern volatile uint8_t mem_address, STATE;
 extern volatile uint8_t todo_byte, state_byte, error_byte, j;
 extern boolean new_num, printer, valve, OK, DEL, stopCommand, mem_address_written;
 extern boolean ask_name, ask_factor, ask_nclien, ask_litro, ask_peso, ask_data, ask_state, ask_todo, error_status;
