@@ -43,6 +43,7 @@ extern unsigned long mainTime;
 extern const uint32_t connectTimeoutMs;
 extern unsigned long  s_timestamp;
 extern int buttonState;
+extern volatile bool found_client;
 //extern volatile uint32_t nclient_data; // nclient_data[4]
 //extern volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
 
@@ -53,6 +54,6 @@ bool strToBool(String str);
 float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
 void loadConfig();
 void system_init();
-void search_nclient();
+void search_nclient(uint32_t aux_client);
 void register_client();
 #endif

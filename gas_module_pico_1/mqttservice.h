@@ -23,6 +23,8 @@ extern char buffer_msg[1024];
 extern const char* client_id;
 
 extern volatile boolean send_log;
+extern volatile boolean clear_log;
+extern volatile boolean new_log;
 
 void callback(char* topic, byte* payload, unsigned int length);
 bool reconnect();

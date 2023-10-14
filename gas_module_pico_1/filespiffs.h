@@ -18,9 +18,12 @@ extern StaticJsonDocument<LIST_SIZE> doc_list;
 extern JsonArray obj_log;
 extern StaticJsonDocument<LOG_SIZE> doc_log;
 
+extern JsonObject newLogEntry;
+
 extern const char *filename;
 extern const char *filedefault;
 extern const char *filelist;
+extern const char *filelog;
 extern volatile bool saveConfig;
 
 extern File file;

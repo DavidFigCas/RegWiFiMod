@@ -11,6 +11,8 @@ StaticJsonDocument<LIST_SIZE> doc_list;
 JsonArray obj_log;
 StaticJsonDocument<LOG_SIZE> doc_log;
 
+JsonObject newLogEntry;
+
 
 const char* filename = "/config.json";
 const char *filedefault = "/default.json";
@@ -24,13 +26,16 @@ File file;
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {
-  JsonObject newLogEntry = obj_log.createNestedObject();
+  newLogEntry = obj_log.createNestedObject();
   //newLogEntry["timestamp"] = DateTimeToString(now);
-  newLogEntry["timestamp"] = now.unixtime(); 
+  newLogEntry["timestamp"] = now.unixtime();
   newLogEntry["lat"] = obj["gps"]["lat"];
   newLogEntry["lon"] = obj["gps"]["lon"];
+  newLogEntry["state"] = STATE;
 
-  serializeJsonPretty(obj_log, Serial);
+  Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
+  if (obj["test"].as<bool>())
+    serializeJsonPretty(obj_log, Serial);
   Serial.println();
 }
 

@@ -17,6 +17,9 @@ char buffer_union_subcribe[30];
 char buffer_msg[1024];
 //const char* client_id = "maquina00018";
 volatile boolean send_log = false;
+volatile boolean clear_log = false;
+volatile boolean new_log = false;
+
 
 // -------------------------------------------------- mqtt_init
 void mqtt_init()
@@ -163,11 +166,16 @@ void callback(char* topic, byte* payload, unsigned int length)
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
   {
     if (strcmp(jsonPayload, "delete") == 0) {
-      obj_log.clear();
+      clear_log = true;
     } else if (strcmp(jsonPayload, "get") == 0) {
       send_log = true;
       Serial.println("prepare send");
     }
+    else if (strcmp(jsonPayload, "add") == 0) {
+      new_log = true;
+      Serial.println("Add new Log");
+    }
+    
   }
 }
 

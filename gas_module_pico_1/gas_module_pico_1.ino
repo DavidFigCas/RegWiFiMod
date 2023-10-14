@@ -8,8 +8,8 @@
 void setup()
 {
   system_init();
-  search_nclient();
-  saveNewlog();
+  search_nclient(0);
+  //saveNewlog();
   Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 }
 
@@ -29,12 +29,13 @@ void loop()
       read_clock();
       if (mqtt_check())
       {
+        // ------------------------------------------- Send Log
         if (send_log == true)
         {
           Serial.println("mqtt sending");
 
-          saveNewlog();
-          
+          //saveNewlog();
+
           strcpy(buffer_union_publish, obj["id"].as<const char*>());
           strcat(buffer_union_publish, publish_topic);
           strcat(buffer_union_publish, log_topic);
@@ -51,21 +52,43 @@ void loop()
       }
     }
 
+    // ------------------------------------------- Clear Log
+    if (clear_log == true)
+    {
+      obj_log.clear();
+      Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+      clear_log = false;
+    }
+
+
+    // ------------------------------------------- MQTT new LOG
+    if (new_log == true)
+    {
+      saveNewlog();
+      new_log = false;
+    }
+
     Serial.print("STATE: ");
     Serial.println(STATE, BIN);
   }
 
 
+  // ---------------------------------------------- I2C new command
   if (newcommand)
   {
     Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
 
 
-    if (todo_byte & (1 << 6)) {  // Find Client
+    if (todo_byte & (1 << 6)) {  // ---- Search Client
       //new_nclient = true;
       //if (new_nclient)
       //{
-      search_nclient();
+      nclient = 0;
+      nclient |= (uint32_t)nclient_data[0] << 24; // Byte más significativo
+      nclient |= (uint32_t)nclient_data[1] << 16;
+      nclient |= (uint32_t)nclient_data[2] << 8;
+      nclient |= (uint32_t)nclient_data[3];
+      search_nclient(nclient);
       todo_byte &= ~(1 << 6);  // Reset ToDo bit
       //}
     }

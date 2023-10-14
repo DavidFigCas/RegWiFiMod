@@ -8,6 +8,7 @@ unsigned long factory_time = 0;
 unsigned long prev_factory_time = 0;
 bool reset_time = false;
 int buttonState = 0;
+volatile bool found_client = false;
 
 
 unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
@@ -51,7 +52,7 @@ void register_client()
 
   Serial.print("Litros: ");
   Serial.println(litros);
-  litros = litros *100;
+  litros = litros * 100;
   for (int i = 0; i < 4; i++) {
     litros_num[i] = (litros >> (8 * i)) & 0xFF;
     Serial.println(litros_num[i]);
@@ -61,37 +62,44 @@ void register_client()
 }
 
 // -------------------------------------------------------------- search_nclient
-void search_nclient()
+void search_nclient(uint32_t aux_client)
 {
   //for (int i = 0; i < 4; i++) {
   //  Serial.println(nclient_data[i]);
   //}
-  nclient = 0;
-  nclient |= (uint32_t)nclient_data[0] << 24; // Byte más significativo
-  nclient |= (uint32_t)nclient_data[1] << 16;
-  nclient |= (uint32_t)nclient_data[2] << 8;
-  nclient |= (uint32_t)nclient_data[3];
 
-  Serial.print("{\"search_client\":");Serial.print(nclient);Serial.print("}");
-  
+
+  Serial.print("{\"search_client\":"); Serial.print(aux_client); Serial.println("}");
+
   new_nclient = 0;
+  found_client = false;
 
   // Buscar el valor de nclient en el array
   for (JsonArray::iterator it = obj_list.begin(); it != obj_list.end(); ++it) {
     obj_in = *it;
     //Serial.println(obj_in["nombre"].as<String>());
-    if (obj_in["cliente"].as<uint32_t>() == nclient) { //-------------------- Cliente encontrado
+    if (obj_in["cliente"].as<uint32_t>() == aux_client) { //-------------------- Cliente encontrado
       Serial.println("{\"client_found\": true}");
-      serializeJson(obj_in, Serial);
+      if (obj["test"].as<bool>())
+        serializeJson(obj_in, Serial);
       register_client();
-
-      //strcat(strcpy(buffer_union_publish, obj_in["nombre"].as<const char*>()), publish_topic);
-      //strcat(strcpy(buffer_union_publish, obj["id"].as<const char*>()), publish_topic);
-      //snprintf(buffer_msg, sizeof(buffer_msg), "%ld", STATE);
-
-      //if ( mqtt_check())
-      //  mqtt_send();
+      found_client = true;
       break;  // Rompe el bucle una vez que encuentres una coincidencia
+    }
+  }
+  if (!found_client) // ------------- Cliente no encontrado se Busca otra vez el 1
+  {
+    Serial.println("{\"client_found\": false}");
+    for (JsonArray::iterator it = obj_list.begin(); it != obj_list.end(); ++it) {
+      obj_in = *it;
+      //Serial.println(obj_in["nombre"].as<String>());
+      if (obj_in["cliente"].as<uint32_t>() == 0) { //-------------------- Cliente Publico encontrado
+        Serial.println("{\"Using Public Client\": true}");
+        serializeJson(obj_in, Serial);
+        register_client();
+        //found_client = true;
+        break;  // Rompe el bucle una vez que encuentres una coincidencia
+      }
     }
   }
 }
@@ -106,10 +114,10 @@ void system_init()
 
   if (spiffs_init())
   {
-    loadConfig();       // Load and update behaivor of system    
+    loadConfig();       // Load and update behaivor of system
     mqtt_init();
     wifi_init();
-    mqtt_check();   
+    mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock
