@@ -8,8 +8,8 @@
 #include <WiFi.h>
 #include <LittleFS.h>
 //#include <Wire.h>
-#include "i2c_fifo.h"
-#include "i2c_slave.h"
+//#include "i2c_fifo.h"
+//#include "i2c_slave.h"
 #include "pico/stdlib.h"
 #include <WiFiUdp.h>
 #include <NTPClient.h>
@@ -28,7 +28,6 @@
 #include "wireservice.h"
 #include "clock.h"
 #include "gps_service.h"
-
 
 //15 seconds WDT
 #define WDT_TIMEOUT 15
@@ -56,4 +55,5 @@ void loadConfig();
 void system_init();
 void search_nclient(uint32_t aux_client);
 void register_client();
+void check_status();
 #endif

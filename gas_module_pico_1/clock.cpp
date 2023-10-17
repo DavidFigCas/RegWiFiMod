@@ -27,14 +27,17 @@ NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
 // ---------------------------------- init_clock
 void init_clock()
 {
-  Wire1.setSDA(2);
-  Wire1.setSCL(3);
-  Wire1.begin();
+  //Wire1.setSDA(2);
+  //Wire1.setSCL(3);
+  //Wire1.begin();
+  delay(1000);
+  rtc_ready = rtc.begin(&Wire);
   delay(100);
-  if (!rtc.begin(&Wire1))
+  if (rtc_ready == false)
   {
     Serial.println("{\"rtc_init\":false}");
-    rtc_ready = false;
+    //rtc.begin(&Wire)
+    //rtc_ready = false;
     delay(10);
   }
   else
@@ -141,6 +144,7 @@ void update_clock()
           Serial.println(timeClient.getFormattedTime());
           // Establece el tiempo del DS1307 utilizando el tiempo del cliente NTP
           rtc.adjust(DateTime(timeClient.getEpochTime()));
+          delay(100);
           rtcUpdated = true;
         }
         else
@@ -155,6 +159,7 @@ void update_clock()
       //if (rtc.isrunning())
       {
         now = rtc.now();
+        delay(100);
         Serial.print("{\"time_rtc\":\"");
         Serial.print(now.year(), DEC);
         Serial.print('/');

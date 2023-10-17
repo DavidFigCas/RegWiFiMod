@@ -20,7 +20,7 @@ extern volatile uint8_t name_data[42], factor_data[2], nclient_data[4], uprice_d
 
 
 void I2C_Init();
-static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event);
+//static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event);
 
 
 #endif  // 

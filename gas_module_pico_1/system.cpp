@@ -17,8 +17,75 @@ unsigned long mainTime = 1000;
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 
+const uint8_t REG_STATUS = 0x01;
+const uint8_t REG_SET_STATUS = 0x08;
+
+uint8_t readBuffer[1];
+uint8_t temp_data;
+bool bit_value=0;
+uint8_t buffer[4];
+uint8_t folio = 0, err_data=0;
+
+
+
 //volatile uint32_t nclient_data; // nclient_data[4]
 //volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
+
+// ---------------------------------------------------- check_status
+void check_status (void)
+{
+  //check status register of internet board
+  //i2c_write_blocking(i2c0, 0x5E, &REG_STATUS, 1, true);//check STATUS of internet board
+  //uint8_t readBuffer[1];
+  //  i2c_read_blocking(i2c0, 0x5E, readBuffer, 1, false);
+  
+  //temp_data = readBuffer[0];
+  //bit_value = (temp_data >> 6) & 0x01; //check internet_connection
+  //if (bit_value == 0) err_data &= ~(1 << 7);
+  //else err_data |= (1 << 7);
+  //bit_value = (temp_data >> 5) & 0x01; //check gps connection
+  //if (bit_value == 0) err_data &= ~(1 << 3);
+  //else err_data |= (1 << 3);
+  // check solenoid
+  //sleep_ms(100);
+  
+  /*i2c_write_blocking(i2c0, 0x5C, &REG_STATUS, 1, true);//check STATUS of control board
+  i2c_read_blocking(i2c0, 0x5C, readBuffer, 1, false);
+  temp_data = readBuffer[0];
+  bit_value = (temp_data >> 2) & 0x01; //check solenoid connection
+  if (bit_value == 0) err_data &= ~(1 << 6);
+  else err_data |= (1 << 6);
+  Serial.print("Control Status:");
+  Serial.println(temp_data,BIN);
+  // check printer
+  sleep_ms(100);
+  i2c_write_blocking(i2c0, 0x5D, &REG_STATUS, 1, true);//check STATUS of printer board
+  i2c_read_blocking(i2c0, 0x5D, readBuffer, 1, false);
+  temp_data = readBuffer[0];
+  bit_value = (temp_data >> 6) & 0x01; //check printer connection
+  if (bit_value == 0) err_data &= ~(1 << 5);
+  else err_data |= (1 << 5);
+  bit_value = (temp_data >> 5) & 0x01; //check paper
+  if (bit_value == 0) err_data &= ~(1 << 4);
+  else err_data |= (1 << 4);
+  Serial.print("Printer Status:");
+  Serial.println(temp_data,BIN);
+  // send data to display board for show statuses
+  sleep_ms(100);
+
+  Serial.print("Show Status:");
+  Serial.println(REG_SET_STATUS,BIN);
+  buffer[0] = err_data;
+  i2c_write_blocking(i2c0, 0x5A, &REG_SET_STATUS, 1, true);
+  i2c_write_blocking(i2c0, 0x5A, buffer, 1, false);
+  Serial.print("try 1");
+  sleep_ms(100);
+  i2c_write_blocking(i2c0, 0x5E, &REG_SET_STATUS, 1, true);
+  i2c_write_blocking(i2c0, 0x5E, buffer, 1, false);
+  Serial.print("Send");
+  Serial.println();*/
+}
+
 
 
 // ------------------------------------------------------------ register_client
@@ -30,8 +97,8 @@ void register_client()
 
 
   uint32_t litros = obj_in["litros"];
-  uint32_t uprice = (obj_in["precio"].as<float>())*100;
-  uint32_t factor = (obj_in["factor"].as<float>())*100;
+  uint32_t uprice = (obj_in["precio"].as<float>()) * 100;
+  uint32_t factor = (obj_in["factor"].as<float>()) * 100;
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 
@@ -140,7 +207,7 @@ void system_init()
     mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
-    init_clock();        // I2C for clock
+    //init_clock();        // I2C for clock
   }
   gps_init();
 }
