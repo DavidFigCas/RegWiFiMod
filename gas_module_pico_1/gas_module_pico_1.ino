@@ -70,6 +70,13 @@ void loop()
 
     Serial.print("STATE: ");
     Serial.println(STATE, BIN);
+    Serial.print("ToDO: ");
+    Serial.println(todo_byte, BIN);
+    Serial.print("Client: ");
+    for (int i = 0; i < 4; i++)
+      Serial.print(nclient_data[i]);
+    Serial.println();
+
   }
 
 
