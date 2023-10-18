@@ -45,6 +45,12 @@ extern int buttonState;
 extern volatile bool found_client;
 //extern volatile uint32_t nclient_data; // nclient_data[4]
 //extern volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
+extern uint8_t buffer[4];
+extern uint8_t folio, err_data;
+
+extern const uint8_t REG_STATUS;
+extern const uint8_t REG_SET_STATUS;
+
 
 //void IRAM_ATTR factory_reset3();
 void reset_config();

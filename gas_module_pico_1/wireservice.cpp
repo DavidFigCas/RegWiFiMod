@@ -32,19 +32,19 @@ void I2C_Init()
     i2c_slave_init(i2c0, ADDRESS, &i2c_slave_handler);
     delay(3000);*/
 
-  /*i2c_init(i2c0, 100 * 1000);
+  i2c_init(i2c0, 100 * 1000);
     // configure I2C0 for slave mode
     gpio_init(SDA_MAIN);
     gpio_init(SCL_MAIN);
     gpio_set_function(SDA_MAIN, GPIO_FUNC_I2C);
     gpio_set_function(SCL_MAIN, GPIO_FUNC_I2C);
     gpio_pull_up(SDA_MAIN);
-    gpio_pull_up(SCL_MAIN);*/
+    gpio_pull_up(SCL_MAIN);
 
-  //Wire.setClock(100000);
+ /* Wire.setClock(100000);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
-  Wire.begin();
+  Wire.begin();*/
   //gpio_put(LED_1, 1);
 
   nclient_data[0] = 2;
