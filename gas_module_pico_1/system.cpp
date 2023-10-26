@@ -30,6 +30,8 @@ void register_client()
 
 
   uint32_t litros = obj_in["litros"];
+  uint32_t uprice = (obj_in["precio"].as<float>())*100;
+  uint32_t factor = (obj_in["factor"].as<float>())*100;
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 
@@ -56,6 +58,24 @@ void register_client()
   for (int i = 0; i < 4; i++) {
     litros_num[i] = (litros >> (8 * i)) & 0xFF;
     Serial.println(litros_num[i]);
+  }
+  Serial.println();
+
+  Serial.print("uPrice: ");
+  Serial.println(uprice);
+  //litros = litros * 100;
+  for (int i = 0; i < 2; i++) {
+    uprice_data[i] = (uprice >> (8 * i)) & 0xFF;
+    Serial.println(uprice_data[i]);
+  }
+  Serial.println();
+
+  Serial.print("Factor: ");
+  Serial.println(factor);
+  //litros = litros * 100;
+  for (int i = 0; i < 2; i++) {
+    factor_data[i] = (factor >> (8 * i)) & 0xFF;
+    Serial.println(factor_data[i]);
   }
   Serial.println();
 

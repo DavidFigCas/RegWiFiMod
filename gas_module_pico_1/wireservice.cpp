@@ -28,6 +28,7 @@ void I2C_Init()
   i2c_slave_init(i2c0, ADDRESS, &i2c_slave_handler);
   delay(3000);
 
+  nclient_data[0]=2;
 }
 
 
