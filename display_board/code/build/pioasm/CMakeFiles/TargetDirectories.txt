@@ -1,0 +1,3 @@
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/display_board/code/build/pioasm/CMakeFiles/rebuild_cache.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/display_board/code/build/pioasm/CMakeFiles/edit_cache.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/display_board/code/build/pioasm/CMakeFiles/pioasm.dir

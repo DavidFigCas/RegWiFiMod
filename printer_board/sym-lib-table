@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "VNA-rescue")(type "Legacy")(uri "/home/pingvin/PROJECTS/VNA/VNA-rescue.lib")(options "")(descr ""))
+)

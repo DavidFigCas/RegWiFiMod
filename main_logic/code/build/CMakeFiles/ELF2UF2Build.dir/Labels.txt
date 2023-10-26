@@ -1,0 +1,13 @@
+# Target labels
+ ELF2UF2Build
+# Source files and their labels
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles/ELF2UF2Build
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles/ELF2UF2Build.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles/ELF2UF2Build-complete.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-build.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-configure.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-download.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-install.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-mkdir.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-patch.rule
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-update.rule

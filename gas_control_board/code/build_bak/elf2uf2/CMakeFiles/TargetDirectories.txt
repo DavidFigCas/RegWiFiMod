@@ -1,0 +1,5 @@
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/gas_control_board/code/build/elf2uf2/CMakeFiles/rebuild_cache.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/gas_control_board/code/build/elf2uf2/CMakeFiles/edit_cache.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/gas_control_board/code/build/elf2uf2/CMakeFiles/elf2uf2.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/gas_control_board/code/build/elf2uf2/boot_uf2_headers/CMakeFiles/rebuild_cache.dir
+/home/pingvin/PROJECTS/Git/Inventoteca/gas_car/gas_control_board/code/build/elf2uf2/boot_uf2_headers/CMakeFiles/edit_cache.dir
