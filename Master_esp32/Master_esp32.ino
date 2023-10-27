@@ -24,7 +24,7 @@ void loop() {
   Serial.println("Sending...");
   Wire.beginTransmission(0x30);
   sprintf(b, "{\"key\":%d}", p++);
-  Wire.write(b, strlen(b));
+  Wire.write((const uint8_t*)b, strlen(b));
   Wire.endTransmission();
 
   // Ensure the slave processing is done and print it out
