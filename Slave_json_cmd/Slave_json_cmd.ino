@@ -44,7 +44,7 @@ void loop() {
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
   deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
 
-  doc["pass"] = doc_aux["key"];
+  doc["pass"] = doc_aux["litros"];     //Commands
   serializeJson(doc, resp);
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
   delay(1000);

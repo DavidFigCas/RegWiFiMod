@@ -22,7 +22,7 @@ void loop() {
 
   // Write a value over I2C to the slave
   Serial.println("Sending...");
-  Wire.beginTransmission(0x30);
+  Wire.beginTransmission(0x5A);
   sprintf(b, "{\"key\":%d}", p++);
   Wire.write((const uint8_t*)b, strlen(b));
   Wire.endTransmission();
