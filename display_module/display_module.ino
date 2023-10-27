@@ -331,6 +331,10 @@ struct bitmap_pair
 void setup()
 {
   
+  
+  Serial.begin(115200);
+  delay(5000);
+  Serial.println("Init Display");
   pinMode(25, OUTPUT);
   digitalWrite(25, 0);
   pinMode(28, OUTPUT);
@@ -368,9 +372,10 @@ void setup()
     //deepSleepTest();
   display.powerOff();
     //Serial.println("setup done");
-  Serial.begin(115200);
-  //delay(5000);
-  Serial.println("Init Display");
+  
+  //STATE = 1;
+  error_status = true;
+  
 }
 
 void loop(){
@@ -378,7 +383,8 @@ void loop(){
   switch(STATE){
     case 0:
     digitalWrite(25, 1);               
-      if (error_status == true){
+      if (error_status == true)
+      {
         Serial.println("recieve error status");
         display.init(0);
         display.setFullWindow();
@@ -443,7 +449,8 @@ void loop(){
       break;
     case 1:
       digitalWrite(27, 1);
-      if (newcommand == 1){
+      if (newcommand == 1)
+      {
         Serial.println("***************************new command***********************************************");
         litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
         Serial.println(litros);
