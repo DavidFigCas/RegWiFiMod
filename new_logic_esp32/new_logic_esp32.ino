@@ -12,12 +12,12 @@
 */
 #include <Wire.h>
 
-#define SDA_MAIN    16
-#define SCL_MAIN    17
-#define OPEN_BOX  2
+//#define SDA_MAIN    16
+//#define SCL_MAIN    17
+#define OPEN_BOX  12
 #define LED_1     25
 #define LED_2     27
-#define LED_3     28
+#define LED_3     26
 uint8_t REG_STATUS = 0x01;
 //const uint8_t REG_UPRICE = 0x03;
 uint8_t REG_SET_PESOS = 0x03;
@@ -463,10 +463,12 @@ void check_status (void) {
   delay(100);
   buffer[0] = err_data;
   i2c_write_blocking( 0x5A, &REG_SET_STATUS, 1, true);
+  delay(6);
   i2c_write_blocking( 0x5A, buffer, 1, false);
   delay(100);
-  i2c_write_blocking( 0x5E, &REG_SET_STATUS, 1, true);
-  i2c_write_blocking( 0x5E, buffer, 1, false);
+  //i2c_write_blocking( 0x5E, &REG_SET_STATUS, 1, true);
+  //delay(6);
+  //i2c_write_blocking( 0x5E, buffer, 1, false);
 }
 
 uint8_t test[4] = {10, 20, 30, 40};
@@ -517,6 +519,7 @@ void setup() {
   digitalWrite(LED_2, 1);
   int ret;
   uint8_t rxdata;
+  
   i2c_write_blocking( 0x5A, &REG_STATUS, 1, true);
   ret = i2c_read_blocking( 0x5A, &rxdata, 1, false);
   if (ret >= 0) display_board = 1;
@@ -576,6 +579,7 @@ void setup() {
   //reset counter
   buffer[0] = 160;
   i2c_write_blocking( 0x5C, &REG_TODO, 1, true);
+  delay(10);
   i2c_write_blocking( 0x5C, buffer, 1, false);
   /*
     if (display_board==1){

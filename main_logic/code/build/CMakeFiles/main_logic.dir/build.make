@@ -688,24 +688,346 @@ CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/p
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio/stdio.c.s"
 	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio/stdio.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio/stdio.c.s
 
-CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj: CMakeFiles/main_logic.dir/flags.make
-CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c
-CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj"
-	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c
 
-CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.i"
-	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.i
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.i
 
-CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.s"
-	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.s
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_54) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_55) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_56) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_57) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_58) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_59) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_60) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_61) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_62) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_63) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_64) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_65) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_66) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_67) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj: /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_68) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj -c /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.s
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj: CMakeFiles/main_logic.dir/flags.make
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_69) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.i"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c > CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.i
+
+CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.s"
+	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.s
 
 CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj: CMakeFiles/main_logic.dir/flags.make
 CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj: /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c
 CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj: CMakeFiles/main_logic.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_70) "Building C object CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj"
 	/usr/bin/arm-none-eabi-gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj -MF CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj.d -o CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj -c /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c
 
 CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.i: cmake_force
@@ -763,7 +1085,30 @@ main_logic_OBJECTS = \
 "CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_standard_link/new_delete.cpp.obj" \
 "CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_standard_link/binary_info.c.obj" \
 "CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio/stdio.c.obj" \
-"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj" \
+"CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj" \
 "CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj"
 
 # External object files for target main_logic
@@ -814,12 +1159,35 @@ main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/
 main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_standard_link/new_delete.cpp.obj
 main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_standard_link/binary_info.c.obj
 main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio/stdio.c.obj
-main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/reset_interface.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_stdio_usb/stdio_usb_descriptors.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/flash.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/dcd_rp2040.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/portable/raspberrypi/rp2040/rp2040_usb.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/device/usbd_control.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/audio/audio_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/cdc/cdc_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/dfu/dfu_rt_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/hid/hid_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/midi/midi_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/msc/msc_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ecm_rndis_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/net/ncm_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/usbtmc/usbtmc_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/vendor/vendor_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/class/video/video_device.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/tusb.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/lib/tinyusb/src/common/tusb_fifo.c.obj
+main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/pico_fix/rp2040_usb_device_enumeration/rp2040_usb_device_enumeration.c.obj
 main_logic.elf: CMakeFiles/main_logic.dir/home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/i2c.c.obj
 main_logic.elf: CMakeFiles/main_logic.dir/build.make
 main_logic.elf: pico-sdk/src/rp2_common/boot_stage2/bs2_default_padded_checksummed.S
 main_logic.elf: CMakeFiles/main_logic.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Linking CXX executable main_logic.elf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_71) "Linking CXX executable main_logic.elf"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main_logic.dir/link.txt --verbose=$(VERBOSE)
 	/usr/bin/arm-none-eabi-objcopy -Oihex /home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/main_logic.elf main_logic.hex
 	/usr/bin/arm-none-eabi-objcopy -Obinary /home/invento/Documentos/GasWiFiModule/RegWiFiMod/main_logic/code/build/main_logic.elf main_logic.bin

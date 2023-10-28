@@ -9,23 +9,24 @@
 static int ctr;
 static char buff[200];
 static char resp[200];
+String jsonStr;
 
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
-StaticJsonDocument<20> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
+StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
 
 void setup() {
   Serial.begin(115200);
   delay(2500);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
-  Wire.begin(0x30);
+  Wire.begin(0x5A);
   Wire.onReceive(recv);
   Wire.onRequest(req);
 
 
-  doc["name"] = "John";
-  doc["age"] = 30;
-  doc["city"] = "New York";
+  doc["nombre"] = "John";
+  doc["litros"] = 30;
+  doc["precio de las tortillas"] = 9.5;
 
   // Serializar el objeto JSON en la variable resp
   serializeJson(doc, resp);
@@ -34,17 +35,17 @@ void setup() {
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
 }
 
-void loop() {
+void loop()
+{
 
   memset(resp, 0, sizeof(resp));
-
-
   Serial.printf("Slave: '%s'\r\n", buff);
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
+  //buff = jsonStr;
   deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
 
-  doc["pass"] = doc_aux["litros"];     //Commands
+  doc["precio de las tortillas"] = doc_aux["precio de las tortillas"];     //Commands
   serializeJson(doc, resp);
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
   delay(1000);

@@ -9,7 +9,7 @@
 //#include "hardware/i2c.h"
 #include "GxEPD2_display_selection_new_style.h"
 //#include <pico/multicore.h>
-//#include <UnixTime.h>
+#include <UnixTime.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
 
@@ -46,8 +46,8 @@ UnixTime stamp(-6);
 
 float uprice = 9.8; //price of 1 litr
 
-static char buff[200];
-static char resp[200];
+static char buffx[200];
+static char respx[200];
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
 StaticJsonDocument<20> doc_aux;  // Crea un documento JSON con espacio para 200 
 
@@ -90,130 +90,6 @@ bool read_touch(uint16_t *x, uint16_t *y, uint16_t *z1,
   return (*x != 4095) && (*y != 4095);
 }
 
-/*static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
-
-    switch (event) {
-    case I2C_SLAVE_RECEIVE: // master has written some data
-
-        if (!mem_address_written) {
-            // writes always start with the memory address
-            //digitalWrite(28,1);
-            mem_address = i2c_read_byte(i2c);
-            //digitalWrite(28,1);
-            if (mem_address == 0x01){
-              ask_state = true;
-
-            }
-            else if (mem_address == 0x05){
-              ask_litro = true;
-            }
-            else if (mem_address == 0x06){
-              ask_peso = true;
-            }
-            else if(mem_address == 0x02){
-              ask_todo = true;
-            }
-            else{
-              //digitalWrite(28,1);
-            }
-            mem_address_written = true;
-        } else {
-          //digitalWrite(28,1);
-          mem_address_written =0;
-            // save into memory
-            if (mem_address == 0x08){
-              //digitalWrite(27,1);
-              error_status = true;
-              error_byte = i2c_read_byte(i2c);
-            }
-            if (mem_address == 0x02){
-              todo_byte = i2c_read_byte(i2c);
-              newcommand = true;
-            }
-            if (mem_address == 0x03){
-              pesos_num[j] = i2c_read_byte(i2c);
-              j++;
-              if (j>4){
-                j=0;
-              }
-            }
-            if (mem_address == 0x04){
-              new_litros = true;
-              litros_num[j] = i2c_read_byte(i2c);
-              j++;
-              if (j>4){
-                j=0;
-              }
-            }
-            if (mem_address == 0x09){
-              client_num[j] = i2c_read_byte(i2c);
-              j++;
-              if (j>4){
-                j=0;
-              }
-            }
-            if (mem_address == 0x10){
-              time_num[j] = i2c_read_byte(i2c);
-              j++;
-              if (j>4){
-                j=0;
-              }
-            }
-            if (mem_address == 0x05){
-              litros_num[j] = i2c_read_byte(i2c);
-              j++;
-              if (j>4){
-                j=0;
-              }
-            }
-        }
-        break;
-    case I2C_SLAVE_REQUEST: // master is requesting data
-        // load from memory
-      mem_address_written =0;
-      if (ask_state == true){
-        i2c_write_byte(i2c, STATE);
-        ask_state = false;
-      }
-      else if (ask_todo == true){
-        i2c_write_byte(i2c, todo_byte);
-        ask_todo = false;
-      }
-      else if (ask_litro == true){
-        i2c_write_byte(i2c, ltr_data[j]);
-        j++;
-        if (j>4){
-          ask_data = false;
-          j=0;
-        }
-      }
-      else if (ask_peso == true){
-        i2c_write_byte(i2c, pes_data[j]);
-        j++;
-        if (j>4){
-          ask_data = false;
-          j=0;
-        }
-      }
-      else i2c_write_byte(i2c, 0);
-      break;
-    case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
-        //mem_address_written = false;
-        //ask_data = false;
-        //ask_state = false;
-        j=0;
-        //gpio_put(LED_2, 0);
-       // gpio_put(LED_3, 0);
-       // gpio_put(LED_1, 1);
-       newData=1;
-        break;
-    default:
-        break;
-    }
-  }
-
-*/
-
 // These are called in an **INTERRUPT CONTEXT** which means NO serial port
 // access (i.e. Serial.print is illegal) and no memory allocations, etc.
 
@@ -222,20 +98,20 @@ bool read_touch(uint16_t *x, uint16_t *y, uint16_t *z1,
 void recv(int len)
 {
   int i;
-  memset(buff, 0, sizeof(buff));
+  memset(buffx, 0, sizeof(buffx));
   // Just stuff the sent bytes into a global the main routine can pick up and use
   for (i = 0; i < len; i++)
   {
-    buff[i] = Wire.read();
+    buffx[i] = Wire.read();
   }
-  //buff[i] = 0;
+  buffx[i] = 0;
 }
 
 // Called when the I2C slave is read from
 // ---------------------------------------------------------------------------- req
 void req()
 {
-  Wire.write(resp, 199);
+  Wire.write(respx, 199);
 }
 
 // ------------------------------------------------------------------------- readData
@@ -386,43 +262,20 @@ void setup()
   Wire.onReceive(recv);
   Wire.onRequest(req);
 
-  //delay(3000);
+  delay(3000);
 
-  //multicore_launch_core1(core1_blink);
-  //Serial.begin(115200);
-  //pinMode(27, OUTPUT);
-
-  
-  //display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
-  //gpio_set_function(P_MISO, GPIO_FUNC_SPI);
-  //gpio_set_function(P_SCK, GPIO_FUNC_SPI);
-  //gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
-
-  //display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
-
-  //display.init(115200, true, 2, false); // USE THIS for Waveshare boards with "clever" reset circuit, 2ms reset pulse
-  
-  //display.setFullWindow();
-  //display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
-  
-  //digitalWrite(25, 0);
-  //display.init(115200, true, 2, false);
-  //showPartialUpdate();
-  //deepSleepTest();
-  
-  //display.powerOff();
   
   //Serial.println("setup done");
 
   //STATE = 1;
-  error_status = true;
+  //error_status = true;
+  
   doc["name"] = "John";
   doc["age"] = 30;
   doc["city"] = "New York";
 
   // Serializar el objeto JSON en la variable resp
-  serializeJson(doc, resp);
-  delay(2000);
+  serializeJson(doc, respx);
 
 }
 
@@ -430,20 +283,24 @@ void setup()
 // --------------------------------------------------------------------- LOOP
 void loop() {
   Serial.println(STATE);
-  memset(resp, 0, sizeof(resp));
+  memset(respx, 0, sizeof(respx));
+  //memset(buff, 0, sizeof(buff));
 
 
-  Serial.printf("Slave: '%s'\r\n", buff);
+  Serial.printf("Slave: '%s'\r\n", buffx);
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
+  deserializeJson(doc_aux, buffx);  // Serializa el documento JSON a una cadena
 
-  doc["pass"] = doc_aux["key"];     //Commands
-  serializeJson(doc, resp);
-  Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+  doc["precio"] = doc_aux["precio de las tortillas"];     //Commands
+  serializeJson(doc, respx);
+  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
 
 
-  delay(1000);
+  // Ahora resp contiene el objeto JSON como una cadena
+  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+
+  delay(500);
   
   /*switch (STATE) {
     case 0:
@@ -566,7 +423,7 @@ void loop() {
         endprocess = 0;
       }
 
-      /*
+      
         if (error_status == true){
         if((error_byte >> 7) & 0x01){
           display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
@@ -665,6 +522,39 @@ void loop() {
     default:
       Serial.println("fuck");
       break;
-  }*/
+  }
+*/
+}
 
+void setup1()
+{
+  //multicore_launch_core1(core1_blink);
+  //Serial.begin(115200);
+  //pinMode(27, OUTPUT);
+
+  
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  gpio_set_function(P_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(P_SCK, GPIO_FUNC_SPI);
+  gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
+
+  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
+
+  //display.init(115200, true, 2, false); // USE THIS for Waveshare boards with "clever" reset circuit, 2ms reset pulse
+  
+  display.setFullWindow();
+  display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+  
+  //digitalWrite(25, 0);
+  //display.init(115200, true, 2, false);
+  //showPartialUpdate();
+  //deepSleepTest();
+  
+  display.powerOff();
+  
+}
+
+void loop1()
+{
+  
 }

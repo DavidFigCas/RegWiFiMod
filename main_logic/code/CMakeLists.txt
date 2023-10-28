@@ -10,5 +10,9 @@ add_executable(main_logic
 	)
 #pico_enable_stdio_usb(test 1)1
 #pico_enable_stdio_uart(test 1)2
+
+pico_enable_stdio_usb(main_logic 1)
+pico_enable_stdio_uart(main_logic 0)
+
 pico_add_extra_outputs(main_logic)
 target_link_libraries(main_logic pico_stdlib hardware_i2c)
