@@ -19,7 +19,7 @@ void setup() {
   delay(2500);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
-  Wire.begin(0x5A);
+  Wire.begin(0x5B);
   Wire.onReceive(recv);
   Wire.onRequest(req);
 
