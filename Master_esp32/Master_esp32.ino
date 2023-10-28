@@ -21,7 +21,7 @@ void setup()
   Wire.begin();
 
   //doc["lit"] = 0;
-  doc["precio de las tortillas"] = 9.5;
+  doc["precio"] = 9.5;
 }
 
 
@@ -30,8 +30,10 @@ void loop()
 
   // Write a value over I2C to the slave
   Serial.println("Sending...");
-  doc["precio de las tortillas"] = p++;
+  doc["precio"] = p++;
   doc["otro"] = p++;
+  doc["wifi"] = false;
+  doc["valve"] = false;
   
   serializeJson(doc, b);
   Serial.println(b);
@@ -41,7 +43,7 @@ void loop()
   Wire.endTransmission();
 
   // Ensure the slave processing is done and print it out
-  //delay(10);
+  delay(10);
   Serial.printf("Master Send: '%s'\r\n", b);
 
   // Read from the slave and print out
@@ -55,5 +57,5 @@ void loop()
   }
 
   Serial.println("'");
-  //delay(10);
+  delay(10);
 }

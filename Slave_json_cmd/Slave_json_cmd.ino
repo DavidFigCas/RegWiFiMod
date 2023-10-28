@@ -39,15 +39,16 @@ void loop()
 {
 
   memset(resp, 0, sizeof(resp));
-  Serial.printf("Slave: '%s'\r\n", buff);
+  Serial.printf("Slave Buff: '%s'\r\n", buff);
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
   //buff = jsonStr;
-  deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
+  //deserializeJson(doc_aux, buff);
+  //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
 
-  doc["precio de las tortillas"] = doc_aux["precio de las tortillas"];     //Commands
-  serializeJson(doc, resp);
-  Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+  //doc["precio"] = doc_aux["precio"];     //Commands
+  //serializeJson(doc, resp);
+  //Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
   delay(1000);
 
 
@@ -72,5 +73,6 @@ void recv(int len)
 // Called when the I2C slave is read from
 void req()
 {
-  Wire.write(resp, 199);
+ // Wire.write(resp, 199);
+ Wire.write((const uint8_t *)resp, 199);
 }

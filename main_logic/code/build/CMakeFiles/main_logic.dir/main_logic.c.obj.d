@@ -63,4 +63,6 @@ CMakeFiles/main_logic.dir/main_logic.c.obj: \
  /home/invento/Documentos/pico/pico-sdk/src/common/pico_binary_info/include/pico/binary_info/code.h \
  /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_i2c/include/hardware/i2c.h \
  /home/invento/Documentos/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/i2c.h \
- /home/invento/Documentos/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/i2c.h
+ /home/invento/Documentos/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/i2c.h \
+ /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_flash/include/hardware/flash.h \
+ /home/invento/Documentos/pico/pico-sdk/src/rp2_common/hardware_sync/include/hardware/sync.h

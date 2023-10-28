@@ -9,6 +9,12 @@
 #include "pico/stdlib.h"
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
+#include "hardware/flash.h"
+#include "hardware/sync.h"
+
+#define BATCH_SIZE 14
+#define FLASH_TARGET_OFFSET (132 * 1024)  // start of data savings? left 128k for code
+#define POINTER_ADDRESS (128 * 1024)
 
 #define SDA_MAIN    16
 #define SCL_MAIN    17
@@ -16,6 +22,15 @@
 #define LED_1			25
 #define LED_2			27
 #define LED_3			28
+#define I2C_ADDR 0x68
+#define DS3231_TIME_REGISTER_COUNT 0x12
+#define DS3231_REGISTER_DAY 0x03
+#define DS3231_I2C_TIMEOUT 5000
+
+const uint8_t *flash_target_contents = (const uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET);
+const uint8_t *flash_counter_contents = (const uint8_t *) (XIP_BASE + POINTER_ADDRESS);
+uint32_t current_address = 555;
+
 const uint8_t REG_STATUS = 0x01;
 //const uint8_t REG_UPRICE = 0x03;
 const uint8_t REG_SET_PESOS = 0x03;
@@ -39,6 +54,8 @@ uint8_t STATUS=0, CONTROL=0, stopper=0, STATE=0;
 uint8_t readBuffer[1];
 uint8_t temp_data;
 
+uint8_t day, month, year, hour, min;
+
 uint32_t unitprice = 950, factor=1;
 uint32_t converter = 368;
 uint32_t litros_set=0, pesos=0, litros_act=0, target =0;
@@ -46,11 +63,14 @@ uint32_t client_number = 0;
 
 uint32_t litros_print, pesos_print, litros;
 
+
+uint8_t data_buffer[BATCH_SIZE];
 uint8_t buffer[4];
 uint8_t folio = 3, err_data=0;
 // Глобальная переменная для хранения времени в миллисекундах
 volatile uint32_t milliseconds = 0;
 uint32_t currentMillis;
+uint32_t interrupts;
 
 bool display_board=0, power_board=0, control_board=0, printer_board=0, internet_board=0, no_service=0;
 bool bit_value=0;
@@ -59,7 +79,67 @@ const char* unidades[] = {"", "uno", "dos", "tres", "cuatro", "cinco", "seis", "
 const char* decenas[] = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"};
 const char* especiales[] = {"diez", "once", "doce", "trece", "catorce", "quince"};
 
-void printCheck (uint32_t num, uint32_t ltr){
+// read registers from DS3231 to buffer
+int readDS3231 (uint8_t * buffer, int bufferLength) {
+  int status = i2c_read_timeout_us(i2c0, I2C_ADDR, buffer, bufferLength, true, DS3231_I2C_TIMEOUT);
+  return 1;
+}
+
+int writeDS3231 (uint8_t * buffer, int bufferLength) {
+  int status = i2c_write_timeout_us(i2c0, I2C_ADDR, buffer, bufferLength, true, DS3231_I2C_TIMEOUT);
+  return 1;
+}
+
+// convert DS3231 register buffer contents to struct tm
+void bufferToTime (uint8_t * buffer) {
+  uint8_t tmp;
+  tmp = buffer[1];
+  min = tmp & 0x0f;
+  tmp >>= 4;
+  min += 10 * (tmp & 0x7);
+  // buffer bcd to hours
+  tmp = buffer[2];
+  // extract hours from the first nibble
+  hour = tmp & 0x0f;
+  tmp >>= 4;
+  // test if 12 hour mode
+  hour += 10 * (tmp & 0x03);
+  // day of week
+  // buffer bcd to day of month
+  tmp = buffer[4];
+  day = tmp & 0x0f;
+  tmp >>= 4;
+  day += 10 * (tmp & 0x03);
+  // buffer bcd to month
+  tmp = buffer[5];
+  month = tmp & 0x0f;
+  tmp >>= 4;
+  month += 10 * (tmp & 0x01);
+  month -= 1;
+  // buffer bcd to year
+  tmp = buffer[6];
+  year += tmp & 0x0f;
+  tmp >>= 4;
+  year += 10 * (tmp & 0x0f);
+}
+
+int readDS3231Time () {
+  uint8_t reg = 0x00; // start register
+  int status;
+  uint8_t time_buffer[DS3231_TIME_REGISTER_COUNT];
+  memset(time_buffer, 0, DS3231_TIME_REGISTER_COUNT);
+  // write single byte to specify the starting register for follow up reads
+  status = writeDS3231(&reg, 1);
+  //if (status) return status;
+  // read all registers into buffer
+  status = readDS3231(time_buffer, DS3231_TIME_REGISTER_COUNT);
+  //if (status) return status;
+  // convert buffer to struct tm
+  bufferToTime(time_buffer);
+  return 1;
+}
+
+void printCheck (uint32_t num, uint32_t ltr, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f){
 	//char* resultado = "";
 	char resultado[150];
 	const char* Total = "TOTAL   $";
@@ -219,35 +299,68 @@ void printCheck (uint32_t num, uint32_t ltr){
 	strncpy((char*)resultadoBytes, resultado, size);
 	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
 	//resultado = "Precio U.   $";
+	printf(resultado, "%u", (unitprice/100));
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	printf(resultado, ".");
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	printf(resultado, "%u", (unitprice%100));
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
 	
-	tempVar = (uint8_t)(unitprice);
-	if (tempVar>0){
-		tempChar = (char)tempVar;
-		i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);	
-	}
-	tempnum = unitprice%1000;
-	tempVar = (uint8_t)(tempnum/100);
-	tempChar = (char)tempVar;
-	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
-	tempnum = num%100;
-	tempVar = (uint8_t)(tempnum/10);
-	tempChar = (char)tempVar;
-	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
-	tempVar = (uint8_t)(tempnum%10);
-	tempChar = (char)tempVar;
-	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
-	//Send end of string
 	//Send end of string
 	tempChar = end1;
 	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
 	tempChar = end2;
 	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
-	// need to add converter from ubnixtime to string
-	strcpy(resultado, "21/09/23  10:23");
-	//resultado = "21/09/23  10:23";
+	
+	sprintf(resultado, "%u", d);
 	size = strlen(resultado);
 	strncpy((char*)resultadoBytes, resultado, size);
 	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	strcpy(resultado, "/");
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	printf(resultado, "%u", m);
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	strcpy(resultado, "/");
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	printf(resultado, "%u", y);
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	strcpy(resultado, " ");
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	
+	printf(resultado, "%u", h);
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	strcpy(resultado, ":");
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	printf(resultado, "%u", mn);
+	size = strlen(resultado);
+	strncpy((char*)resultadoBytes, resultado, size);
+	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
+	// need to add converter from ubnixtime to string
+	//strcpy(resultado, "21/09/23  10:23");
+	//resultado = "21/09/23  10:23";
+	//size = strlen(resultado);
+	//strncpy((char*)resultadoBytes, resultado, size);
+	//i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
 	//Send end of string
 	tempChar = end1;
 	i2c_write_blocking(i2c0, 0x5D, &tempChar, 1, false);
@@ -269,7 +382,7 @@ void printCheck (uint32_t num, uint32_t ltr){
 	size = strlen(resultado);
 	strncpy((char*)resultadoBytes, resultado, size);
 	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
-	sprintf(resultado, "%u", folio);
+	sprintf(resultado, "%u", f);
 	size = strlen(resultado);
 	strncpy((char*)resultadoBytes, resultado, size);
 	i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
@@ -371,8 +484,6 @@ void check_status (void){
 	//uint8_t readBuffer[1];
 	i2c_read_blocking(i2c0, 0x5E, readBuffer, 1, false);
 	temp_data = readBuffer[0];
-	printf("ret \n");
-    	printf("%u",temp_data);
 	bit_value = (temp_data >> 6) & 0x01; //check internet_connection
 	if (bit_value == 0) err_data &= ~(1 << 7);
 	else err_data |= (1 << 7);
@@ -408,8 +519,48 @@ void check_status (void){
 	i2c_write_blocking(i2c0, 0x5E, buffer, 1, false);
 }
 
-uint8_t test[4] = {10,20,30,40};
-const uint8_t addr=0x04;
+void saveLog(){
+	readDS3231Time(); 
+	data_buffer[0] = year;
+	data_buffer[1] = month;
+	data_buffer[2] = day;
+	data_buffer[3] = hour;
+	data_buffer[4] = min;
+	data_buffer[5] = folio;
+	data_buffer[6] = (litros >> 24) & 0xFF;  // extract the most significant byte
+	data_buffer[7] = (litros >> 16) & 0xFF;  // extract the second byte
+	data_buffer[8] = (litros >> 8) & 0xFF;   // extract the third byte
+	data_buffer[9] = litros & 0xFF;          // extract the least significant byte
+	data_buffer[10] = (pesos >> 24) & 0xFF;  // extract the most significant byte
+	data_buffer[11] = (pesos >> 16) & 0xFF;  // extract the second byte
+	data_buffer[12] = (pesos >> 8) & 0xFF;   // extract the third byte
+	data_buffer[13] = pesos & 0xFF;
+	uint8_t point[4];
+	point[0] = (current_address >> 24) & 0xFF;
+	point[1] = (current_address >> 16) & 0xFF;
+	point[2] = (current_address >> 8) & 0xFF;
+	point[3] = current_address & 0xFF;
+	current_address = ((uint32_t)flash_counter_contents[0] << 24) | ((uint32_t)flash_counter_contents[1] << 16) | ((uint32_t)flash_counter_contents[2] << 8) | flash_counter_contents[3];
+	interrupts = save_and_disable_interrupts();//stop interrupts
+	if (current_address==FLASH_TARGET_OFFSET)  flash_range_erase(FLASH_TARGET_OFFSET, FLASH_SECTOR_SIZE); 
+	flash_range_program(current_address, data_buffer, BATCH_SIZE * sizeof(uint8_t));       
+    current_address += BATCH_SIZE * sizeof(uint8_t);
+	flash_range_erase(POINTER_ADDRESS, FLASH_SECTOR_SIZE);
+	flash_range_program(POINTER_ADDRESS, point, sizeof(current_address));
+	restore_interrupts(interrupts);
+
+}
+void printLog(){
+	uint32_t counter = 0;
+	while (counter <= (current_address/BATCH_SIZE)){
+		litros = ((uint32_t)flash_target_contents[6+counter] << 24) | ((uint32_t)flash_target_contents[7+counter] << 16) | ((uint32_t)flash_target_contents[8+counter] << 8) | flash_target_contents[9+counter];
+		pesos = ((uint32_t)flash_target_contents[10+counter] << 24) | ((uint32_t)flash_target_contents[11+counter] << 16) | ((uint32_t)flash_target_contents[12+counter] << 8) | flash_target_contents[13+counter];
+		printCheck ((pesos/100), (litros/100), flash_target_contents[2+counter], flash_target_contents[1+counter], flash_target_contents[0+counter], flash_target_contents[3+counter], flash_target_contents[4+counter], flash_target_contents[5+counter]);
+		counter++;
+	}
+}
+//uint8_t test[4] = {10,20,30,40};
+//const uint8_t addr=0x04;
 int main() {
 	static repeating_timer_t timer;
 
@@ -441,10 +592,23 @@ int main() {
 	gpio_pull_up(SDA_MAIN);
 	gpio_pull_up(SCL_MAIN);
 	gpio_put(LED_1, 1);
+//read current address of data	
+	current_address = ((uint32_t)flash_counter_contents[0] << 24) | ((uint32_t)flash_counter_contents[1] << 16) | ((uint32_t)flash_counter_contents[2] << 8) | flash_counter_contents[3];
 	
-	printf("Hello, world!\n");
+	/*if ((current_address == 0) || (current_address>280)){
+		current_address = FLASH_TARGET_OFFSET;
+		uint8_t point1[4];
+		point1[0] = (current_address >> 24) & 0xFF;
+		point1[1] = (current_address >> 16) & 0xFF;
+		point1[2] = (current_address >> 8) & 0xFF;
+		point1[3] = current_address & 0xFF;
+		interrupts = save_and_disable_interrupts();
+		flash_range_erase(POINTER_ADDRESS, FLASH_SECTOR_SIZE);
+		flash_range_program(POINTER_ADDRESS, point1, sizeof(current_address));
+		restore_interrupts(interrupts);
+	}*/
+	//flash_range_read(POINTER_ADDRESS, &current_address, sizeof(current_address));
 	sleep_ms(10000);
-	printf("Hello, world 2!\n");
 
 	
 	//check configuration of sistem
@@ -496,8 +660,6 @@ int main() {
     uint8_t rxdata;
     i2c_write_blocking(i2c0, 0x5A, &REG_STATUS, 1, true);
     ret = i2c_read_blocking(i2c0, 0x5A, &rxdata, 1, false);
-    printf("ret \n");
-    printf("%u",ret);
     if (ret>=0) display_board=1;
     gpio_put(LED_2, 0);
     sleep_ms(100);
@@ -574,19 +736,19 @@ int main() {
     while (1) {
 		// Check some errors every time
 		//openbox
-		
-		printf("Hello, world 3!\n");
-		
 		if(gpio_get(OPEN_BOX)==0){
 			err_data &= ~(1 << 0);//place 0 to err_register
 			no_service=1;
 		}
-		printf("%i",STATE);
 		switch (STATE){
 				case 0:
 					if ((milliseconds-currentMillis)>=10000){	//check error status every 5000ms
 						check_status();
 						currentMillis=milliseconds;
+						readDS3231Time();
+						if ((hour == 0) && (min<=1)) printLog();
+						sleep_ms(30000);
+						
 					}
 					i2c_write_blocking(i2c0, 0x5C, &REG_STATUS, 1, true);//check STATUS of control board
 					i2c_read_blocking(i2c0, 0x5C, readBuffer, 1, false);
@@ -740,7 +902,10 @@ int main() {
 					gpio_put(LED_3, 0);
 					pesos_print = pesos/100;
 					litros_print = litros/100;
-					printCheck (pesos_print, litros_print);
+					readDS3231Time();
+					saveLog();
+					sleep_ms(2000);
+					printCheck (pesos_print, litros_print, day, month, year, hour, min, folio);
 					folio++;
 					STATE = 0;
 					break;
@@ -748,4 +913,3 @@ int main() {
 		
     }
   }
-

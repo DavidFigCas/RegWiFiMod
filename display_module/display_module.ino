@@ -49,7 +49,9 @@ float uprice = 9.8; //price of 1 litr
 static char buffx[200];
 static char respx[200];
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
-StaticJsonDocument<20> doc_aux;  // Crea un documento JSON con espacio para 200 
+StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
+String jsonStr;
+const char* aux_char;
 
 //float number=0, l=0, p=0;
 volatile uint32_t litros, pesos, print_litros, print_pesos;
@@ -264,12 +266,12 @@ void setup()
 
   delay(3000);
 
-  
+
   //Serial.println("setup done");
 
-  //STATE = 1;
-  //error_status = true;
-  
+  STATE = 0;
+  error_status = true;
+
   doc["name"] = "John";
   doc["age"] = 30;
   doc["city"] = "New York";
@@ -277,95 +279,167 @@ void setup()
   // Serializar el objeto JSON en la variable resp
   serializeJson(doc, respx);
 
+  //multicore_launch_core1(core1_blink);
+  //Serial.begin(115200);
+  //pinMode(27, OUTPUT);
+
+
+
+
 }
 
 
 // --------------------------------------------------------------------- LOOP
 void loop() {
-  Serial.println(STATE);
-  memset(respx, 0, sizeof(respx));
-  //memset(buff, 0, sizeof(buff));
+
+  //Serial.println(STATE);
+  //memset(respx, 0, sizeof(respx));
 
 
-  Serial.printf("Slave: '%s'\r\n", buffx);
+  Serial.printf("Slave Buffer: '%s'\r\n", buffx);
+
+  //aux_char = jsonStr.c_str();  // Obtén una representación const char* de la cadena
+  //Serial.println(aux_char);  // Imprime la cadena JSON
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  deserializeJson(doc_aux, buffx);  // Serializa el documento JSON a una cadena
+  //jsonStr = String(buffx);
 
-  doc["precio"] = doc_aux["precio de las tortillas"];     //Commands
-  serializeJson(doc, respx);
-  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+  jsonStr = buffx;
+  Serial.println(jsonStr);
+  //deserializeJson(doc_aux, jsonStr);  // Serializa el documento JSON a una cadena
+
+  //doc["precio"] = doc_aux["precio"];     //Commands
+  //doc["wifi"] = doc_aux["wifi"];     //Commands
+  //doc["valve"] = doc_aux["valve"];     //Commands
+
+  DeserializationError error = deserializeJson(doc_aux, jsonStr);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+
+  Serial.print("aux: ");
+  serializeJson(doc_aux, Serial); Serial.println();
+  //Serial.print("resp: ");
+  //serializeJson(doc, respx);
+  //Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
 
 
   // Ahora resp contiene el objeto JSON como una cadena
-  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+  // Salida: {"name":"John","age":30,"city":"New York"}
 
   delay(500);
-  
-  /*switch (STATE) {
+
+
+}
+
+
+// ----------------------------------------------------------------- SETUP1
+void setup1()
+{
+
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  gpio_set_function(P_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(P_SCK, GPIO_FUNC_SPI);
+  gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
+
+  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
+  display.setFullWindow();
+  display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+
+  display.powerOff();
+}
+
+
+// ----------------------------------------------------------------- LOOP1
+void loop1()
+{
+  switch (STATE) {
     case 0:
       digitalWrite(25, 1);
       if (error_status == true)
       {
         Serial.println("recieve error status");
         //display.init(0);
-        //display.setFullWindow();
-        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+        display.setFullWindow();
+        display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
 
-        if ((error_byte >> 7) & 0x01) {
-          //display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
+        //if ((error_byte >> 7) & 0x01)
+        if (doc_aux["wifi"].as<bool>() == false) // ------------------ Wifi
+        {
+          Serial.println("Wifi On");
+          display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
         }
-        else {
-          //display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
+        else
+        {
+          Serial.println("Wifi OFF");
+          display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
         }
-        if ((error_byte >> 6) & 0x01) {
-          //display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
-        }
-        else {
-          //display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 3) & 0x01) {
-          //display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
-        }
-        else {
-          //display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 2) & 0x01) {
-          //display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
-        }
-        else {
-          //display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 5) & 0x01) {
-          //display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
-        }
-        else {
-          //display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 4) & 0x01) {
-          //display.drawImage(printer_on, 290, 285, 64, 64, false, false, true);
-        }
-        else {
-          //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
-        }
-        unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-        stamp.getDateTime(unixtime);
-        //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-        //display.setCursor(237, 49);
-        //display.setFont(&FreeMonoBold9pt7b);
-        //display.print(stamp.day);
-        //display.print("/");
-        //display.print(stamp.month);
-        //display.print("/");
-        //display.print(stamp.year);
-        //display.print("  ");
-        //display.print(stamp.hour);
-        //display.print(":");
-        //display.print(stamp.minute);
-        //display.displayWindow(237, 10, 490, 45);
-        //display.powerOff();
-        STATE = 1;
-        Serial.println("goto STATE 1");
+
+        //if ((error_byte >> 6) & 0x01)       // ------------------ valve
+        /*
+          if (doc["valve"].as<bool>() == false)
+          {
+          display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
+          }
+          else
+          {
+          display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
+          }
+          if ((error_byte >> 3) & 0x01)
+          {
+          display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
+          }
+          else
+          {
+          display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
+          }
+          if ((error_byte >> 2) & 0x01)
+          {
+          display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
+          }
+          else
+          {
+          display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
+          }
+          if ((error_byte >> 5) & 0x01) {
+          display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
+          }
+          else
+          {
+          display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
+          }
+          if ((error_byte >> 4) & 0x01)
+          {
+          display.drawImage(printer_on, 290, 285, 64, 64, false, false, true);
+          }
+          else
+          {
+          display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+          }
+          unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+          stamp.getDateTime(unixtime);
+          //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+          //display.setCursor(237, 49);
+          //display.setFont(&FreeMonoBold9pt7b);
+          //display.print(stamp.day);
+          //display.print("/");
+          //display.print(stamp.month);
+          //display.print("/");
+          //display.print(stamp.year);
+          //display.print("  ");
+          //display.print(stamp.hour);
+          //display.print(":");
+          //display.print(stamp.minute);
+          //display.displayWindow(237, 10, 490, 45);
+          //display.powerOff();
+
+          //STATE = 1;
+          //Serial.println("goto STATE 1");
+        */
+        delay(60000);
+
       }
       //touch_data=0;
       break;
@@ -398,14 +472,14 @@ void loop() {
         //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
         //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
         //Show litros
-        
+
         //display.setTextColor(GxEPD_BLACK);
         //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         //display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
         //display.setCursor(450, 169);
         //display.print(print_litros);
         //display.displayWindow(450, 125, 250, 50);
-        
+
         //Show price
         //display.setTextColor(GxEPD_BLACK);
         //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
@@ -423,42 +497,42 @@ void loop() {
         endprocess = 0;
       }
 
-      
-        if (error_status == true){
-        if((error_byte >> 7) & 0x01){
+
+      if (error_status == true) {
+        if ((error_byte >> 7) & 0x01) {
           display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
         }
-        if((error_byte >> 6) & 0x01){
+        if ((error_byte >> 6) & 0x01) {
           display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
         }
-        if((error_byte >> 3) & 0x01){
+        if ((error_byte >> 3) & 0x01) {
           display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
         }
-        if((error_byte >> 2) & 0x01){
+        if ((error_byte >> 2) & 0x01) {
           display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
         }
-        if((error_byte >> 5) & 0x01){
+        if ((error_byte >> 5) & 0x01) {
           display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
         }
-        if((error_byte >> 4) & 0x01){
+        if ((error_byte >> 4) & 0x01) {
           //display.drawImage(printer_on, 290, 285, 64, 64, false, false, true);
         }
-        else{
+        else {
           display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
         }
         unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
@@ -477,22 +551,22 @@ void loop() {
         display.print(stamp.minute);
         display.displayWindow(237, 10, 490, 45);
         display.powerOff();
-        }
-      
+      }
+
       //digitalWrite(27, 0);
       break;
     case 2:
 
       //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
       //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
-      
+
       //display.setTextColor(GxEPD_BLACK);
       //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
       //display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
       //display.setCursor(450, 169);
       //display.print(print_litros);
       //display.displayWindow(450, 125, 250, 50);
-      
+
       //Show price
       //display.setTextColor(GxEPD_BLACK);
       //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
@@ -522,39 +596,7 @@ void loop() {
     default:
       Serial.println("fuck");
       break;
+
   }
-*/
-}
 
-void setup1()
-{
-  //multicore_launch_core1(core1_blink);
-  //Serial.begin(115200);
-  //pinMode(27, OUTPUT);
-
-  
-  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
-  gpio_set_function(P_MISO, GPIO_FUNC_SPI);
-  gpio_set_function(P_SCK, GPIO_FUNC_SPI);
-  gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
-
-  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
-
-  //display.init(115200, true, 2, false); // USE THIS for Waveshare boards with "clever" reset circuit, 2ms reset pulse
-  
-  display.setFullWindow();
-  display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
-  
-  //digitalWrite(25, 0);
-  //display.init(115200, true, 2, false);
-  //showPartialUpdate();
-  //deepSleepTest();
-  
-  display.powerOff();
-  
-}
-
-void loop1()
-{
-  
 }
