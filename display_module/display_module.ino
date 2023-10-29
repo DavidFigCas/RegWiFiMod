@@ -107,6 +107,7 @@ void recv(int len)
     buffx[i] = Wire.read();
   }
   //buffx[i] = 0;
+  
 }
 
 // Called when the I2C slave is read from
@@ -355,6 +356,8 @@ void setup1()
 // ----------------------------------------------------------------- LOOP1
 void loop1()
 {
+  
+  
   switch (STATE) {
     case 0:
       digitalWrite(25, 1);
@@ -365,84 +368,35 @@ void loop1()
         display.setFullWindow();
         display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
 
-        //if ((error_byte >> 7) & 0x01)
-        if (doc_aux["wifi"].as<bool>() == false) // ------------------ Wifi
-        {
-          Serial.println("Wifi On");
-          display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
-        }
-        else
-        {
-          Serial.println("Wifi OFF");
-          display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
-        }
+        print_icons();
 
-        //if ((error_byte >> 6) & 0x01)       // ------------------ valve
-        /*
-          if (doc["valve"].as<bool>() == false)
-          {
-          display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
-          }
-          else
-          {
-          display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
-          }
-          if ((error_byte >> 3) & 0x01)
-          {
-          display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
-          }
-          else
-          {
-          display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
-          }
-          if ((error_byte >> 2) & 0x01)
-          {
-          display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
-          }
-          else
-          {
-          display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
-          }
-          if ((error_byte >> 5) & 0x01) {
-          display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
-          }
-          else
-          {
-          display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
-          }
-          if ((error_byte >> 4) & 0x01)
-          {
-          display.drawImage(printer_on, 290, 285, 64, 64, false, false, true);
-          }
-          else
-          {
-          display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
-          }
-          unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-          stamp.getDateTime(unixtime);
-          //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-          //display.setCursor(237, 49);
-          //display.setFont(&FreeMonoBold9pt7b);
-          //display.print(stamp.day);
-          //display.print("/");
-          //display.print(stamp.month);
-          //display.print("/");
-          //display.print(stamp.year);
-          //display.print("  ");
-          //display.print(stamp.hour);
-          //display.print(":");
-          //display.print(stamp.minute);
-          //display.displayWindow(237, 10, 490, 45);
-          //display.powerOff();
 
-          //STATE = 1;
-          //Serial.println("goto STATE 1");
-        */
-        delay(60000);
+        unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+        stamp.getDateTime(unixtime);
+        //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+        //display.setCursor(237, 49);
+        //display.setFont(&FreeMonoBold9pt7b);
+        //display.print(stamp.day);
+        //display.print("/");
+        //display.print(stamp.month);
+        //display.print("/");
+        //display.print(stamp.year);
+        //display.print("  ");
+        //display.print(stamp.hour);
+        //display.print(":");
+        //display.print(stamp.minute);
+        //display.displayWindow(237, 10, 490, 45);
+        //display.powerOff();
+
+        STATE = 1;
+        Serial.println("goto STATE 1");
+
+        //delay(10000);
 
       }
       //touch_data=0;
       break;
+    
     case 1:
       digitalWrite(27, 1);
       if (newcommand == 1)
@@ -459,13 +413,15 @@ void loop1()
         new_litros = false;
         newcommand = 0;
         shown = 1;
-        if (!((todo_byte >> 6) & 0x01)) {
+        if (!((todo_byte >> 6) & 0x01))
+        {
           endprocess = 1;
           Serial.println("end process");
           digitalWrite(27, 0);
         }
       }
-      if (shown == 1) {
+      if (shown == 1) 
+      {
         digitalWrite(28, 1);
         shown = 0;
         //uprice = ((uint16_t)client_num[0] << 8) | client_num[1];
@@ -490,7 +446,9 @@ void loop1()
         //shown = 0;
         digitalWrite(28, 0);
       }
-      if (endprocess == 1) {
+
+      if (endprocess == 1)
+      {
         STATE = 2;
         //digitalWrite(27, 0);
         Serial.println("goto STATE 2");
@@ -498,43 +456,10 @@ void loop1()
       }
 
 
-      if (error_status == true) {
-        if ((error_byte >> 7) & 0x01) {
-          display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 6) & 0x01) {
-          display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 3) & 0x01) {
-          display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 2) & 0x01) {
-          display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 5) & 0x01) {
-          display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
-        }
-        if ((error_byte >> 4) & 0x01) {
-          //display.drawImage(printer_on, 290, 285, 64, 64, false, false, true);
-        }
-        else {
-          display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
-        }
+      if (error_status == true)
+      {
+        print_icons();
+        
         unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
         stamp.getDateTime(unixtime);
         display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
@@ -599,4 +524,71 @@ void loop1()
 
   }
 
+}
+
+
+void print_icons()
+{
+  //if ((error_byte >> 7) & 0x01)
+  if (doc_aux["wifi"].as<bool>() == true) // ------------------ Wifi
+  {
+    Serial.println("Wifi On");
+    display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    Serial.println("Wifi OFF");
+    display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
+  }
+
+  //if ((error_byte >> 6) & 0x01)       // ------------------ valve
+  if (doc_aux["valve"].as<bool>() == true)
+  {
+    display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
+  }
+
+
+  if (doc_aux["gps"].as<bool>() == true)    // ------------------ gps
+    //if ((error_byte >> 3) & 0x01)
+  {
+    display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
+  }
+
+  if (doc_aux["clock"].as<bool>() == true)    // ------------------ clock
+    // if ((error_byte >> 2) & 0x01)
+  {
+    display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
+  }
+
+  if (doc_aux["printer"].as<bool>() == true)    // ------------------ printer
+    //if ((error_byte >> 5) & 0x01)
+  {
+    display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
+  }
+
+  if (doc_aux["paper"].as<bool>() == false)    // ------------------ paper
+    //if ((error_byte >> 4) & 0x01)
+  {
+    display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+  }
+  else
+  {
+    //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+  }
 }

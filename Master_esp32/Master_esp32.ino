@@ -32,8 +32,13 @@ void loop()
   Serial.println("Sending...");
   doc["precio"] = p++;
   doc["otro"] = p++;
-  doc["wifi"] = false;
+  doc["wifi"] = true;
   doc["valve"] = false;
+  doc["gps"] = false;
+  doc["clock"] = true;
+  doc["printer"] = true;
+  doc["paper"] = true;
+  
   
   serializeJson(doc, b);
   Serial.println(b);
