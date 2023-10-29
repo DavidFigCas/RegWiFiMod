@@ -13,7 +13,6 @@ String jsonStr;
 
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
-
 void setup() {
   Serial.begin(115200);
   delay(2500);
@@ -22,7 +21,8 @@ void setup() {
   Wire.begin(0x5A);
   Wire.onReceive(recv);
   Wire.onRequest(req);
-
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
 
   doc["nombre"] = "John";
   doc["litros"] = 30;
@@ -37,19 +37,30 @@ void setup() {
 
 void loop()
 {
-
-  memset(resp, 0, sizeof(resp));
+  if (digitalRead(2) == HIGH) {
+    Serial.println("HIGH");
+  }
+  else {
+    //Serial.println("LOW");
+     if (digitalRead(3) == HIGH) {
+        Serial.println("HIGH");
+      }
+      else {
+        Serial.println("LOW");
+      }
+  }
+ 
+ /* memset(resp, 0, sizeof(resp));
   Serial.printf("Slave: '%s'\r\n", buff);
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  jsonStr =  buff;
-  //deserializeJson(doc_aux, buff);
-  //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
+  //buff = jsonStr;
+  deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
 
   doc["precio de las tortillas"] = doc_aux["precio de las tortillas"];     //Commands
   serializeJson(doc, resp);
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-  delay(1000);
+  delay(1000);*/
 
 
 }
