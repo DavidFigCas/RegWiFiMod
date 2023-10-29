@@ -42,7 +42,7 @@ void loop()
   Serial.printf("Slave Buff: '%s'\r\n", buff);
 
   //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  //buff = jsonStr;
+  jsonStr =  buff;
   //deserializeJson(doc_aux, buff);
   //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
 

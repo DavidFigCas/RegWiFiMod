@@ -106,7 +106,7 @@ void recv(int len)
   {
     buffx[i] = Wire.read();
   }
-  buffx[i] = 0;
+  //buffx[i] = 0;
 }
 
 // Called when the I2C slave is read from
