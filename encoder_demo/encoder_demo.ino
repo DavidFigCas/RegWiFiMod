@@ -2,11 +2,16 @@
 
 #define SDA_MAIN    16
 #define SCL_MAIN    17
+#define C1          2
+#define C2          3
 
 #include <ArduinoJson.h>
 #include <Wire.h>
 
-static int ctr;
+volatile int  n    = 0;
+volatile byte ant  = 0;
+volatile byte act  = 0;
+
 static char buff[200];
 static char resp[200];
 String jsonStr;
@@ -21,8 +26,6 @@ void setup() {
   Wire.begin(0x5A);
   Wire.onReceive(recv);
   Wire.onRequest(req);
-  pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
 
   doc["nombre"] = "John";
   doc["litros"] = 30;
@@ -33,36 +36,58 @@ void setup() {
 
   // Ahora resp contiene el objeto JSON como una cadena
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+
+  
 }
 
 void loop()
 {
-  if (digitalRead(2) == HIGH) {
-    Serial.println("HIGH");
-  }
-  else {
-    //Serial.println("LOW");
-     if (digitalRead(3) == HIGH) {
-        Serial.println("HIGH");
-      }
-      else {
-        Serial.println("LOW");
-      }
-  }
- 
- /* memset(resp, 0, sizeof(resp));
-  Serial.printf("Slave: '%s'\r\n", buff);
+  /* if (digitalRead(2) == HIGH) {
+     Serial.print("HIGH");
+    }
+    else {
+     Serial.print("LOW");
 
-  //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  //buff = jsonStr;
-  deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
+    }
 
-  doc["precio de las tortillas"] = doc_aux["precio de las tortillas"];     //Commands
-  serializeJson(doc, resp);
-  Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-  delay(1000);*/
+    Serial.print("\t");
+
+    if (digitalRead(3) == HIGH) {
+     Serial.print("HIGH");
+    }
+    else {
+     Serial.print("LOW");
+    }*/
 
 
+  delay(1000);
+  Serial.println(n);
+  /* memset(resp, 0, sizeof(resp));
+    Serial.printf("Slave: '%s'\r\n", buff);
+
+    //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
+    //buff = jsonStr;
+    deserializeJson(doc_aux, buff);  // Serializa el documento JSON a una cadena
+
+    doc["precio de las tortillas"] = doc_aux["precio de las tortillas"];     //Commands
+    serializeJson(doc, resp);
+    Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+    delay(1000);*/
+
+
+}
+
+void setup1(){
+  pinMode(C1, INPUT_PULLUP);
+  pinMode(C2, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(C1), encoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(C2), encoder, CHANGE);
+}
+
+void loop1()
+{
+  
 }
 
 // These are called in an **INTERRUPT CONTEXT** which means NO serial port
@@ -85,4 +110,26 @@ void recv(int len)
 void req()
 {
   Wire.write(resp, 199);
+}
+
+
+// -------------------------------------- encoder
+void encoder()
+{
+   ant=act;
+  
+  if(digitalRead(C1)) bitSet(act,1); else bitClear(act,1);            
+  if(digitalRead(C2)) bitSet(act,0); else bitClear(act,0);
+  
+  
+  
+  if(ant == 2 && act ==0) n++;
+  if(ant == 0 && act ==1) n++;
+  if(ant == 3 && act ==2) n++;
+  if(ant == 1 && act ==3) n++;
+  
+  if(ant == 1 && act ==0) n--;
+  if(ant == 3 && act ==1) n--;
+  if(ant == 0 && act ==2) n--;
+  if(ant == 2 && act ==3) n--;  
 }
