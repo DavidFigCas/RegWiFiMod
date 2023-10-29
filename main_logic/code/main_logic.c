@@ -138,7 +138,7 @@ int readDS3231Time () {
   bufferToTime(time_buffer);
   return 1;
 }
-
+                 //Numero       letra          dia          mes       año       hora       minuto      
 void printCheck (uint32_t num, uint32_t ltr, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f){
 	//char* resultado = "";
 	char resultado[150];
