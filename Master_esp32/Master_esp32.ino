@@ -20,7 +20,6 @@ void setup()
   //Wire.setSCL(SCL_MAIN);
   Wire.begin();
 
-  //doc["lit"] = 0;
   doc["precio"] = 9.5;
 }
 
@@ -30,8 +29,8 @@ void loop()
 
   // Write a value over I2C to the slave
   Serial.println("Sending...");
-  doc["precio"] = p++;
-  doc["otro"] = p++;
+  //doc["precio"] = p++;
+  doc["litros"] = p++;
   doc["wifi"] = true;
   doc["valve"] = false;
   doc["gps"] = false;

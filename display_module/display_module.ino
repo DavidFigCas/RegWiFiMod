@@ -106,7 +106,7 @@ void recv(int len)
   {
     buffx[i] = Wire.read();
   }
-  //buffx[i] = 0;
+  newcommand = true;
   
 }
 
@@ -273,12 +273,12 @@ void setup()
   STATE = 0;
   error_status = true;
 
-  doc["name"] = "John";
-  doc["age"] = 30;
-  doc["city"] = "New York";
+  //doc["name"] = "John";
+  //doc["age"] = 30;
+  //doc["city"] = "New York";
 
   // Serializar el objeto JSON en la variable resp
-  serializeJson(doc, respx);
+  //serializeJson(doc, respx);
 
   //multicore_launch_core1(core1_blink);
   //Serial.begin(115200);
@@ -309,8 +309,8 @@ void loop() {
   Serial.println(jsonStr);
   //deserializeJson(doc_aux, jsonStr);  // Serializa el documento JSON a una cadena
 
-  //doc["precio"] = doc_aux["precio"];     //Commands
-  //doc["wifi"] = doc_aux["wifi"];     //Commands
+  doc["precio"] = doc_aux["precio"];     //Commands
+  doc["STATE"] = STATE;     //Commands
   //doc["valve"] = doc_aux["valve"];     //Commands
 
   DeserializationError error = deserializeJson(doc_aux, jsonStr);
@@ -322,9 +322,8 @@ void loop() {
 
   Serial.print("aux: ");
   serializeJson(doc_aux, Serial); Serial.println();
-  //Serial.print("resp: ");
-  //serializeJson(doc, respx);
-  //Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+  serializeJson(doc, respx);
+  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
 
 
   // Ahora resp contiene el objeto JSON como una cadena
@@ -391,7 +390,7 @@ void loop1()
         STATE = 1;
         Serial.println("goto STATE 1");
 
-        //delay(10000);
+        delay(10000);
 
       }
       //touch_data=0;
@@ -402,23 +401,28 @@ void loop1()
       if (newcommand == 1)
       {
         Serial.println("***************************new command***********************************************");
-        litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
+        //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
+        litros = doc_aux["litros"].as<uint32_t>();
         Serial.println(litros);
-        pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+
+        //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+        pesos = doc["precio"];
         Serial.println(pesos);
-        print_litros = litros / 100;
+        print_litros = litros;
         Serial.println(print_litros);
         print_pesos = pesos / 100;
         Serial.println(print_pesos);
+        
         new_litros = false;
         newcommand = 0;
         shown = 1;
-        if (!((todo_byte >> 6) & 0x01))
-        {
-          endprocess = 1;
-          Serial.println("end process");
-          digitalWrite(27, 0);
-        }
+        
+        //if (!((todo_byte >> 6) & 0x01))
+        //{
+        //  endprocess = 1;
+        //  Serial.println("end process");
+        //  digitalWrite(27, 0);
+        //}
       }
       if (shown == 1) 
       {
@@ -429,12 +433,12 @@ void loop1()
         //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
         //Show litros
 
-        //display.setTextColor(GxEPD_BLACK);
-        //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        //display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-        //display.setCursor(450, 169);
-        //display.print(print_litros);
-        //display.displayWindow(450, 125, 250, 50);
+        display.setTextColor(GxEPD_BLACK);
+        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+        display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
+        display.setCursor(450, 169);
+        display.print(print_litros);
+        display.displayWindow(450, 125, 250, 50);
 
         //Show price
         //display.setTextColor(GxEPD_BLACK);
@@ -456,7 +460,7 @@ void loop1()
       }
 
 
-      if (error_status == true)
+      /*if (error_status == true)
       {
         print_icons();
         
@@ -476,7 +480,7 @@ void loop1()
         display.print(stamp.minute);
         display.displayWindow(237, 10, 490, 45);
         display.powerOff();
-      }
+      }*/
 
       //digitalWrite(27, 0);
       break;
