@@ -28,7 +28,7 @@ void loop()
 {
 
   // Write a value over I2C to the slave
-  Serial.println("Sending...");
+  //Serial.println("Sending...");
   //doc["precio"] = p++;
   doc["litros"] = p++;
   doc["wifi"] = true;
@@ -40,18 +40,18 @@ void loop()
   
   
   serializeJson(doc, b);
-  Serial.println(b);
+  //Serial.println(b);
   
-  Wire.beginTransmission(0x5A);
+  Wire.beginTransmission(0x5C);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
 
   // Ensure the slave processing is done and print it out
   delay(10);
-  Serial.printf("Master Send: '%s'\r\n", b);
+  //Serial.printf("Master Send: '%s'\r\n", b);
 
   // Read from the slave and print out
-  Wire.requestFrom(0x5A, 199);
+  Wire.requestFrom(0x5C, 199);
 
   Serial.print("\nrecv: '");
 
@@ -61,5 +61,7 @@ void loop()
   }
 
   Serial.println("'");
-  delay(10);
+  delay(1000);
+  
+  //doc["reset"] = true;
 }
