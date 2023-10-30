@@ -12,8 +12,12 @@
 static int p;
 char b[200];
 static char buff[200];
+int i;
+volatile bool display_reset = false;
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
+StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
+StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
 String jsonStr;
 
 void setup()
@@ -35,84 +39,103 @@ void loop()
   //Serial.println("Sending...");
   //doc["precio"] = p++;
   //doc["litros"] = p++;
-  doc["wifi"] = true;
-  doc["valve"] = false;
-  doc["gps"] = false;
-  doc["clock"] = true;
-  doc["printer"] = true;
-  doc["paper"] = true;
 
 
-  serializeJson(doc, b);
-  //Serial.println(b);
 
-  //Wire.beginTransmission(0x5C);
-  //Wire.write((const uint8_t*)b, (strlen(b)));
-  //Wire.endTransmission();
 
-  // Ensure the slave processing is done and print it out
-  //delay(10);
-  //Serial.printf("Master Send: '%s'\r\n", b);
-
-  // Read from the slave and print out
-  //Wire.requestFrom(0x5C, 199);
-
-  //Serial.print("\nrecv: '");
-
-  //while (Wire.available())
-  //{
-  //Serial.print((char)Wire.read());
-  //}
-
-  //Serial.println("'");
-  //delay(1000);
-
-  
 
 
   // --------------------- leer encoder
   // Read from the slave and print out
+  Serial.print("Encoder: ");
   Wire.requestFrom(ENCODE_ADD, 199);
   memset(buff, 0, sizeof(buff));
-  int i;
+  i = 0;
   while (Wire.available())
   {
     buff[i] = Wire.read();
     //Serial.print((char)buff[i]);
     i++;
   }
-  Serial.println();
+  //Serial.println();
 
   jsonStr =  buff;
   //Serial.println(jsonStr);
-  deserializeJson(doc_aux, jsonStr);
-  serializeJson(doc_aux, Serial);
+  deserializeJson(doc_encoder, jsonStr);
+  serializeJson(doc_encoder, Serial);
   Serial.println();
+  delay(100);
 
-  if(doc_aux["STATE"] ==  3)
+
+  // --------------------- leer display
+  // Read from the slave and print out
+  Serial.print("Display: ");
+  Wire.requestFrom(DISPLAY_ADD, 199);
+  memset(buff, 0, sizeof(buff));
+  i = 0;
+  while (Wire.available())
+  {
+    buff[i] = Wire.read();
+    //Serial.print((char)buff[i]);
+    i++;
+  }
+  //Serial.println();
+
+  jsonStr =  buff;
+  //Serial.println(jsonStr);
+  deserializeJson(doc_display, jsonStr);
+  serializeJson(doc_display, Serial);
+  Serial.println();
+  delay(100);
+
+
+  p = doc_encoder["pulses"].as<int>();
+
+
+  if (doc_encoder["STATE"] ==  3)
   {
     Serial.println("Running");
     Serial.println("Litros: ");
-    p = doc_aux["current"].as<int>();
+    p = doc_encoder["current"].as<int>();
     Serial.println(p);
-    doc["reset"] = true;
-    doc["litros"] = p;
+    display_reset = true;
 
-    
-    serializeJson(doc, b);
-    
-    
-
-    Wire.beginTransmission(DISPLAY_ADD);
-    Wire.write((const uint8_t*)b, (strlen(b)));
-    Wire.endTransmission();
-
-    Wire.beginTransmission(ENCODE_ADD);
-    Wire.write((const uint8_t*)b, (strlen(b)));
-    Wire.endTransmission();
-    
   }
 
-  
-  delay(1000);
+
+  // ---------------------- display doc
+  //doc["litros"] = p;
+  doc.clear();
+  doc["wifi"] = true;
+  doc["valve"] = doc_encoder["valve_open"].as<bool>();
+  doc["gps"] = false;
+  doc["clock"] = true;
+  doc["printer"] = true;
+  doc["paper"] = true;
+  doc["litros"] = p;
+  serializeJson(doc, b);
+  Serial.print("Master to display: ");
+  serializeJson(doc, Serial);
+  Serial.println();
+
+
+  Wire.beginTransmission(DISPLAY_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+  delay(100);
+
+  // ---------------------- encoder doc
+  doc.clear();
+  doc["reset"] = display_reset;
+  doc["litros"] = p;
+  serializeJson(doc, b);
+  Serial.print("Master to encoder: ");
+  serializeJson(doc, Serial);
+  Serial.println();
+
+  Wire.beginTransmission(ENCODE_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+
+  delay(100 );
 }

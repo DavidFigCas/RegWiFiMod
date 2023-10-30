@@ -270,7 +270,7 @@ void setup()
 
   //Serial.println("setup done");
 
-  STATE = 0;
+  STATE = 1;
   error_status = true;
 
   //doc["name"] = "John";

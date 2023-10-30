@@ -11,9 +11,15 @@
 #define SDA_MAIN    16
 #define SCL_MAIN    17
 
+#define ALARM_NUM 0
+#define ALARM_IRQ TIMER_IRQ_0
+
 #include "pio_encoder.h"
+#include "pico/time.h"
+#include "hardware/timer.h"
 #include <ArduinoJson.h>
 #include <Wire.h>
+//#include "RP2040_TimerInterrupt.h"
 
 static char buff[200];
 static char resp[200];
@@ -25,11 +31,14 @@ StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
 uint8_t STATE = 0;
 volatile int32_t current_value, new_value, delta, old_value = 0, old_value_m = 0;
 bool flow, buttonx, act_button = false;
+static volatile bool alarm_fired;
 unsigned long previousMillis = 0;  // Almacena la última vez que el LED cambió
 const long interval = 500;
 unsigned long currentMillis;
 
 PioEncoder encoder(2); // encoder is connected to GPIO2 and GPIO3
+uint64_t alarm_callback(alarm_id_t id, void *user_data);
+
 
 
 //---------------------------------------------------- setup
@@ -51,7 +60,9 @@ void setup()
   pinMode(SOLENOID, OUTPUT);
   pinMode(BTN_START, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
+  // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
   doc["valve_open"] = false;
+
 
 }
 
@@ -59,73 +70,88 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+
+  //if (alarm_fired == true)
+  //{
+
+  //}
+
+  new_value = encoder.getCount();
+  delay(50);
+  
   currentMillis = millis();
-  Serial.println(encoder.getCount());
-  delay(10);
+  if (currentMillis - previousMillis >= interval)
+  {
 
-  memset(resp, 0, sizeof(resp));
-  //Serial.printf("Slave: '%s'\r\n", buff);
+    //alarm_fired = true;
+    
 
-  jsonStr =  buff;
-  deserializeJson(doc_aux, jsonStr);
-  serializeJson(doc_aux, Serial);
-  Serial.println();
-  //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
+    memset(resp, 0, sizeof(resp));
+    //Serial.printf("Slave: '%s'\r\n", buff);
 
-  doc["pulses"] = encoder.getCount();   //Commands
-  new_value = doc["pulses"];
-  //Serial.println(new_value);
-  serializeJson(doc, resp);
-  Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-  delay(500);
-  doc["STATE"] = STATE;
+    jsonStr =  buff;
+    deserializeJson(doc_aux, jsonStr);
+    serializeJson(doc_aux, Serial);
+    Serial.println();
+    //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
+
+    doc["pulses"] = new_value;   //Commands
+    serializeJson(doc, resp);
+    Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+    //delay(500);
+    doc["STATE"] = STATE;
+    doc["delta"] = delta;
+    doc["flow"] = flow;
+    previousMillis = currentMillis;
+
+    // ------------------------------------- delta is noise?
+    delta = new_value - old_value_m;
+    alarm_fired = false;
+    Serial.print("Delta: ");
+    Serial.println(delta);
+    if (delta < 15)
+    {
+      //gpio_put(LED_2, 0);
+      flow = false;
+      //delta = 0;
+      old_value_m = new_value;
+      //encoder.reset();
+    }
+    else
+    {
+      Serial.println("Flow detected");
+      flow = true;
+      old_value_m = new_value;;
+      delta = 0;
+    }
+
+    if (new_value < 0)
+    {
+      Serial.println("no ok");
+      //gpio_put(LED_1, 1);
+      old_value_m = 0;
+      new_value = 0;
+      delta = 0;
+      encoder.reset();
+
+    }
+  }
+
+
 
   switch (STATE)
   {
     case 0:// ---------------------------------------------------------- wait start of process
-      if (currentMillis - previousMillis >= interval)
-      {
+      //Serial.println("Check flow");
+      // ------------------------------------- start to moving
 
-        Serial.println("Check flow");
-        // ------------------------------------- start to moving
-        if (new_value < 0)
-        {
-          Serial.println("no ok");
-          //gpio_put(LED_1, 1);
-          old_value_m = new_value;
-          delta = 0;
-
-        }
-
-        delta = new_value - old_value_m;
-        //Serial.print("Delta: "); Serial.println(delta);
-        doc["delta"] = delta;
-
-        // ------------------------------------- delta is noise?
-        if (delta < 15)
-        {
-          //gpio_put(LED_2, 0);
-          flow = false;
-          //encoder.reset();
-        }
-        else
-        {
-          Serial.println("Flow detected");
-          flow = true;
-          old_value = old_value_m;
-        }
-
-        doc["flow"] = flow;
-
-        old_value_m = new_value;
-        delta = 0;
-        previousMillis = currentMillis;
-      }
 
       if (flow == true)
       {
+        //old_value_m = new_value;
+        //delta = 0;
         STATE = 1;
-        doc["STATE"] = STATE;
+        //doc["STATE"] = STATE;
         //state_byte |= (1 << 5); //new data
         //state_byte |= (1 << 4);//start process
         //gpio_put(LED_3, 1);
@@ -158,27 +184,21 @@ void loop()
 
       break;
     case 1: // ------------------------------------------------------process started
-      sleep_ms (100);
-      current_value = encoder.getCount() - old_value;
-      doc["current"] = current_value;
-      //enc_data[0] = (current_value >> 24) & 0xFF;  // Старший байт
-      //enc_data[1] = (current_value >> 16) & 0xFF;  // Второй байт
-      //enc_data[2] = (current_value >> 8) & 0xFF;   // Третий байт
-      //enc_data[3] = current_value & 0xFF;          // Младший байт
-      delta = current_value - old_value_m;
+      current_value = new_value - old_value;
+      doc["current"] = current_value;         // Младший байт
 
-      if (delta == 0)
+      if (flow == false)
       {
         STATE = 2;
-        doc["STATE"] = STATE;
+        //doc["STATE"] = STATE;
       }
-      else
-      {
-        old_value_m = current_value;
-        delta = 0;
-      }
+      //else
+      //{
+        //old_value_m = current_value;
+        //delta = 0;
+      //}
 
-      doc["delta"] = delta;
+      //doc["delta"] = delta;
 
       if (buttonx == 1) {
         sleep_ms(150);
@@ -266,4 +286,13 @@ void req()
 void open_valve()
 {
   buttonx = true;
+}
+
+
+uint64_t alarm_callback(alarm_id_t id, void *user_data) {
+  // Cambiar el estado del LED cada vez que se llama a la interrupción
+  //digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+
+  // Devolver 0 para que el timer siga llamando a esta función
+  return 0;
 }
