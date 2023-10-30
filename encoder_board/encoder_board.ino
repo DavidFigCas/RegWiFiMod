@@ -77,7 +77,7 @@ void loop()
   //Serial.println(new_value);
   serializeJson(doc, resp);
   Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-  //delay(1000);
+  delay(500);
   doc["STATE"] = STATE;
 
   switch (STATE)
@@ -184,14 +184,14 @@ void loop()
         sleep_ms(150);
         while (gpio_get(BTN_START) == 0) {}
         act_button = !act_button;
-        
-        if (act_button == 1) 
+
+        if (act_button == 1)
         {
           Serial.println("Valve CLOSED");
           digitalWrite(SOLENOID, HIGH);
           doc["valve_open"] = false;
         }
-        else 
+        else
         {
           Serial.println("Valve OPEN");
           digitalWrite(SOLENOID, LOW);
@@ -203,8 +203,9 @@ void loop()
       break;
 
     case 2: //------------------------------------------------- stop process, close valve
-      //gpio_put(LED_3, 0);
-      //gpio_put(SOLENOID, 0);
+      Serial.println("Valve CLOSED");
+      digitalWrite(SOLENOID, HIGH);
+      doc["valve_open"] = false;
       //state_byte &= ~((1 << 4) | (1 << 5)); // set state in stop
       STATE = 3;
       doc["STATE"] = STATE;
@@ -214,7 +215,7 @@ void loop()
 
     case 3: //wait reset command from MASTER
       //if (bit == 1)
-      if (doc_aux["reset"].as<bool>() == true)
+      if ((doc_aux["reset"].as<bool>() == true) && (!(doc_aux["reset"].isNull())))
       {
         delta = 0;
         old_value_m = current_value;
