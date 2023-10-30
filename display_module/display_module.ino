@@ -249,7 +249,7 @@ void setup()
 
 
   Serial.begin(115200);
-  //delay(5000);
+  delay(5000);
   Serial.println("Init Display");
   pinMode(25, OUTPUT);
   digitalWrite(25, 0);
@@ -273,12 +273,12 @@ void setup()
   //STATE = 1;
   error_status = true;
 
-  //doc["name"] = "John";
-  //doc["age"] = 30;
-  //doc["city"] = "New York";
+  doc["name"] = "John";
+  doc["age"] = 30;
+  doc["city"] = "New York";
 
   // Serializar el objeto JSON en la variable resp
-  //serializeJson(doc, respx);
+  serializeJson(doc, respx);
 
   //multicore_launch_core1(core1_blink);
   //Serial.begin(115200);
@@ -317,19 +317,20 @@ void loop() {
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
     Serial.println(error.f_str());
-    return;
+    //return;
   }
 
   Serial.print("aux: ");
   serializeJson(doc_aux, Serial); Serial.println();
-  serializeJson(doc, respx);
+  Serial.print("resp: ");
+  serializeJson(doc, respx);Serial.println();
   Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
 
 
   // Ahora resp contiene el objeto JSON como una cadena
   // Salida: {"name":"John","age":30,"city":"New York"}
 
-  delay(500);
+  delay(1000);
 
 
 }
@@ -460,28 +461,6 @@ void loop1()
       }
 
 
-      /*if (error_status == true)
-      {
-        print_icons();
-        
-        unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-        stamp.getDateTime(unixtime);
-        display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-        display.setCursor(237, 49);
-        display.setFont(&FreeMonoBold9pt7b);
-        display.print(stamp.day);
-        display.print("/");
-        display.print(stamp.month);
-        display.print("/");
-        display.print(stamp.year);
-        display.print("  ");
-        display.print(stamp.hour);
-        display.print(":");
-        display.print(stamp.minute);
-        display.displayWindow(237, 10, 490, 45);
-        display.powerOff();
-      }*/
-
       //digitalWrite(27, 0);
       break;
     case 2:
@@ -525,7 +504,6 @@ void loop1()
     default:
       Serial.println("fuck");
       break;
-
   }
 
 }

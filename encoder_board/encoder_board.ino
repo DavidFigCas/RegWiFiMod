@@ -44,7 +44,7 @@ uint64_t alarm_callback(alarm_id_t id, void *user_data);
 //---------------------------------------------------- setup
 void setup()
 {
-  encoder.begin();
+  
   Serial.begin(115200);
   while (!Serial);
   Wire.setSDA(SDA_MAIN);
@@ -58,6 +58,7 @@ void setup()
   pinMode(SOLENOID, OUTPUT);
   pinMode(BTN_START, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
+  encoder.begin();
   // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
   doc["valve_open"] = false;
 
@@ -75,7 +76,7 @@ void loop()
   //}
 
   new_value = encoder.getCount();
-  delay(50);
+  delay(100);
   
   currentMillis = millis();
   if (currentMillis - previousMillis >= interval)
