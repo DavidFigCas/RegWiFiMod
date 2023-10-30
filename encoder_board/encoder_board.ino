@@ -47,14 +47,12 @@ void setup()
   encoder.begin();
   Serial.begin(115200);
   while (!Serial);
-
-  Serial.begin(115200);
-  delay(2500);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
   Wire.begin(I2C_SLAVE_ADDRESS);
   Wire.onReceive(recv);
   Wire.onRequest(req);
+  delay(1000);
 
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
   pinMode(SOLENOID, OUTPUT);

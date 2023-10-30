@@ -249,7 +249,7 @@ void setup()
 
 
   Serial.begin(115200);
-  delay(5000);
+  //delay(5000);
   Serial.println("Init Display");
   pinMode(25, OUTPUT);
   digitalWrite(25, 0);
@@ -265,12 +265,12 @@ void setup()
   Wire.onReceive(recv);
   Wire.onRequest(req);
 
-  delay(3000);
+  delay(1000);
 
 
   //Serial.println("setup done");
 
-  STATE = 1;
+  //STATE = 1;
   error_status = true;
 
   //doc["name"] = "John";

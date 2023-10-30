@@ -27,8 +27,8 @@ void setup()
   //Wire.setSDA(SDA_MAIN);
   //Wire.setSCL(SCL_MAIN);
   Wire.begin();
+  delay(5000);
 
-  doc["precio"] = 9.5;
 }
 
 
@@ -113,6 +113,7 @@ void loop()
   doc["printer"] = true;
   doc["paper"] = true;
   doc["litros"] = p;
+  doc["precio"] = 9.5;
   serializeJson(doc, b);
   Serial.print("Master to display: ");
   serializeJson(doc, Serial);
