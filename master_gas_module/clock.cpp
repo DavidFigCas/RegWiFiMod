@@ -9,6 +9,8 @@ DateTime last_ac;
 int dias;
 int mes;
 int anio;
+int hora;
+int minuto;
 int dia_hoy;
 
 const char* ntpServer = "pool.ntp.org";
@@ -27,7 +29,7 @@ NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
 // ---------------------------------- init_clock
 void init_clock()
 {
-//  Wire1.setSDA(2);
+  //  Wire1.setSDA(2);
   //Wire1.setSCL(3);
   //Wire.begin();
   //delay(100);
@@ -208,6 +210,8 @@ void read_clock()
       mes = now.month();
       anio = now.year();
       dia_hoy = now.day();
+      hora = now.hour();
+      minuto = now.minute();
 
       Serial.print("{\"time\":\"");
       Serial.print(now.year(), DEC);
@@ -232,11 +236,11 @@ void read_clock()
 }
 
 String DateTimeToString(const DateTime& now) {
-    char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d", 
-             now.year(), now.month(), now.day(), 
-             now.hour(), now.minute(), now.second());
-    return String(buffer);
+  char buffer[20];
+  snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d",
+           now.year(), now.month(), now.day(),
+           now.hour(), now.minute(), now.second());
+  return String(buffer);
 }
 
 

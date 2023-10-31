@@ -4,7 +4,7 @@
 #include "system.h"
 
 
-#define FILE_SIZE   512
+#define FILE_SIZE   1750
 #define LIST_SIZE   6048
 #define LOG_SIZE   6048
 

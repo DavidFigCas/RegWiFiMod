@@ -42,7 +42,7 @@
 const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 
 GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
-UnixTime stamp(-6);
+UnixTime stamp(0);
 
 bool flag_print = true;
 
@@ -386,24 +386,25 @@ void loop1()
       print_icons();
 
 
-      unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+      //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+      unixtime = doc["time"];
       stamp.getDateTime(unixtime);
 
 
-      //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-      //display.setCursor(237, 49);
-      //display.setFont(&FreeMonoBold9pt7b);
-      //display.print(stamp.day);
-      //display.print("/");
-      //display.print(stamp.month);
-      //display.print("/");
-      //display.print(stamp.year);
-      //display.print("  ");
-      //display.print(stamp.hour);
-      //display.print(":");
-      //display.print(stamp.minute);
-      //display.displayWindow(237, 10, 490, 45);
-      //display.powerOff();
+      display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+      display.setCursor(237, 49);
+      display.setFont(&FreeMonoBold9pt7b);
+      display.print(stamp.day);
+      display.print("/");
+      display.print(stamp.month);
+      display.print("/");
+      display.print(stamp.year);
+      display.print("  ");
+      display.print(stamp.hour);
+      display.print(":");
+      display.print(stamp.minute);
+      display.displayWindow(237, 10, 490, 45);
+      display.powerOff();
 
 
       Serial.println("goto STATE 1");

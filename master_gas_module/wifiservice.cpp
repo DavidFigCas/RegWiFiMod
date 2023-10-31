@@ -198,6 +198,8 @@ bool wifi_check()
         //STATE = 1;
         STATE |= (1 << 6);
 
+         connectFirebase();
+
 
       }
 

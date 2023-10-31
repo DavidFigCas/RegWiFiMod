@@ -15,6 +15,8 @@ extern int dias;
 extern int mes;
 extern int anio;
 extern int dia_hoy;
+extern int hora;
+extern int minuto;
 
 extern const char* ntpServer;
 extern long  gmtOffset_sec;

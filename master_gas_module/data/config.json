@@ -7,11 +7,17 @@
   "enable_wifi": true,
   "ssid": "Inventoteca_2G",
   "pass": "science_7425",
+  "email": "info@inventoteca.com",
+  "firepass": "Homerosim",
+  "key": "AIzaSyAOfGOjdpVQZtnhwTjmNRy8mApY993zHfc",
+  "storage_id": "smart-industry-panels.appspot.com",
+  "updated": true,
   "mainTime": 60000,
   "gmtOff" : -21600,
   "dayOff" : 0,
   "capacity": 10000,
   "percentage": 70.5,
   "uprice": 9.7,
-  "pulsos_litro": 10
+  "pulsos_litro": 10,
+  "folio": 2
 }

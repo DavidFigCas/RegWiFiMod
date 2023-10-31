@@ -32,10 +32,13 @@ void saveNewlog()
 {
   newLogEntry = obj_log.createNestedObject();
   //newLogEntry["timestamp"] = DateTimeToString(now);
+  newLogEntry["folio"] = folio;
   newLogEntry["timestamp"] = now.unixtime();
   newLogEntry["lat"] = obj["gps"]["lat"];
   newLogEntry["lon"] = obj["gps"]["lon"];
   newLogEntry["state"] = STATE;
+  newLogEntry["litros"] = litros;
+  newLogEntry["precio"] = precio;
 
   Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   if (obj["test"].as<bool>())

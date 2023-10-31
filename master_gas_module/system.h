@@ -16,6 +16,8 @@
 #include "RTClib.h"
 #include <Wire.h>
 #include <TinyGPSPlus.h>
+#include <Firebase_ESP_Client.h>
+#include <esp_task_wdt.h>
 
 //#include <WiFiManager_RP2040W.h>  
 
@@ -28,6 +30,7 @@
 #include "clock.h"
 #include "gps_service.h"
 #include  "printerservice.h"
+#include "firebasedb.h"
 
 
 //15 seconds WDT
@@ -78,7 +81,7 @@ extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;
 
-//static int p;
+extern int folio;
 extern char b[200];
 extern char buff[200];
 extern int i;

@@ -49,7 +49,7 @@ float uprice = 9.8; //price of 1 litre
 uint32_t litros_check;
 uint32_t precio_check;
 
-//static int p;
+int folio;
 char b[200];
 char buff[200];
 int i;
@@ -188,6 +188,10 @@ void system_init()
     init_clock();        // I2C for clock
   }
   //gps_init();
+
+  // WatchDog Timer
+  esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
@@ -302,6 +306,8 @@ void loadConfig()
 
   //--------------- LOAD REGISTERS
   String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
+  updated = obj["updated"].as<bool>();
+  
   size_t length = email.length();
 
   /* if (length <= sizeof(name_data)) {
@@ -362,6 +368,14 @@ void loadConfig()
 
   uprice = obj["uprice"];
   pulsos_litro = obj["pulsos_litro"];
+  if (!obj["folio"].isNull())
+    folio = obj["folio"];
+  else
+  {
+    folio = 0;
+    obj["folio"] = 0;
+  }
+
 
 
   Serial.println("{\"config\":true}");

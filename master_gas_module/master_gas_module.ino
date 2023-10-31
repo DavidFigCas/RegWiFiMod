@@ -131,8 +131,12 @@ void loop()
        }
       }*/
     delay(10000);
-    printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), 1, 11, 23, 14, 45, 6);
+    printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
     STATE_DISPLAY = 0;
+    folio++;
+    obj["folio"] = folio;
+    saveConfig = true;
+    new_log = true;
     Serial.println("Done reset");
   }
   else
@@ -169,6 +173,7 @@ void loop()
         Serial.println("Display Bing Printer");
         litros_check = litros;
         precio_check = precio;
+        new_log = true;
       }
     }
   }
@@ -205,8 +210,11 @@ void loop()
     doc_aux["litros"] = litros;
     doc_aux["precio"] = precio;
   }
+
   doc_aux["STATE"] = STATE_DISPLAY;
+  doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
+
   //Serial.print("Master to display: ");
   //serializeJson(doc, Serial);
   //Serial.println();
@@ -232,20 +240,34 @@ void loop()
 
   delay(TIME_SPACE);
 
+  // ------------------------------------------- Clear Log
+  if (clear_log == true)
+  {
+    obj_log.clear();
+    Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    clear_log = false;
+  }
 
-  
-  if (millis() - mainRefresh > mainTime)
+
+  // ------------------------------------------- New LOG
+  if (new_log == true)
+  {
+    saveNewlog();
+    new_log = false;
+  }
+
+  if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
     //gps_update();
 
     // ----------------------------------------- check internet
-    //if (wifi_check())
+    if (wifi_check())
     {
-      //update_clock();
+      update_clock();
       read_clock();
       /*if (mqtt_check())
-      {
+        {
         // ------------------------------------------- Send Log
         if (send_log == true)
         {
@@ -266,24 +288,10 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg);
           send_log = false;
         }
-      }*/
-    }
-
-    // ------------------------------------------- Clear Log
-    if (clear_log == true)
-    {
-      obj_log.clear();
-      Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
-      clear_log = false;
+        }*/
     }
 
 
-    // ------------------------------------------- MQTT new LOG
-    if (new_log == true)
-    {
-      saveNewlog();
-      new_log = false;
-    }
 
     //Serial.print("STATE: ");
     //Serial.println(STATE, BIN);
@@ -372,5 +380,5 @@ void loop()
 
     saveConfig = false;
   }
-
+esp_task_wdt_reset();
 }
