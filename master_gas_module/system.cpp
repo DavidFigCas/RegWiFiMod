@@ -43,9 +43,11 @@ volatile bool startCounting2 = false;
 
 
 uint32_t litros;
+uint32_t target_litros;
 unsigned int pulsos_litro = 10;
 uint32_t precio;
 float uprice = 9.8; //price of 1 litre
+float factor;
 uint32_t litros_check;
 uint32_t precio_check;
 
@@ -71,10 +73,10 @@ void register_client()
 
   //serializeJson(obj_in["nombre"], Serial);
 
-
-  uint32_t litros = obj_in["litros"];
-  uint32_t uprice = (obj_in["precio"].as<float>()) * 100;
-  uint32_t factor = (obj_in["factor"].as<float>()) * 100;
+  //pulsos_litro = obj_in["pulsos_litro"];
+  target_litros = obj_in["litros"];
+  uprice = (obj_in["precio"].as<float>());
+  factor = (obj_in["factor"].as<float>());
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 
@@ -96,8 +98,8 @@ void register_client()
   Serial.println();
 
   Serial.print("Litros: ");
-  Serial.println(litros);
-  litros = litros * 100;
+  Serial.println(target_litros);
+  //litros = litros * 100;
   //for (int i = 0; i < 4; i++) {
   //litros_num[i] = (litros >> (8 * i)) & 0xFF;
   //Serial.println(litros_num[i]);
@@ -366,8 +368,9 @@ void loadConfig()
   }
   mainRefresh = mainTime + 1;
 
-  uprice = obj["uprice"];
-  pulsos_litro = obj["pulsos_litro"];
+  //uprice = obj["uprice"];
+  //pulsos_litro = obj["pulsos_litro"];
+  
   if (!obj["folio"].isNull())
     folio = obj["folio"];
   else

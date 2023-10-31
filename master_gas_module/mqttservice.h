@@ -25,6 +25,8 @@ extern const char* client_id;
 extern volatile boolean send_log;
 extern volatile boolean clear_log;
 extern volatile boolean new_log;
+extern volatile boolean flag_new_list;
+
 extern byte STATE, todo_byte;
 extern bool newcommand;
 extern uint32_t nclient;

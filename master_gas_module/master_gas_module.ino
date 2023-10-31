@@ -259,7 +259,7 @@ void loop()
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
-    gps_update();
+    //gps_update();
 
     // ----------------------------------------- check internet
     if (wifi_check())
@@ -267,9 +267,9 @@ void loop()
       update_clock();
       read_clock();
       if (mqtt_check())
-        {
+      {
         // ------------------------------------------- Send Log
-        //if (send_log == true)
+        if (send_log == true)
         {
           Serial.println("mqtt sending");
 
@@ -288,7 +288,7 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg);
           send_log = false;
         }
-        }
+      }
     }
 
 
@@ -324,9 +324,15 @@ void loop()
 
 
 
-
-
-
+  // ----------------------------------------- save new List
+  //if(flag_new_list == true)
+  //{
+  //flag_new_list = false;
+  //Serial.print("Saving List on Loop: ");
+  //serializeJson(doc_list,Serial);
+  //Serial.println();
+  //saveListData();
+  //}
 
 
 
@@ -380,5 +386,5 @@ void loop()
 
     saveConfig = false;
   }
-esp_task_wdt_reset();
+  esp_task_wdt_reset();
 }

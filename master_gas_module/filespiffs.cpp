@@ -52,11 +52,11 @@ bool spiffs_init()
   /*if (!LittleFS.begin()) {
     Serial.println("{\"spiffs\":false}");
     return false;
-  } else {
+    } else {
     Serial.println("{\"spiffs\":true}");
     Cfg_get();  // Load File from spiffs
     return true;
-  }*/
+    }*/
 
   // SPIFFS Init
   if (!SPIFFS.begin(true)) {
@@ -122,7 +122,7 @@ bool saveJSonToAFile(JsonObject * doc, String filename) {
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
   //file = LittleFS.open(filename, "w");
-  file = SPIFFS.open(filename);
+  file = SPIFFS.open(filename, FILE_WRITE);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);
@@ -210,6 +210,7 @@ void saveConfigData()
 // ------------------------------------------------------------------------------------------- saveListData
 void saveListData()
 {
+  //serializeJson(obj_list, Serial);
   Serial.println(saveJSonArrayToAFile(&obj_list, filelist) ? "{\"list_update_spiffs\":true}" : "{\"list_update_spiffs\":false}");
   if (obj["test"].as<bool>())
     serializeJson(obj_list, Serial);
@@ -275,9 +276,9 @@ bool saveJSonArrayToAFile(JsonArray * doc_list, String filename)
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
-  
+
   //file = LittleFS.open(filename, "w");
-  file = SPIFFS.open(filename);
+  file = SPIFFS.open(filename, FILE_WRITE);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);

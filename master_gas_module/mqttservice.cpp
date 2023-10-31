@@ -19,6 +19,7 @@ char buffer_msg[1024];
 volatile boolean send_log = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
+volatile boolean flag_new_list = false;
 byte STATE, todo_byte;
 bool newcommand;
 uint32_t nclient;
@@ -47,6 +48,7 @@ void mqtt_init()
 bool mqtt_check()
 {
   // MQTT Enable
+  esp_task_wdt_reset();
   if (!Mclient.connected())
   {
     if (reconnect())
@@ -76,7 +78,7 @@ void callback(char* topic, byte* payload, unsigned int length)
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
   Serial.print("Message arrived: ");
 
-  if (obj["test"].as<bool>())
+  //if (obj["test"].as<bool>())
   {
     Serial.print(topic);
     Serial.print("<-- ");
@@ -135,8 +137,14 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println();
     }
 
+    //
+    // Flag save ListData
+    flag_new_list = true;
+    //Serial.print("New List Data: ");
+    //serializeJson(obj_list,Serial);
+    //Serial.println();
     saveListData();
-    STATE |= (1 << 4);                  // NEW LIST
+    //STATE |= (1 << 4);                  // NEW LIST
 
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
@@ -164,7 +172,8 @@ void callback(char* topic, byte* payload, unsigned int length)
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
   {
-    Serial.println("Config");
+    Serial.println("Config Update");
+    updated = false;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
   {
