@@ -1,0 +1,15 @@
+{
+  "enable_mqtt": true,
+  "mqtt_server": "inventoteca.com",
+  "mqtt_port": 1883,
+  "test": true,
+  "id": "18",
+  "enable_wifi": true,
+  "ssid": "4G-MIFI-C91",
+  "pass": "1234567890",
+  "mainTime": 10000,
+  "gmtOff" : -21600,
+  "dayOff" : 0,
+  "capacity": 10000,
+  "percentage": 70.5
+}
