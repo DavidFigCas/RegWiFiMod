@@ -512,6 +512,7 @@ void loop1()
         shown = false;
       }
       flag_print = true;
+      delay(10);
       break;
 
     // ---------------------------------------------------------- Bing Printer
@@ -534,22 +535,26 @@ void loop1()
       if (flag_print == true)
       {
         flag_print = false;
-        //display.init(0);
-        display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
+        //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
+        //display.firstPage();
+        //do {
+        //  display.fillScreen(GxEPD_WHITE);  // Llena la pantalla de blanco (borra todo)
+        //} while (display.nextPage());
+
+        //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
         display.firstPage();
         do {
-          display.fillScreen(GxEPD_WHITE);  // Llena la pantalla de blanco (borra todo)
-        } while (display.nextPage());
-        
         display.setFullWindow();
         display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
+        } while (display.nextPage());
+        
         display.powerOff();
       }
 
 
       //STATE = 0;
       //Serial.println("goto STATE 0");
-      //
+      delay(10);
       break;
     default:
       break;
