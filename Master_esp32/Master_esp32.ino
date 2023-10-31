@@ -20,6 +20,11 @@ const unsigned long intervalo = 10000;
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
 
+const unsigned long intervalo2 = 10000;
+unsigned long tiempoAnterior2 = 0;
+unsigned long tiempoActual2;
+volatile bool startCounting2 = false;
+
 
 unsigned int litros;
 unsigned int pulsos_litro = 10;
@@ -137,14 +142,53 @@ void loop()
   //  STATE_DISPLAY = 1;
   //}
   //else
-  if (!doc_display["STATE"].isNull())
-  {
-    if (doc_display["STATE"] >  0)
-      STATE_DISPLAY = doc_display["STATE"];
+  //if (!doc_display["STATE"].isNull())
+  //{
+  //  if (doc_display["STATE"] >  0)
+  //    STATE_DISPLAY = doc_display["STATE"];
 
     //if(STATE_DISPLAY == 1)
+  //}
+
+  // ------------------------------------- printer
+  if (STATE_DISPLAY == 3)
+  {
+   Serial.println("Display on 3, reset");
+   /* if (!startCounting2)
+    {
+      // Detectado por primera vez
+      tiempoAnterior2 = millis();
+      startCounting2 = true;
+      Serial.println("Printer START");
+      //Serial.print("Litros: ");
+      //Serial.println(litros);
+      //STATE_DISPLAY = 2;
+    }
+    else
+    {
+      // Ya se ha detectado antes, verificar el intervalo
+      tiempoActual2 = millis();
+      if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+      {
+        // Ha pasado 1 minuto
+        //display_reset = true;
+        startCounting2 = false;  // Detener el conteo
+        //if (STATE_DISPLAY == 3)
+          STATE_DISPLAY = 0;
+        Serial.println("Printer Finish");
+      }
+    }*/
+    delay(10000);
+    STATE_DISPLAY = 0;
+  }
+  else
+  {
+    // Si STATE no es 3, resetear el conteo
+   // startCounting = false;
   }
 
+   
+  // ------------------------------------- encoder Read and stop
   if (doc_encoder["STATE"] == 3)
   {
     if (!startCounting)
@@ -155,6 +199,7 @@ void loop()
       Serial.println("STOP FLOWING");
       Serial.print("Litros: ");
       Serial.println(litros);
+      STATE_DISPLAY = 2;
     }
     else
     {
@@ -165,9 +210,9 @@ void loop()
         // Ha pasado 1 minuto
         display_reset = true;
         startCounting = false;  // Detener el conteo
-        if (STATE_DISPLAY == 3)
-          STATE_DISPLAY = 0;
-        Serial.println("Display Reset");
+        //if (STATE_DISPLAY == 3)
+          STATE_DISPLAY = 3;
+        Serial.println("Display Bing Printer");
       }
     }
   }
@@ -177,6 +222,8 @@ void loop()
     startCounting = false;
   }
 
+  
+
 
 
   // ----------------------------------------------- enviar
@@ -184,9 +231,7 @@ void loop()
 
   // ---------------------- display doc
   doc.clear();
-  doc["STATE"] = STATE_DISPLAY;
-
-
+  
   if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
   {
     doc["valve"] = doc_encoder["valve_open"].as<bool>();
@@ -195,6 +240,8 @@ void loop()
     doc["clock"] = true;
     doc["printer"] = true;
     doc["paper"] = true;
+    STATE_DISPLAY = 1;
+    
   }
   else
   {
@@ -202,6 +249,7 @@ void loop()
     doc["litros"] = litros;
     doc["precio"] = precio;
   }
+  doc["STATE"] = STATE_DISPLAY;
   serializeJson(doc, b);
   //Serial.print("Master to display: ");
   //serializeJson(doc, Serial);

@@ -376,8 +376,8 @@ void loop1()
     // -------------------------------------------------------- display icons
     case 0:
       digitalWrite(25, HIGH);
-      if (flag_print == true)
-      {
+      //if (flag_print == true)
+      //{
         Serial.println("Display Main Screen");
         //display.init(0);
         display.setFullWindow();
@@ -405,13 +405,14 @@ void loop1()
         //display.displayWindow(237, 10, 490, 45);
         //display.powerOff();
 
-        STATE = 1;
+        
         Serial.println("goto STATE 1");
 
         //delay(10000);
-        flag_print = false;
-      }
+        //flag_print = false;
+      //}
       //touch_data=0;
+      STATE = 1;
       break;
 
     // -------------------------------------------------------- display litros
@@ -420,42 +421,32 @@ void loop1()
       digitalWrite(27, LOW);
       digitalWrite(28, LOW);
 
-      //if (flag_print == false)
-      {
-        litros = doc_aux["litros"].as<uint32_t>();
-        print_litros = litros;
+      litros = doc_aux["litros"].as<uint32_t>();
+      print_litros = litros;
 
 
-        Serial.print("Litros: ");
-        Serial.println(litros);
+      Serial.print("Litros: ");
+      Serial.println(litros);
 
 
-        pesos = doc["precio"].as<uint32_t>();
-        Serial.print("precio: ");
-        Serial.println(pesos);
+      pesos = doc["precio"].as<uint32_t>();
+      Serial.print("precio: ");
+      Serial.println(pesos);
 
-        print_pesos = pesos;
-        //Serial.println(print_pesos);
+      print_pesos = pesos;
+      //Serial.println(print_pesos);
 
-        new_litros = false;
-        newcommand = false;
-        //flag_print = true;
-        shown = 1;
-      }
+      new_litros = false;
+      newcommand = false;
+
 
       //if (shown == 1)
       {
         digitalWrite(25, !digitalRead(25));
         if (litros > 0)
           digitalWrite(27, !digitalRead(27));
-        //shown = 0;
-        //uprice = ((uint16_t)client_num[0] << 8) | client_num[1];
-        //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
-        //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+
         //Show litros
-
-
-
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
@@ -474,20 +465,14 @@ void loop1()
         //digitalWrite(28, 0);
       }
 
-      if ((doc_aux["flow"].as<bool>()) == false)
-      {
-        STATE = 2;
-        //digitalWrite(27, 0);
-        //Serial.println("goto STATE 2");
-        //endprocess = 0;
-      }
-
-
+      shown = true;
 
       break;
+
+    // ---------------------------------------------------------- Final price
     case 2:
       digitalWrite(28, LOW);
-
+      Serial.println("STATE 2");
       tiempoActual2 = millis();
 
       if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
@@ -502,7 +487,7 @@ void loop1()
       //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
       //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
 
-      //if (shown == 1)
+      if (shown == true)
       {
         Serial.println("Final Numbers");
         display.setTextColor(GxEPD_BLACK);
@@ -522,13 +507,16 @@ void loop1()
         Serial.println("Show price");
         //delay(5000);
         //Serial.println("goto STATE 3");
-        STATE = 3;
-        //shown = 0;
+        //STATE = 3;
+        shown = false;
       }
+      flag_print = true;
       break;
-    case 3:
 
-      digitalWrite(28, HIGH);
+    // ---------------------------------------------------------- Bing Printer
+    case 3:
+      Serial.println("STATE 3");
+      //digitalWrite(28, HIGH);
       digitalWrite(27, LOW);
       digitalWrite(25, LOW);
       tiempoActual2 = millis();
@@ -539,18 +527,25 @@ void loop1()
         tiempoAnterior2 = tiempoActual2;
         digitalWrite(28, !digitalRead(28));
       }
-      //display.init(0);
-      //display.setFullWindow();
-      //display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
-      //display.powerOff();
-      //sleep_ms(20000);
-      //display.init(0);
-      //display.setFullWindow();
-      //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-      //display.powerOff();
+      
+      if (flag_print == true)
+      {
+        flag_print = false;
+        //display.init(0);
+        display.setFullWindow();
+        display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
+        display.powerOff();
+        //sleep_ms(20000);
+        //display.init(0);
+        //display.setFullWindow();
+        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+        //display.powerOff();
+      }
+
 
       //STATE = 0;
       //Serial.println("goto STATE 0");
+      //
       break;
     default:
       break;
