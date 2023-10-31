@@ -212,12 +212,14 @@ void loop()
   }
 
   doc_aux["STATE"] = STATE_DISPLAY;
+  read_clock();
   doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
 
-  //Serial.print("Master to display: ");
+  Serial.print("Master to display: ");
   //serializeJson(doc, Serial);
-  //Serial.println();
+  Serial.print(b);
+  Serial.println();
 
 
   Wire.beginTransmission(DISPLAY_ADD);
@@ -230,9 +232,11 @@ void loop()
   doc_aux["reset"] = display_reset;
   doc_aux["litros"] = litros;
   serializeJson(doc_aux, b);
-  //Serial.print("Master to encoder: ");
-  //serializeJson(doc, Serial);
-  //Serial.println();
+  
+  Serial.print("Master to encoder: ");
+  //serializeJson(doc_aux, Serial);
+  Serial.print(b);
+  Serial.println();
 
   Wire.beginTransmission(ENCODE_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
@@ -266,8 +270,8 @@ void loop()
     {
       update_clock();
       read_clock();
-      if (mqtt_check())
-      {
+      /*if (mqtt_check())
+        {
         // ------------------------------------------- Send Log
         if (send_log == true)
         {
@@ -288,7 +292,7 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg);
           send_log = false;
         }
-      }
+        }*/
     }
 
 
@@ -324,15 +328,9 @@ void loop()
 
 
 
-  // ----------------------------------------- save new List
-  //if(flag_new_list == true)
-  //{
-  //flag_new_list = false;
-  //Serial.print("Saving List on Loop: ");
-  //serializeJson(doc_list,Serial);
-  //Serial.println();
-  //saveListData();
-  //}
+
+
+
 
 
 
@@ -386,5 +384,5 @@ void loop()
 
     saveConfig = false;
   }
-  esp_task_wdt_reset();
+
 }

@@ -1,4 +1,4 @@
-#include "wifiservice.h"
+  #include "wifiservice.h"
 
 bool correct = false;
 int wifi_trys;
@@ -197,8 +197,6 @@ bool wifi_check()
         flag = true;
         //STATE = 1;
         STATE |= (1 << 6);
-
-         //connectFirebase();
 
 
       }

@@ -116,6 +116,11 @@ void recv(int len)
   }
   newcommand = true;
   jsonStr = buffx;
+  DeserializationError error = deserializeJson(doc_aux, jsonStr);
+  if (error) {
+    //Serial.print(F("deserializeJson() failed: "));
+    //Serial.println(error.f_str());
+  }
 }
 
 // Called when the I2C slave is read from
@@ -320,13 +325,6 @@ void loop() {
 
     //Serial.println(jsonStr);
 
-
-    DeserializationError error = deserializeJson(doc_aux, jsonStr);
-    if (error) {
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.f_str());
-    }
-
     Serial.print("aux: ");
     serializeJson(doc_aux, Serial);
     Serial.println();
@@ -427,7 +425,9 @@ void loop1()
 
 
       Serial.print("Litros: ");
-      Serial.println(litros);
+      Serial.print(litros);
+
+      Serial.print("\t");
 
 
       pesos = doc["precio"].as<uint32_t>();
@@ -545,10 +545,10 @@ void loop1()
         //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
         display.firstPage();
         do {
-        display.setFullWindow();
-        display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
+          display.setFullWindow();
+          display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
         } while (display.nextPage());
-        
+
         display.powerOff();
       }
 
