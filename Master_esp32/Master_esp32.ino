@@ -180,6 +180,7 @@ void loop()
     }*/
     delay(10000);
     STATE_DISPLAY = 0;
+    Serial.println("Done reset");
   }
   else
   {

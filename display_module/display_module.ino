@@ -378,38 +378,38 @@ void loop1()
       digitalWrite(25, HIGH);
       //if (flag_print == true)
       //{
-        Serial.println("Display Main Screen");
-        //display.init(0);
-        display.setFullWindow();
-        display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+      Serial.println("Display Main Screen");
+      //display.init(0);
+      display.setFullWindow();
+      display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
 
-        print_icons();
-
-
-        unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-        stamp.getDateTime(unixtime);
+      print_icons();
 
 
-        //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-        //display.setCursor(237, 49);
-        //display.setFont(&FreeMonoBold9pt7b);
-        //display.print(stamp.day);
-        //display.print("/");
-        //display.print(stamp.month);
-        //display.print("/");
-        //display.print(stamp.year);
-        //display.print("  ");
-        //display.print(stamp.hour);
-        //display.print(":");
-        //display.print(stamp.minute);
-        //display.displayWindow(237, 10, 490, 45);
-        //display.powerOff();
+      unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+      stamp.getDateTime(unixtime);
 
-        
-        Serial.println("goto STATE 1");
 
-        //delay(10000);
-        //flag_print = false;
+      //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+      //display.setCursor(237, 49);
+      //display.setFont(&FreeMonoBold9pt7b);
+      //display.print(stamp.day);
+      //display.print("/");
+      //display.print(stamp.month);
+      //display.print("/");
+      //display.print(stamp.year);
+      //display.print("  ");
+      //display.print(stamp.hour);
+      //display.print(":");
+      //display.print(stamp.minute);
+      //display.displayWindow(237, 10, 490, 45);
+      //display.powerOff();
+
+
+      Serial.println("goto STATE 1");
+
+      //delay(10000);
+      //flag_print = false;
       //}
       //touch_data=0;
       STATE = 1;
@@ -480,6 +480,7 @@ void loop1()
         // Ha pasado 1 minuto
         tiempoAnterior2 = tiempoActual2;
         digitalWrite(27, !digitalRead(27));
+
       }
 
 
@@ -515,8 +516,9 @@ void loop1()
 
     // ---------------------------------------------------------- Bing Printer
     case 3:
-      Serial.println("STATE 3");
+
       //digitalWrite(28, HIGH);
+      Serial.println("STATE 3");
       digitalWrite(27, LOW);
       digitalWrite(25, LOW);
       tiempoActual2 = millis();
@@ -526,20 +528,22 @@ void loop1()
         // Ha pasado 1 minuto
         tiempoAnterior2 = tiempoActual2;
         digitalWrite(28, !digitalRead(28));
+
       }
-      
+
       if (flag_print == true)
       {
         flag_print = false;
         //display.init(0);
+        display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
+        display.firstPage();
+        do {
+          display.fillScreen(GxEPD_WHITE);  // Llena la pantalla de blanco (borra todo)
+        } while (display.nextPage());
+        
         display.setFullWindow();
         display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
         display.powerOff();
-        //sleep_ms(20000);
-        //display.init(0);
-        //display.setFullWindow();
-        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-        //display.powerOff();
       }
 
 
