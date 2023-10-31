@@ -29,9 +29,9 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
 
 uint8_t STATE = 0;
-volatile int32_t current_value, new_value, delta, old_value = 0, old_value_m = 0;
+//volatile uint32_t current_value;
+volatile uint32_t new_value, delta, old_value = 0;
 bool flow, buttonx, act_button = false;
-static volatile bool alarm_fired;
 unsigned long previousMillis = 0;  // Almacena la última vez que el LED cambió
 const long interval = 500;
 unsigned long currentMillis;
@@ -39,7 +39,7 @@ unsigned long currentMillis;
 PioEncoder encoder(2); // encoder is connected to GPIO2 and GPIO3
 uint64_t alarm_callback(alarm_id_t id, void *user_data);
 
-const unsigned long intervalo = 10;  // Intervalo de tiempo (1 minuto en milisegundos)
+const unsigned long intervalo = 100;  // Intervalo de tiempo (1 minuto en milisegundos)
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
 
@@ -94,6 +94,8 @@ void loop()
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
     new_value = encoder.getCount();
+    Serial.print("new_value: ");
+    Serial.println(new_value);
 
     // ------------------------------------------- check direction
     if (new_value < 0)
@@ -101,7 +103,7 @@ void loop()
       encoder.reset();
       Serial.println("no ok");
       //gpio_put(LED_1, 1);
-      old_value_m = 0;
+      old_value = 0;
       new_value = 0;
       delta = 0;
     }
@@ -115,27 +117,30 @@ void loop()
     tiempoAnterior2 = tiempoActual2;
 
     // ------------------------------------- delta is noise?
-    delta = new_value - old_value_m;
-    alarm_fired = false;
-    Serial.print("Delta: ");
-    Serial.println(delta);
+    delta = new_value - old_value;
     if (delta < 10)
     {
-      //gpio_put(LED_2, 0);
       flow = false;
-      //delta = 0;
-      old_value_m = new_value;
       digitalWrite(25, LOW);
-      //encoder.reset();
+      encoder.reset();
+      if (STATE == 1)
+      {
+        STATE = 2;
+      }
     }
     else
     {
       Serial.println("Flow detected");
       flow = true;
       digitalWrite(25, HIGH);
-      old_value_m = new_value;
-      delta = 0;
+      if(STATE == 0)
+      {
+        STATE = 1;
+      }
     }
+    old_value = new_value;
+    Serial.print("Delta: ");
+    Serial.println(delta);
   }
 
 
@@ -145,18 +150,6 @@ void loop()
     case 0:// ---------------------------------------------------------- wait start of process
       //Serial.println("Check flow");
       // ------------------------------------- start to moving
-
-
-      if (flow == true)
-      {
-        //old_value_m = new_value;
-        //delta = 0;
-        STATE = 1;
-        //doc["STATE"] = STATE;
-        //state_byte |= (1 << 5); //new data
-        //state_byte |= (1 << 4);//start process
-        //gpio_put(LED_3, 1);
-      }
 
       // ---------------------- open valve button
       if (buttonx == true)
@@ -182,26 +175,15 @@ void loop()
         }
         buttonx = false;
       }
-
       break;
+
     case 1: // ------------------------------------------------------process started
-      current_value = new_value - old_value;
-      doc["current"] = current_value;         // Младший байт
+      //current_value = new_value - old_value;
 
-      if (flow == false)
+
+      // ---------------------- open valve button
+      if (buttonx == 1)
       {
-        STATE = 2;
-        //doc["STATE"] = STATE;
-      }
-      //else
-      //{
-      //old_value_m = current_value;
-      //delta = 0;
-      //}
-
-      //doc["delta"] = delta;
-
-      if (buttonx == 1) {
         sleep_ms(150);
         while (gpio_get(BTN_START) == 0) {}
         act_button = !act_button;
@@ -210,13 +192,13 @@ void loop()
         {
           Serial.println("Valve CLOSED");
           digitalWrite(SOLENOID, HIGH);
-          doc["valve_open"] = false;
+          //doc["valve_open"] = false;
         }
         else
         {
           Serial.println("Valve OPEN");
           digitalWrite(SOLENOID, LOW);
-          doc["valve_open"] = true;
+          //doc["valve_open"] = true;
           //gpio_put(LED_1, 0);
         }
         buttonx = 0;
@@ -224,33 +206,19 @@ void loop()
       break;
 
     case 2: //------------------------------------------------- stop process, close valve
-      Serial.println("Valve CLOSED");
-      digitalWrite(SOLENOID, HIGH);
-      doc["valve_open"] = false;
-      //state_byte &= ~((1 << 4) | (1 << 5)); // set state in stop
+      Serial.println("FLOW STOP");
+      digitalWrite(SOLENOID, LOW);
       STATE = 3;
-      doc["STATE"] = STATE;
-      flow = false;
-      doc["flow"] = flow;
+      //flow = false;
       break;
 
     case 3: //wait reset command from MASTER
-      //if (bit == 1)
       if ((doc_aux["reset"].as<bool>() == true) && (!(doc_aux["reset"].isNull())))
       {
-        delta = 0;
-        old_value_m = current_value;
-        old_value = old_value_m;
-        //enc_data[0] = 0;
-        //enc_data[1] = 0;
-        //enc_data[2] = 0;
-        //enc_data[3] = 0;
+        //delta = 0;
+        //old_value = current_value;
         STATE = 0;
-        flow = 0;
-        current_value = 0;
-        doc["STATE"] = STATE;
-        doc["flow"] = flow;
-        doc["current"] = current_value;
+        //current_value = 0;
         encoder.reset();
       }
       break;
@@ -264,25 +232,27 @@ void loop()
   if (currentMillis - previousMillis >= interval)
   {
 
-    //alarm_fired = true;
+    // ---------------------------------------- Blink LED
     digitalWrite(28, !(digitalRead(28)));
-
-    memset(resp, 0, sizeof(resp));
     //Serial.printf("Slave: '%s'\r\n", buff);
 
-    jsonStr =  buff;
+
+    // ------------------------------------- print In/Out
+
     deserializeJson(doc_aux, jsonStr);
     serializeJson(doc_aux, Serial);
     Serial.println();
-    //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
 
     doc["pulses"] = new_value;   //Commands
-    serializeJson(doc, resp);
-    Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-    //delay(500);
     doc["STATE"] = STATE;
     doc["delta"] = delta;
     doc["flow"] = flow;
+    doc["current"] = new_value;
+    doc["valve_open"] = bool (digitalRead(SOLENOID));
+    //memset(resp, 0, sizeof(resp));
+    serializeJson(doc, resp);
+    Serial.println(resp);
+
     previousMillis = currentMillis;
   }
 }
@@ -300,13 +270,22 @@ void recv(int len)
   {
     buff[i] = Wire.read();
   }
-  //buff[i] = 0;
+  jsonStr =  buff;
 }
 
 // Called when the I2C slave is read from
 // --------------------------------------------------------------- Req
 void req()
 {
+  doc["pulses"] = new_value;   //Commands
+  doc["STATE"] = STATE;
+  doc["delta"] = delta;
+  doc["flow"] = flow;
+  doc["current"] = new_value;
+  doc["valve_open"] = bool (digitalRead(SOLENOID));
+  //memset(resp, 0, sizeof(resp));
+  serializeJson(doc, resp);
+
   Wire.write(resp, 199);
 }
 

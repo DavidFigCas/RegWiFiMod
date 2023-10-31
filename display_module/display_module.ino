@@ -110,13 +110,16 @@ void recv(int len)
     buffx[i] = Wire.read();
   }
   newcommand = true;
-
+  jsonStr = buffx;
 }
 
 // Called when the I2C slave is read from
 // ---------------------------------------------------------------------------- req
 void req()
 {
+  doc["precio"] = doc_aux["precio"];     //Commands
+  doc["STATE"] = STATE;     //Commands
+  serializeJson(doc, respx);
   Wire.write(respx, 199);
 }
 
@@ -254,8 +257,7 @@ void setup()
   Serial.begin(115200);
   delay(2000);
   Serial.println("Init Display");
-  pinMode(25, OUTPUT);
-  digitalWrite(25, 0);
+  
   pinMode(28, OUTPUT);
   digitalWrite(28, 0);
   pinMode(27, OUTPUT);
@@ -276,12 +278,12 @@ void setup()
   //STATE = 1;
   error_status = true;
 
-  doc["name"] = "David";
-  doc["client"] = 30;
-  doc["city"] = "Puebla";
+  //doc["name"] = "David";
+  //doc["client"] = 30;
+  //doc["city"] = "Puebla";
 
   // Serializar el objeto JSON en la variable resp
-  serializeJson(doc, respx);
+  //serializeJson(doc, respx);
 
   //multicore_launch_core1(core1_blink);
   //Serial.begin(115200);
@@ -301,39 +303,30 @@ void loop() {
 
   tiempoActual = millis();
 
-  if (tiempoActual - tiempoAnterior >= intervalo) 
+  if (tiempoActual - tiempoAnterior >= intervalo)
   {
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
 
-    Serial.printf("Display Read Buffer: '%s'\r\n", buffx);
+    //Serial.printf("Display Read Buffer: '%s'\r\n", buffx);
+    //Serial.println();
 
-    //aux_char = jsonStr.c_str();  // Obtén una representación const char* de la cadena
-    //Serial.println(aux_char);  // Imprime la cadena JSON
+    
+    //Serial.println(jsonStr);
 
-    //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-    //jsonStr = String(buffx);
-
-    jsonStr = buffx;
-    Serial.println(jsonStr);
-    //deserializeJson(doc_aux, jsonStr);  // Serializa el documento JSON a una cadena
-
-    doc["precio"] = doc_aux["precio"];     //Commands
-    doc["STATE"] = STATE;     //Commands
-    //doc["valve"] = doc_aux["valve"];     //Commands
 
     DeserializationError error = deserializeJson(doc_aux, jsonStr);
     if (error) {
       Serial.print(F("deserializeJson() failed: "));
       Serial.println(error.f_str());
-      //return;
     }
 
     Serial.print("aux: ");
-    serializeJson(doc_aux, Serial); Serial.println();
+    serializeJson(doc_aux, Serial);
+    Serial.println(); 
     Serial.print("resp: ");
-    serializeJson(doc, respx); Serial.println();
-    Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+    Serial.println(respx);
+
 
 
     // Ahora resp contiene el objeto JSON como una cadena
@@ -350,7 +343,8 @@ void loop() {
 // ----------------------------------------------------------------- SETUP1
 void setup1()
 {
-
+  pinMode(25, OUTPUT);
+  digitalWrite(25, HIGH);
   display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
   gpio_set_function(P_MISO, GPIO_FUNC_SPI);
   gpio_set_function(P_SCK, GPIO_FUNC_SPI);
@@ -362,6 +356,7 @@ void setup1()
   display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
 
   display.powerOff();
+  digitalWrite(25, LOW);
 }
 
 
@@ -372,7 +367,7 @@ void loop1()
 
   switch (STATE) {
     case 0:
-      digitalWrite(25, 1);
+      digitalWrite(25, HIGH);
       if (error_status == true)
       {
         Serial.println("recieve error status");
@@ -410,13 +405,14 @@ void loop1()
       break;
 
     case 1:
-      digitalWrite(27, 1);
-      
+      digitalWrite(27, HIGH);
+
       //if (newcommand == 1)
       {
-        Serial.println("***************************new command***********************************************");
+        //Serial.println("***************************new command***********************************************");
         //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
         litros = doc_aux["litros"].as<uint32_t>();
+        Serial.print("Litros: ");
         Serial.println(litros);
 
         //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
@@ -474,7 +470,7 @@ void loop1()
       }
 
 
-      //digitalWrite(27, 0);
+      digitalWrite(27, LOW);
       break;
     case 2:
 

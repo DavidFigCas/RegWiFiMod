@@ -4,7 +4,7 @@
 #define SCL_MAIN    17
 #define ENCODE_ADD  0x5C
 #define DISPLAY_ADD  0x5A
-#define TIME_SPACE  500
+#define TIME_SPACE  1000
 
 
 #include <Wire.h>
@@ -72,7 +72,7 @@ void loop()
   deserializeJson(doc_display, jsonStr);
   serializeJson(doc_display, Serial);
   Serial.println();
-  delay(1000);
+  delay(TIME_SPACE);
 
   // --------------------- leer encoder
   // Read from the slave and print out
@@ -93,10 +93,10 @@ void loop()
   deserializeJson(doc_encoder, jsonStr);
   serializeJson(doc_encoder, Serial);
   Serial.println();
-  delay(1000);
+  delay(TIME_SPACE);
 
 
-  litros = doc_encoder["current"];
+  litros = doc_encoder["current"].as<unsigned int>();
   display_reset = false;
 
 
@@ -122,14 +122,18 @@ void loop()
 
   // ---------------------- display doc
   doc.clear();
-  doc["wifi"] = true;
+  doc["flow"] = doc_encoder["flow"].as<bool>();  
+  doc["litros"] = litros;
   doc["valve"] = doc_encoder["valve_open"].as<bool>();
+  doc["precio"] = 9.5;
+  doc["wifi"] = true;
   doc["gps"] = false;
   doc["clock"] = true;
   doc["printer"] = true;
   doc["paper"] = true;
-  doc["litros"] = p;
-  doc["precio"] = 9.5;
+  
+  
+  
   serializeJson(doc, b);
   Serial.print("Master to display: ");
   serializeJson(doc, Serial);
@@ -139,7 +143,7 @@ void loop()
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
-  delay(1000);
+  delay(TIME_SPACE);
 
   // ---------------------- encoder doc
   doc.clear();
@@ -154,5 +158,5 @@ void loop()
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
 
-  delay(1000);
+  delay(TIME_SPACE);
 }
