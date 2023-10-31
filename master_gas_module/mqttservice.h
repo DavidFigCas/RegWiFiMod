@@ -17,9 +17,9 @@ extern const char* wild_topic;
 extern const char* gps_topic;
 extern const char* log_topic;
 
-extern char buffer_union_publish[30]; 
-extern char buffer_union_subcribe[30];
-extern char buffer_msg[1024];
+extern char buffer_union_publish[LOG_SIZE]; 
+extern char buffer_union_subcribe[LOG_SIZE];
+extern char buffer_msg[LOG_SIZE];
 extern const char* client_id;
 
 extern volatile boolean send_log;

@@ -7,6 +7,12 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 //#include <LittleFS.h>
+#define WDT_TIMEOUT 150
+#define FILE_SIZE   1024
+#define LIST_SIZE   3048
+#define LOG_SIZE   3048
+
+
 #include "FS.h"
 #include "SPIFFS.h"
 #include <Wire.h>
@@ -34,7 +40,7 @@
 
 
 //15 seconds WDT
-#define WDT_TIMEOUT 150
+
 
 extern unsigned long startTime;
 

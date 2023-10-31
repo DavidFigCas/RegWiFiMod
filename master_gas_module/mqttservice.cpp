@@ -12,9 +12,9 @@ const char* config_topic = "/config";
 const char* log_topic = "/log";
 const char* gps_topic = "/gps";
 const char* wild_topic = "/#";
-char buffer_union_publish[30];
-char buffer_union_subcribe[30];
-char buffer_msg[1024];
+char buffer_union_publish[LOG_SIZE];
+char buffer_union_subcribe[LOG_SIZE];
+char buffer_msg[LOG_SIZE];
 //const char* client_id = "maquina00018";
 volatile boolean send_log = false;
 volatile boolean clear_log = false;
@@ -146,6 +146,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     //Serial.println();
     saveListData();
     search_nclient(0);
+    return;
     //STATE |= (1 << 4);                  // NEW LIST
 
   }
@@ -169,28 +170,37 @@ void callback(char* topic, byte* payload, unsigned int length)
     //doc_list.add(obj["new"]);
     //obj_list.add(obj["new"].as<JsonObject>());
     //doc_list.add(doc_m_add.as<JsonObject>());
-    obj_list.add(doc_m.as<JsonObject>());
-    saveListData();
+    //obj_list.add(doc_m.as<JsonObject>());
+    //saveListData();
+    return;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
   {
     Serial.println("Config Update");
     updated = false;
+    return;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
   {
-    if (strcmp(jsonPayload, "delete") == 0) {
+    if (strcmp(jsonPayload, "delete") == 0) 
+    {
       clear_log = true;
-    } else if (strcmp(jsonPayload, "get") == 0) {
+      return;
+    } else if (strcmp(jsonPayload, "get") == 0) 
+    {
       send_log = true;
       Serial.println("prepare send");
+      return;
     }
-    else if (strcmp(jsonPayload, "add") == 0) {
+    else if (strcmp(jsonPayload, "add") == 0) 
+    {
       new_log = true;
       Serial.println("Add new Log");
+      return;
     }
     
   }
+  return;
 }
 
 

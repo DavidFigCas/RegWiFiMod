@@ -1,6 +1,9 @@
 #include "system.h"
 
 #define   PRESS   LOW
+#define FILE_SIZE   1024
+#define LIST_SIZE   3048
+#define LOG_SIZE   3048
 //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
 bool factory_press = false;
