@@ -214,11 +214,11 @@ void loop()
 
 
   // ------------------------------------------- New LOG
-  //if (new_log == true)
-  //{
-    //saveNewlog();
-    //new_log = false;
-  //}
+  if (new_log == true)
+  {
+    saveNewlog();
+    new_log = false;
+  }
 
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {

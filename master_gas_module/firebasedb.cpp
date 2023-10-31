@@ -287,15 +287,16 @@ void connectFirebase()
     Firebase.reconnectWiFi(true);
 
     unsigned long startTime = millis();
-    //while (!Firebase.ready())
-    if (!Firebase.ready())
+      esp_task_wdt_reset();
+    while (!Firebase.ready())
+    //if (!Firebase.ready())
     {
-      //if (millis() - startTime > mainTime)
-      //{
-      //Serial.println("Failed to connect to Firebase within timeout period");
-      //break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
-      //}
-      //delay(100); // Esperar un poco antes de comprobar de nuevo, para no bloquear completamente el bucle
+      if (millis() - startTime > mainTime)
+      {
+      Serial.println("Failed to connect to Firebase within timeout period");
+      break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
+      }
+      delay(100); // Esperar un poco antes de comprobar de nuevo, para no bloquear completamente el bucle
     }
 
 
