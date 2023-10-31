@@ -365,10 +365,7 @@ void setup1()
 void loop1()
 {
 
-  if (!doc_aux["STATE"].isNull())
-  {
-    STATE = doc_aux["STATE"];
-  }
+  
 
   switch (STATE)
   {
@@ -429,10 +426,11 @@ void loop1()
 
 
         pesos = doc["precio"];
+        Serial.print("precio: ");
         Serial.println(pesos);
 
         print_pesos = pesos;
-        Serial.println(print_pesos);
+        //Serial.println(print_pesos);
 
         new_litros = false;
         newcommand = false;
@@ -475,12 +473,12 @@ void loop1()
       //endprocess = 0;
       //}
 
-
+      
       
       break;
     case 2:
-
-
+      digitalWrite(28, HIGH);
+      
       digitalWrite(27, !digitalRead(27));
       
       //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
@@ -525,6 +523,12 @@ void loop1()
       break;
     default:
       break;
+  }
+
+  // ------------------------------------------- take STATE from master
+  if (!doc_aux["STATE"].isNull())
+  {
+    STATE = doc_aux["STATE"];
   }
 
 }
