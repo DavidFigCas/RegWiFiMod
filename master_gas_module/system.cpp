@@ -174,7 +174,7 @@ void system_init()
   Serial.begin(115200);
   delay(5000);
   I2C_Init(); Serial.println("i2c_Init");// Slave mode
-  Serial.println("gps-test");
+  Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
 
   if (spiffs_init())
@@ -187,7 +187,7 @@ void system_init()
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
-  //gps_init();
+  gps_init();
 
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts

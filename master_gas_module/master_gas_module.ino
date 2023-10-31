@@ -259,17 +259,17 @@ void loop()
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
-    //gps_update();
+    gps_update();
 
     // ----------------------------------------- check internet
     if (wifi_check())
     {
       update_clock();
       read_clock();
-      /*if (mqtt_check())
+      if (mqtt_check())
         {
         // ------------------------------------------- Send Log
-        if (send_log == true)
+        //if (send_log == true)
         {
           Serial.println("mqtt sending");
 
@@ -288,7 +288,7 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg);
           send_log = false;
         }
-        }*/
+        }
     }
 
 
