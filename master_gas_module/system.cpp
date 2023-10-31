@@ -50,10 +50,11 @@ uint32_t litros_check;
 uint32_t precio_check;
 
 //static int p;
-//char b[200];
+char b[200];
 char buff[200];
 int i;
 String jsonStr;
+unsigned int STATE_DISPLAY = 1;
 
 volatile bool display_reset = false;
 volatile bool start_print = false;
@@ -171,6 +172,7 @@ void system_init()
 {
   delay(100);
   Serial.begin(115200);
+  delay(5000);
   I2C_Init(); Serial.println("i2c_Init");// Slave mode
   Serial.println("gps-test");
   Serial.print("Version:"); Serial.println(VERSION);
@@ -178,9 +180,9 @@ void system_init()
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system
-    mqtt_init();
-    wifi_init();
-    mqtt_check();
+    //mqtt_init();
+    //wifi_init();
+    //mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock

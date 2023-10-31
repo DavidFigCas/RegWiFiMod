@@ -27,6 +27,7 @@
 #include "wireservice.h"
 #include "clock.h"
 #include "gps_service.h"
+#include  "printerservice.h"
 
 
 //15 seconds WDT
@@ -78,10 +79,11 @@ extern uint32_t litros_check;
 extern uint32_t precio_check;
 
 //static int p;
-//char b[200];
+extern char b[200];
 extern char buff[200];
 extern int i;
 extern String jsonStr;
+extern unsigned int STATE_DISPLAY;
 
 extern volatile bool display_reset;
 extern volatile bool start_print;

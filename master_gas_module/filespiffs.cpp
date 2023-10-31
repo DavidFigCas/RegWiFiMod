@@ -13,6 +13,7 @@ StaticJsonDocument<LOG_SIZE> doc_log;
 
 JsonObject newLogEntry;
 
+StaticJsonDocument<200> doc_aux;
 StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
 StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
 

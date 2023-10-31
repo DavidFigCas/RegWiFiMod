@@ -2,7 +2,6 @@
 
 void I2C_Init()
 {
-  delay(5000);
   //Wire.setSDA(SDA_MAIN);
   //Wire.setSCL(SCL_MAIN);
   Wire.begin();
@@ -70,5 +69,53 @@ void I2C_Get()
 
 void I2C_Put()
 {
+  // ----------------------------------------------- enviar
 
+
+  // ---------------------- display doc
+  doc_aux.clear();
+
+  if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
+  {
+    doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
+    doc_aux["wifi"] = true;
+    doc_aux["gps"] = false;
+    doc_aux["clock"] = true;
+    doc_aux["printer"] = true;
+    doc_aux["paper"] = true;
+    STATE_DISPLAY = 1;
+
+  }
+  else
+  {
+    doc_aux["flow"] = doc_encoder["flow"].as<bool>();
+    doc_aux["litros"] = litros;
+    doc_aux["precio"] = precio;
+  }
+  doc_aux["STATE"] = STATE_DISPLAY;
+  serializeJson(doc, b);
+  //Serial.print("Master to display: ");
+  //serializeJson(doc, Serial);
+  //Serial.println();
+
+
+  Wire.beginTransmission(DISPLAY_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+  delay(TIME_SPACE);
+
+  // ---------------------- encoder doc
+  doc_aux.clear();
+  doc_aux["reset"] = display_reset;
+  doc_aux["litros"] = litros;
+  serializeJson(doc, b);
+  //Serial.print("Master to encoder: ");
+  //serializeJson(doc, Serial);
+  //Serial.println();
+
+  Wire.beginTransmission(ENCODE_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+
+  delay(TIME_SPACE);
 }
