@@ -4,10 +4,20 @@
 #define SCL_MAIN    17
 #define ENCODE_ADD  0x5C
 #define DISPLAY_ADD  0x5A
+#define TIME_SPACE  500
 
 
 #include <Wire.h>
 #include <ArduinoJson.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+#include "time.h"
+#include "RTClib.h"
+//#include "clock.h"
+const unsigned long intervalo = 20000;
+unsigned long tiempoAnterior = 0;
+unsigned long tiempoActual;
+unsigned int litros;
 
 static int p;
 char b[200];
@@ -43,7 +53,26 @@ void loop()
 
 
 
+  // --------------------- leer display
+  // Read from the slave and print out
+  Serial.print("Display: ");
+  Wire.requestFrom(DISPLAY_ADD, 199);
+  memset(buff, 0, sizeof(buff));
+  i = 0;
+  while (Wire.available())
+  {
+    buff[i] = Wire.read();
+    //Serial.print((char)buff[i]);
+    i++;
+  }
+  //Serial.println();
 
+  jsonStr =  buff;
+  //Serial.println(jsonStr);
+  deserializeJson(doc_display, jsonStr);
+  serializeJson(doc_display, Serial);
+  Serial.println();
+  delay(1000);
 
   // --------------------- leer encoder
   // Read from the slave and print out
@@ -64,47 +93,34 @@ void loop()
   deserializeJson(doc_encoder, jsonStr);
   serializeJson(doc_encoder, Serial);
   Serial.println();
-  delay(100);
+  delay(1000);
 
 
-  // --------------------- leer display
-  // Read from the slave and print out
-  Serial.print("Display: ");
-  Wire.requestFrom(DISPLAY_ADD, 199);
-  memset(buff, 0, sizeof(buff));
-  i = 0;
-  while (Wire.available())
-  {
-    buff[i] = Wire.read();
-    //Serial.print((char)buff[i]);
-    i++;
-  }
-  //Serial.println();
-
-  jsonStr =  buff;
-  //Serial.println(jsonStr);
-  deserializeJson(doc_display, jsonStr);
-  serializeJson(doc_display, Serial);
-  Serial.println();
-  delay(100);
-
-
-  p = doc_encoder["pulses"].as<int>();
+  litros = doc_encoder["current"];
+  display_reset = false;
 
 
   if (doc_encoder["STATE"] ==  3)
   {
-    Serial.println("Running");
-    Serial.println("Litros: ");
-    p = doc_encoder["current"].as<int>();
-    Serial.println(p);
-    display_reset = true;
+    tiempoActual = millis();
+    Serial.println("STOP FLOWING");
+    Serial.print("Litros: ");
+    Serial.println(litros);
+    
+
+    if (tiempoActual - tiempoAnterior >= intervalo) 
+    {
+      // Ha pasado 1 minuto
+      tiempoAnterior = tiempoActual;  // Actualiza la última vez que se activó el retardo
+      display_reset = true;
+      Serial.println("Display Reset");
+      
+    }
 
   }
 
 
   // ---------------------- display doc
-  //doc["litros"] = p;
   doc.clear();
   doc["wifi"] = true;
   doc["valve"] = doc_encoder["valve_open"].as<bool>();
@@ -123,12 +139,12 @@ void loop()
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
-  delay(100);
+  delay(1000);
 
   // ---------------------- encoder doc
   doc.clear();
   doc["reset"] = display_reset;
-  doc["litros"] = p;
+  doc["litros"] = litros;
   serializeJson(doc, b);
   Serial.print("Master to encoder: ");
   serializeJson(doc, Serial);
@@ -138,5 +154,5 @@ void loop()
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
 
-  delay(100 );
+  delay(1000);
 }

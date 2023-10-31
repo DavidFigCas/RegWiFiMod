@@ -52,6 +52,9 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
 String jsonStr;
 const char* aux_char;
+const unsigned long intervalo = 1000;  // Intervalo de tiempo (1 minuto en milisegundos)
+unsigned long tiempoAnterior = 0;
+unsigned long tiempoActual;
 
 //float number=0, l=0, p=0;
 volatile uint32_t litros, pesos, print_litros, print_pesos;
@@ -107,7 +110,7 @@ void recv(int len)
     buffx[i] = Wire.read();
   }
   newcommand = true;
-  
+
 }
 
 // Called when the I2C slave is read from
@@ -249,7 +252,7 @@ void setup()
 
 
   Serial.begin(115200);
-  delay(5000);
+  delay(2000);
   Serial.println("Init Display");
   pinMode(25, OUTPUT);
   digitalWrite(25, 0);
@@ -265,17 +268,17 @@ void setup()
   Wire.onReceive(recv);
   Wire.onRequest(req);
 
-  delay(1000);
-
+  //delay(2000);
+  Serial.println("I2C Ready");
 
   //Serial.println("setup done");
 
   //STATE = 1;
   error_status = true;
 
-  doc["name"] = "John";
-  doc["age"] = 30;
-  doc["city"] = "New York";
+  doc["name"] = "David";
+  doc["client"] = 30;
+  doc["city"] = "Puebla";
 
   // Serializar el objeto JSON en la variable resp
   serializeJson(doc, respx);
@@ -296,41 +299,49 @@ void loop() {
   //Serial.println(STATE);
   //memset(respx, 0, sizeof(respx));
 
+  tiempoActual = millis();
 
-  Serial.printf("Slave Buffer: '%s'\r\n", buffx);
+  if (tiempoActual - tiempoAnterior >= intervalo) 
+  {
+    // Ha pasado 1 minuto
+    tiempoAnterior = tiempoActual;
 
-  //aux_char = jsonStr.c_str();  // Obtén una representación const char* de la cadena
-  //Serial.println(aux_char);  // Imprime la cadena JSON
+    Serial.printf("Display Read Buffer: '%s'\r\n", buffx);
 
-  //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
-  //jsonStr = String(buffx);
+    //aux_char = jsonStr.c_str();  // Obtén una representación const char* de la cadena
+    //Serial.println(aux_char);  // Imprime la cadena JSON
 
-  jsonStr = buffx;
-  Serial.println(jsonStr);
-  //deserializeJson(doc_aux, jsonStr);  // Serializa el documento JSON a una cadena
+    //deserializeJson(doc_aux, jsonStr);  // (FUNCIONA)Serializa el documento JSON a una cadena
+    //jsonStr = String(buffx);
 
-  doc["precio"] = doc_aux["precio"];     //Commands
-  doc["STATE"] = STATE;     //Commands
-  //doc["valve"] = doc_aux["valve"];     //Commands
+    jsonStr = buffx;
+    Serial.println(jsonStr);
+    //deserializeJson(doc_aux, jsonStr);  // Serializa el documento JSON a una cadena
 
-  DeserializationError error = deserializeJson(doc_aux, jsonStr);
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    //return;
+    doc["precio"] = doc_aux["precio"];     //Commands
+    doc["STATE"] = STATE;     //Commands
+    //doc["valve"] = doc_aux["valve"];     //Commands
+
+    DeserializationError error = deserializeJson(doc_aux, jsonStr);
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      //return;
+    }
+
+    Serial.print("aux: ");
+    serializeJson(doc_aux, Serial); Serial.println();
+    Serial.print("resp: ");
+    serializeJson(doc, respx); Serial.println();
+    Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
+
+
+    // Ahora resp contiene el objeto JSON como una cadena
+    // Salida: {"name":"John","age":30,"city":"New York"}
   }
 
-  Serial.print("aux: ");
-  serializeJson(doc_aux, Serial); Serial.println();
-  Serial.print("resp: ");
-  serializeJson(doc, respx);Serial.println();
-  Serial.println(respx);  // Salida: {"name":"John","age":30,"city":"New York"}
 
-
-  // Ahora resp contiene el objeto JSON como una cadena
-  // Salida: {"name":"John","age":30,"city":"New York"}
-
-  delay(1000);
+  //delay(1000);
 
 
 }
@@ -346,6 +357,7 @@ void setup1()
   gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
 
   display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
+  //delay(500);
   display.setFullWindow();
   display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
 
@@ -356,8 +368,8 @@ void setup1()
 // ----------------------------------------------------------------- LOOP1
 void loop1()
 {
-  
-  
+
+
   switch (STATE) {
     case 0:
       digitalWrite(25, 1);
@@ -391,15 +403,16 @@ void loop1()
         STATE = 1;
         Serial.println("goto STATE 1");
 
-        delay(10000);
+        //delay(10000);
 
       }
       //touch_data=0;
       break;
-    
+
     case 1:
       digitalWrite(27, 1);
-      if (newcommand == 1)
+      
+      //if (newcommand == 1)
       {
         Serial.println("***************************new command***********************************************");
         //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
@@ -408,16 +421,16 @@ void loop1()
 
         //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
         pesos = doc["precio"];
-        Serial.println(pesos);
+        //Serial.println(pesos);
         print_litros = litros;
-        Serial.println(print_litros);
-        print_pesos = pesos / 100;
-        Serial.println(print_pesos);
-        
+        //Serial.println(print_litros);
+        //print_pesos = pesos / 100;
+        //Serial.println(print_pesos);
+
         new_litros = false;
-        newcommand = 0;
+        newcommand = false;
         shown = 1;
-        
+
         //if (!((todo_byte >> 6) & 0x01))
         //{
         //  endprocess = 1;
@@ -425,7 +438,7 @@ void loop1()
         //  digitalWrite(27, 0);
         //}
       }
-      if (shown == 1) 
+      if (shown == 1)
       {
         digitalWrite(28, 1);
         shown = 0;
@@ -502,7 +515,6 @@ void loop1()
       Serial.println("goto STATE 0");
       break;
     default:
-      Serial.println("fuck");
       break;
   }
 

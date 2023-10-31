@@ -39,25 +39,41 @@ unsigned long currentMillis;
 PioEncoder encoder(2); // encoder is connected to GPIO2 and GPIO3
 uint64_t alarm_callback(alarm_id_t id, void *user_data);
 
+const unsigned long intervalo = 10;  // Intervalo de tiempo (1 minuto en milisegundos)
+unsigned long tiempoAnterior = 0;
+unsigned long tiempoActual;
 
+const unsigned long intervalo2 = 500;  // Intervalo de tiempo (1 minuto en milisegundos)
+unsigned long tiempoAnterior2 = 0;
+unsigned long tiempoActual2;
 
 //---------------------------------------------------- setup
 void setup()
 {
-  
+
   Serial.begin(115200);
-  while (!Serial);
+  //while (!Serial);
+  Serial.println("Encoder Init");
+  //delay(2000);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
   Wire.begin(I2C_SLAVE_ADDRESS);
   Wire.onReceive(recv);
   Wire.onRequest(req);
-  delay(1000);
-
+  pinMode(25, OUTPUT);
+  digitalWrite(25, 0);
+  pinMode(28, OUTPUT);
+  digitalWrite(28, 0);
+  pinMode(27, OUTPUT);
+  digitalWrite(27, 0);
+  //delay(2000);
+  Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
   pinMode(SOLENOID, OUTPUT);
   pinMode(BTN_START, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
   encoder.begin();
   // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
   doc["valve_open"] = false;
@@ -70,69 +86,55 @@ void setup()
 void loop()
 {
 
-  //if (alarm_fired == true)
-  //{
 
-  //}
-
-  new_value = encoder.getCount();
-  delay(100);
-  
-  currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
+  // ---------------------------------------------- read encoder
+  tiempoActual = millis();
+  if (tiempoActual - tiempoAnterior >= intervalo)
   {
+    // Ha pasado 1 minuto
+    tiempoAnterior = tiempoActual;
+    new_value = encoder.getCount();
 
-    //alarm_fired = true;
-    
+    // ------------------------------------------- check direction
+    if (new_value < 0)
+    {
+      encoder.reset();
+      Serial.println("no ok");
+      //gpio_put(LED_1, 1);
+      old_value_m = 0;
+      new_value = 0;
+      delta = 0;
+    }
+  }
 
-    memset(resp, 0, sizeof(resp));
-    //Serial.printf("Slave: '%s'\r\n", buff);
-
-    jsonStr =  buff;
-    deserializeJson(doc_aux, jsonStr);
-    serializeJson(doc_aux, Serial);
-    Serial.println();
-    //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
-
-    doc["pulses"] = new_value;   //Commands
-    serializeJson(doc, resp);
-    Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
-    //delay(500);
-    doc["STATE"] = STATE;
-    doc["delta"] = delta;
-    doc["flow"] = flow;
-    previousMillis = currentMillis;
+  // ---------------------------------------------- check_delta
+  tiempoActual2 = millis();
+  if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+  {
+    // Ha pasado 1 minuto
+    tiempoAnterior2 = tiempoActual2;
 
     // ------------------------------------- delta is noise?
     delta = new_value - old_value_m;
     alarm_fired = false;
     Serial.print("Delta: ");
     Serial.println(delta);
-    if (delta < 15)
+    if (delta < 10)
     {
       //gpio_put(LED_2, 0);
       flow = false;
       //delta = 0;
       old_value_m = new_value;
+      digitalWrite(25, LOW);
       //encoder.reset();
     }
     else
     {
       Serial.println("Flow detected");
       flow = true;
-      old_value_m = new_value;;
+      digitalWrite(25, HIGH);
+      old_value_m = new_value;
       delta = 0;
-    }
-
-    if (new_value < 0)
-    {
-      Serial.println("no ok");
-      //gpio_put(LED_1, 1);
-      old_value_m = 0;
-      new_value = 0;
-      delta = 0;
-      encoder.reset();
-
     }
   }
 
@@ -193,8 +195,8 @@ void loop()
       }
       //else
       //{
-        //old_value_m = current_value;
-        //delta = 0;
+      //old_value_m = current_value;
+      //delta = 0;
       //}
 
       //doc["delta"] = delta;
@@ -255,6 +257,33 @@ void loop()
 
     default:
       break;
+  }
+
+  // --------------------------------------------------- print_and_send
+  currentMillis = millis();
+  if (currentMillis - previousMillis >= interval)
+  {
+
+    //alarm_fired = true;
+    digitalWrite(28, !(digitalRead(28)));
+
+    memset(resp, 0, sizeof(resp));
+    //Serial.printf("Slave: '%s'\r\n", buff);
+
+    jsonStr =  buff;
+    deserializeJson(doc_aux, jsonStr);
+    serializeJson(doc_aux, Serial);
+    Serial.println();
+    //Serial.println(buff);  // Salida: {"name":"John","age":30,"city":"New York"}
+
+    doc["pulses"] = new_value;   //Commands
+    serializeJson(doc, resp);
+    Serial.println(resp);  // Salida: {"name":"John","age":30,"city":"New York"}
+    //delay(500);
+    doc["STATE"] = STATE;
+    doc["delta"] = delta;
+    doc["flow"] = flow;
+    previousMillis = currentMillis;
   }
 }
 

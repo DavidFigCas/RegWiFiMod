@@ -8,9 +8,9 @@
 #include <WiFi.h>
 #include <LittleFS.h>
 //#include <Wire.h>
-#include "i2c_fifo.h"
-#include "i2c_slave.h"
-#include "pico/stdlib.h"
+//#include "i2c_fifo.h"
+//#include "i2c_slave.h"
+//#include "pico/stdlib.h"
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "time.h"
