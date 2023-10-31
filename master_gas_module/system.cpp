@@ -180,9 +180,9 @@ void system_init()
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system
-    //mqtt_init();
-    //wifi_init();
-    //mqtt_check();
+    mqtt_init();
+    wifi_init();
+    mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock
@@ -359,6 +359,9 @@ void loadConfig()
     Serial.println("}");
   }
   mainRefresh = mainTime + 1;
+
+  uprice = obj["uprice"];
+  pulsos_litro = obj["pulsos_litro"];
 
 
   Serial.println("{\"config\":true}");
