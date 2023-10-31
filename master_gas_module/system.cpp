@@ -17,8 +17,50 @@ unsigned long mainTime = 1000;
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 
-//volatile uint32_t nclient_data; // nclient_data[4]
-//volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
+
+const char  end1 = '\r';
+const char  end2 = '\n';
+uint8_t tempVar = 0;
+char tempChar;
+uint8_t resultadoBytes[200];
+
+char resultado[200];
+
+const char* unidades[] = {"", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
+const char* decenas[] = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"};
+const char* especiales[] = {"diez", "once", "doce", "trece", "catorce", "quince"};
+//uint32_t unitprice;
+
+
+const unsigned long intervalo = 10000;
+unsigned long tiempoAnterior = 0;
+unsigned long tiempoActual;
+
+const unsigned long intervalo2 = 10000;
+unsigned long tiempoAnterior2 = 0;
+unsigned long tiempoActual2;
+volatile bool startCounting2 = false;
+
+
+uint32_t litros;
+unsigned int pulsos_litro = 10;
+uint32_t precio;
+float uprice = 9.8; //price of 1 litre
+uint32_t litros_check;
+uint32_t precio_check;
+
+//static int p;
+//char b[200];
+char buff[200];
+int i;
+String jsonStr;
+
+volatile bool display_reset = false;
+volatile bool start_print = false;
+volatile bool startCounting = false;
+
+
+volatile uint32_t pesos;
 
 
 // ------------------------------------------------------------ register_client
@@ -30,54 +72,54 @@ void register_client()
 
 
   uint32_t litros = obj_in["litros"];
-  uint32_t uprice = (obj_in["precio"].as<float>())*100;
-  uint32_t factor = (obj_in["factor"].as<float>())*100;
+  uint32_t uprice = (obj_in["precio"].as<float>()) * 100;
+  uint32_t factor = (obj_in["factor"].as<float>()) * 100;
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 
   Serial.println();
   Serial.print("NAME: ");
-  for (int i = 0; i < len && i < 42; i++) {
-    name_data[i] = (uint8_t)client_name[i];
-  }
+  //for (int i = 0; i < len && i < 42; i++) {
+  //  name_data[i] = (uint8_t)client_name[i];
+  //}
 
   // Si la longitud de la cadena es menor que 42, rellena el resto del array con 0s
-  for (int i = len; i < 42; i++) {
-    name_data[i] = 0;
-  }
+  //for (int i = len; i < 42; i++) {
+  //name_data[i] = 0;
+  //}
 
   //Serial.print("NAME2: ");
-  for (int i = 0; i < 42; i++) {
-    Serial.print(char(name_data[i]));
-  }
+  //for (int i = 0; i < 42; i++) {
+  //  Serial.print(char(name_data[i]));
+  //}
   Serial.println();
 
   Serial.print("Litros: ");
   Serial.println(litros);
   litros = litros * 100;
-  for (int i = 0; i < 4; i++) {
-    litros_num[i] = (litros >> (8 * i)) & 0xFF;
-    Serial.println(litros_num[i]);
-  }
-  Serial.println();
+  //for (int i = 0; i < 4; i++) {
+  //litros_num[i] = (litros >> (8 * i)) & 0xFF;
+  //Serial.println(litros_num[i]);
+  //}
+  //Serial.println();
 
   Serial.print("uPrice: ");
   Serial.println(uprice);
   //litros = litros * 100;
-  for (int i = 0; i < 2; i++) {
-    uprice_data[i] = (uprice >> (8 * i)) & 0xFF;
-    Serial.println(uprice_data[i]);
-  }
-  Serial.println();
+  //for (int i = 0; i < 2; i++) {
+  //uprice_data[i] = (uprice >> (8 * i)) & 0xFF;
+  //Serial.println(uprice_data[i]);
+  //}
+  //Serial.println();
 
   Serial.print("Factor: ");
   Serial.println(factor);
   //litros = litros * 100;
-  for (int i = 0; i < 2; i++) {
-    factor_data[i] = (factor >> (8 * i)) & 0xFF;
-    Serial.println(factor_data[i]);
-  }
-  Serial.println();
+  //for (int i = 0; i < 2; i++) {
+  //factor_data[i] = (factor >> (8 * i)) & 0xFF;
+  //Serial.println(factor_data[i]);
+  //}
+  //Serial.println();
 
 }
 
@@ -91,7 +133,7 @@ void search_nclient(uint32_t aux_client)
 
   Serial.print("{\"search_client\":"); Serial.print(aux_client); Serial.println("}");
 
-  new_nclient = 0;
+  //new_nclient = 0;
   found_client = false;
 
   // Buscar el valor de nclient en el array
@@ -127,8 +169,9 @@ void search_nclient(uint32_t aux_client)
 // ----------------------------------------------------------- init
 void system_init()
 {
+  delay(100);
   Serial.begin(115200);
-  I2C_Init(); Serial.println("i2c0_Init");// Slave mode
+  I2C_Init(); Serial.println("i2c_Init");// Slave mode
   Serial.println("gps-test");
   Serial.print("Version:"); Serial.println(VERSION);
 
@@ -142,7 +185,7 @@ void system_init()
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
-  gps_init();
+  //gps_init();
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
@@ -228,7 +271,7 @@ void reset_config()
   Serial.println(saveJSonToAFile(&obj, filename) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
   delay(2000);
   //ESP.restart();
-  rp2040.reboot();
+  // rp2040.reboot();
 
 }
 

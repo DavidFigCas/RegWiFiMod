@@ -6,11 +6,10 @@
 //#include <vector>
 #include <PubSubClient.h>
 #include <WiFi.h>
-#include <LittleFS.h>
-//#include <Wire.h>
-#include "i2c_fifo.h"
-#include "i2c_slave.h"
-#include "pico/stdlib.h"
+//#include <LittleFS.h>
+#include "FS.h"
+#include "SPIFFS.h"
+#include <Wire.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "time.h"
@@ -44,8 +43,52 @@ extern const uint32_t connectTimeoutMs;
 extern unsigned long  s_timestamp;
 extern int buttonState;
 extern volatile bool found_client;
-//extern volatile uint32_t nclient_data; // nclient_data[4]
-//extern volatile uint8_t price_data[2], litro_data[4], factor_data[2], name_data[42];
+
+
+
+extern const char  end1;
+extern const char  end2;
+extern uint8_t tempVar;
+extern char tempChar;
+extern uint8_t resultadoBytes[200];
+
+extern char resultado[200];
+
+extern const char* unidades[];
+extern const char* decenas[];
+extern const char* especiales[];
+//uint32_t unitprice;
+
+
+extern const unsigned long intervalo;
+extern unsigned long tiempoAnterior;
+extern unsigned long tiempoActual;
+
+extern const unsigned long intervalo2;
+extern unsigned long tiempoAnterior2;
+extern unsigned long tiempoActual2;
+extern volatile bool startCounting2;
+
+
+extern uint32_t litros;
+extern unsigned int pulsos_litro;
+extern uint32_t precio;
+extern float uprice; //price of 1 litre
+extern uint32_t litros_check;
+extern uint32_t precio_check;
+
+//static int p;
+//char b[200];
+extern char buff[200];
+extern int i;
+extern String jsonStr;
+
+extern volatile bool display_reset;
+extern volatile bool start_print;
+extern volatile bool startCounting;
+
+
+extern volatile uint32_t pesos;
 
 //void IRAM_ATTR factory_reset3();
 void reset_config();

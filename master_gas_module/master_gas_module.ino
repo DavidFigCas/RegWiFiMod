@@ -10,17 +10,20 @@ void setup()
   system_init();
   search_nclient(0);
   //saveNewlog();
-  Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 }
 
 
 // ------------------------------------------------------ loop
 void loop()
 {
+  I2C_Get();
+  
+  
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
-    gps_update();
+    //gps_update();
 
     // ----------------------------------------- check internet
     if (wifi_check())
@@ -73,55 +76,26 @@ void loop()
     Serial.print("ToDO: ");
     Serial.println(todo_byte, BIN);
     Serial.print("Client: ");
-    for (int i = 0; i < 4; i++)
-      Serial.print(nclient_data[i]);
+    //for (int i = 0; i < 4; i++)
+    //  Serial.print(nclient_data[i]);
     Serial.println();
 
   }
 
 
   // ---------------------------------------------- I2C new command
-  if (newcommand)
-  {
-    Serial.print("New Command ToDo: "); Serial.println(todo_byte, BIN);
+  
 
-
-    if (todo_byte & (1 << 6)) {  // ---- Search Client
-      //new_nclient = true;
-      //if (new_nclient)
-      //{
-      nclient = 0;
-      nclient |= (uint32_t)nclient_data[0] << 24; // Byte más significativo
-      nclient |= (uint32_t)nclient_data[1] << 16;
-      nclient |= (uint32_t)nclient_data[2] << 8;
-      nclient |= (uint32_t)nclient_data[3];
-      search_nclient(nclient);
-      todo_byte &= ~(1 << 6);  // Reset ToDo bit
-      //}
-    }
-
-    if (todo_byte & (1 << 5)) {  // New LOG
-      //new_nclient = true;
-      //if (new_nclient)
-      //{
-      saveNewlog();
-      todo_byte &= ~(1 << 5);  // Reset ToDo bit
-      //}
-    }
-    newcommand = 0;
-    todo_byte = 0;
-  }
-
-  if (new_litros)
-  {
-    Serial.println("NEW Litros: ");
+//  if (new_litros)
+  //{
+    //Serial.println("NEW Litros: ");
     //Serial.println(nclient);
-    for (int i = 0; i < 4; i++)
-    {
-      Serial.println(litros_num[i]);
-    }
-    new_litros = 0;
-  }
+    //for (int i = 0; i < 4; i++)
+    //{
+      //Serial.println(litros_num[i]);
+    //}
+    //new_litros = 0;
+  //}
 
   // ------------------------------- gps
 

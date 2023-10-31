@@ -25,6 +25,9 @@ extern const char* client_id;
 extern volatile boolean send_log;
 extern volatile boolean clear_log;
 extern volatile boolean new_log;
+extern byte STATE, todo_byte;
+extern bool newcommand;
+extern uint32_t nclient;
 
 void callback(char* topic, byte* payload, unsigned int length);
 bool reconnect();

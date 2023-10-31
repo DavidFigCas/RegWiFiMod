@@ -13,6 +13,9 @@ StaticJsonDocument<LOG_SIZE> doc_log;
 
 JsonObject newLogEntry;
 
+StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
+StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
+
 
 const char* filename = "/config.json";
 const char *filedefault = "/default.json";
@@ -42,12 +45,23 @@ void saveNewlog()
 // ------------------------------------------------------------------------------------- spiffs_init
 bool spiffs_init()
 {
-  if (!LittleFS.begin()) {
+  /*if (!LittleFS.begin()) {
+    Serial.println("{\"spiffs\":false}");
+    return false;
+  } else {
+    Serial.println("{\"spiffs\":true}");
+    Cfg_get();  // Load File from spiffs
+    return true;
+  }*/
+
+  // SPIFFS Init
+  if (!SPIFFS.begin(true)) {
     Serial.println("{\"spiffs\":false}");
     return false;
   } else {
     Serial.println("{\"spiffs\":true}");
     Cfg_get(/*NULL*/);  // Load File from spiffs
+    loadConfig();       // Load and update behaivor of system
     return true;
   }
 }
@@ -103,7 +117,8 @@ bool saveJSonToAFile(JsonObject * doc, String filename) {
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
-  file = LittleFS.open(filename, "w");
+  //file = LittleFS.open(filename, "w");
+  file = SPIFFS.open(filename);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);
@@ -133,7 +148,8 @@ bool saveJSonToAFile(JsonObject * doc, String filename) {
 JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError)
 {
   // open the file for reading:
-  file = LittleFS.open(filename, "r");
+  //file = LittleFS.open(filename, "r");
+  file = SPIFFS.open(filename);
   if (file)
   {
     //Serial.println("Opening File");
@@ -203,7 +219,8 @@ JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String f
 
 {
   // open the file for reading:
-  file = LittleFS.open(filename, "r");
+  //file = LittleFS.open(filename, "r");
+  file = SPIFFS.open(filename);
   if (file)
   {
     //Serial.println("Opening File");
@@ -254,7 +271,9 @@ bool saveJSonArrayToAFile(JsonArray * doc_list, String filename)
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
-  file = LittleFS.open(filename, "w");
+  
+  //file = LittleFS.open(filename, "w");
+  file = SPIFFS.open(filename);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);

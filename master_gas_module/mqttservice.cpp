@@ -19,6 +19,9 @@ char buffer_msg[1024];
 volatile boolean send_log = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
+byte STATE, todo_byte;
+bool newcommand;
+uint32_t nclient;
 
 
 // -------------------------------------------------- mqtt_init
@@ -211,6 +214,7 @@ bool reconnect()
       Serial.print("failed, rc=");
       Serial.print(Mclient.state());
       Serial.println(" try in the next");
+
       STATE &= ~(1 << 0);                 // MQTT error
       recsta =  false;
     }

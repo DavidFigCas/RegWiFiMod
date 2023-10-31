@@ -20,6 +20,11 @@ extern StaticJsonDocument<LOG_SIZE> doc_log;
 
 extern JsonObject newLogEntry;
 
+//extern StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
+//extern StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
+extern StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
+extern StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
+
 extern const char *filename;
 extern const char *filedefault;
 extern const char *filelist;

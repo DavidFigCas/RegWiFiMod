@@ -5,7 +5,7 @@ TinyGPSPlus gps;
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
 }
 
@@ -96,11 +96,11 @@ void gps_update()
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
-  do
-  {
-    while (Serial1.available())
-      gps.encode(Serial1.read());
-  } while (millis() - start < ms);
+  //do
+  //{
+    //while (Serial1.available())
+      //gps.encode(Serial1.read());
+  //} while (millis() - start < ms);
 }
 
 // ----------------------------------------------------- printFloat

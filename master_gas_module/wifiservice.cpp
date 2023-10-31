@@ -13,7 +13,7 @@ bool WMISBLOCKING    = true;
 void wifi_init()
 {
 
-  if (obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED))
+  //if (obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED))
   {
     WiFi.mode(WIFI_STA);
     //const char* auxssid = obj["ssid"].as<String>().c_str();
@@ -100,13 +100,13 @@ void wifi_init()
     }
 
   }
-  else if (obj["enable_wifi"].as<bool>() == false)
-  {
+  //else if (obj["enable_wifi"].as<bool>() == false)
+  //{
     //
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
-    Serial.println("{\"wifi\":{\"enable\":false}}");
-  }
+    //WiFi.disconnect(true);
+    //WiFi.mode(WIFI_OFF);
+    //Serial.println("{\"wifi\":{\"enable\":false}}");
+  //}
 
 
 }
