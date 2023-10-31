@@ -29,7 +29,7 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
 
 uint8_t STATE = 0;
-//volatile uint32_t current_value;
+volatile uint32_t current_value;
 volatile uint32_t new_value, delta, old_value = 0;
 bool flow, buttonx, act_button = false;
 unsigned long previousMillis = 0;  // Almacena la última vez que el LED cambió
@@ -46,6 +46,8 @@ unsigned long tiempoActual;
 const unsigned long intervalo2 = 500;  // Intervalo de tiempo (1 minuto en milisegundos)
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
+
+bool newcommand = false;
 
 //---------------------------------------------------- setup
 void setup()
@@ -85,7 +87,13 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
-
+  if (newcommand == true )
+  {
+    deserializeJson(doc_aux, jsonStr);
+    serializeJson(doc_aux, Serial);
+    Serial.println();
+    newcommand = false;
+  }
 
   // ---------------------------------------------- read encoder
   tiempoActual = millis();
@@ -94,8 +102,8 @@ void loop()
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
     new_value = encoder.getCount();
-    Serial.print("new_value: ");
-    Serial.println(new_value);
+    //Serial.print("new_value: ");
+    //Serial.println(new_value);
 
     // ------------------------------------------- check direction
     if (new_value < 0)
@@ -133,14 +141,14 @@ void loop()
       Serial.println("Flow detected");
       flow = true;
       digitalWrite(25, HIGH);
-      if(STATE == 0)
+      if (STATE == 0)
       {
         STATE = 1;
       }
     }
     old_value = new_value;
-    Serial.print("Delta: ");
-    Serial.println(delta);
+    //Serial.print("Delta: ");
+    //Serial.println(delta);
   }
 
 
@@ -178,9 +186,7 @@ void loop()
       break;
 
     case 1: // ------------------------------------------------------process started
-      //current_value = new_value - old_value;
-
-
+      current_value = new_value;
       // ---------------------- open valve button
       if (buttonx == 1)
       {
@@ -206,19 +212,20 @@ void loop()
       break;
 
     case 2: //------------------------------------------------- stop process, close valve
+      Serial.println("STATE 2");
       Serial.println("FLOW STOP");
       digitalWrite(SOLENOID, LOW);
       STATE = 3;
-      //flow = false;
+      current_value = new_value;
       break;
 
     case 3: //wait reset command from MASTER
       if ((doc_aux["reset"].as<bool>() == true) && (!(doc_aux["reset"].isNull())))
       {
-        //delta = 0;
-        //old_value = current_value;
+        old_value = 0;
+        new_value = 0;
         STATE = 0;
-        //current_value = 0;
+        current_value = 0;
         encoder.reset();
       }
       break;
@@ -237,17 +244,12 @@ void loop()
     //Serial.printf("Slave: '%s'\r\n", buff);
 
 
-    // ------------------------------------- print In/Out
-
-    deserializeJson(doc_aux, jsonStr);
-    serializeJson(doc_aux, Serial);
-    Serial.println();
-
+    // ------------------------------------- print states
     doc["pulses"] = new_value;   //Commands
     doc["STATE"] = STATE;
     doc["delta"] = delta;
     doc["flow"] = flow;
-    doc["current"] = new_value;
+    doc["current"] = current_value;
     doc["valve_open"] = bool (digitalRead(SOLENOID));
     //memset(resp, 0, sizeof(resp));
     serializeJson(doc, resp);
@@ -271,6 +273,7 @@ void recv(int len)
     buff[i] = Wire.read();
   }
   jsonStr =  buff;
+  newcommand = true;
 }
 
 // Called when the I2C slave is read from
@@ -281,7 +284,7 @@ void req()
   doc["STATE"] = STATE;
   doc["delta"] = delta;
   doc["flow"] = flow;
-  doc["current"] = new_value;
+  doc["current"] = current_value;
   doc["valve_open"] = bool (digitalRead(SOLENOID));
   //memset(resp, 0, sizeof(resp));
   serializeJson(doc, resp);

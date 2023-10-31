@@ -44,7 +44,7 @@ const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
 UnixTime stamp(-6);
 
-float uprice = 9.8; //price of 1 litr
+bool flag_print = true;
 
 static char buffx[200];
 static char respx[200];
@@ -56,8 +56,8 @@ const unsigned long intervalo = 1000;  // Intervalo de tiempo (1 minuto en milis
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
 
-//float number=0, l=0, p=0;
-volatile uint32_t litros, pesos, print_litros, print_pesos;
+float uprice = 9.8; //price of 1 litre
+volatile uint32_t litros, print_litros, print_pesos, pesos;
 
 boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0, newcommand = 0, new_litros = 0;
 uint8_t mem_address = 0;
@@ -119,6 +119,7 @@ void req()
 {
   doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
+  doc["litros"] = litros;
   serializeJson(doc, respx);
   Wire.write(respx, 199);
 }
@@ -257,7 +258,7 @@ void setup()
   Serial.begin(115200);
   delay(2000);
   Serial.println("Init Display");
-  
+
   pinMode(28, OUTPUT);
   digitalWrite(28, 0);
   pinMode(27, OUTPUT);
@@ -311,7 +312,7 @@ void loop() {
     //Serial.printf("Display Read Buffer: '%s'\r\n", buffx);
     //Serial.println();
 
-    
+
     //Serial.println(jsonStr);
 
 
@@ -323,7 +324,7 @@ void loop() {
 
     Serial.print("aux: ");
     serializeJson(doc_aux, Serial);
-    Serial.println(); 
+    Serial.println();
     Serial.print("resp: ");
     Serial.println(respx);
 
@@ -364,13 +365,19 @@ void setup1()
 void loop1()
 {
 
+  if (!doc_aux["STATE"].isNull())
+  {
+    STATE = doc_aux["STATE"];
+  }
 
-  switch (STATE) {
+  switch (STATE)
+  {
+    // -------------------------------------------------------- display icons
     case 0:
       digitalWrite(25, HIGH);
-      if (error_status == true)
+      if (flag_print == true)
       {
-        Serial.println("recieve error status");
+        Serial.println("Display Once");
         //display.init(0);
         display.setFullWindow();
         display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
@@ -380,6 +387,8 @@ void loop1()
 
         unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
         stamp.getDateTime(unixtime);
+
+
         //display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
         //display.setCursor(237, 49);
         //display.setFont(&FreeMonoBold9pt7b);
@@ -399,44 +408,41 @@ void loop1()
         Serial.println("goto STATE 1");
 
         //delay(10000);
-
+        flag_print = false;
       }
       //touch_data=0;
       break;
 
+    // -------------------------------------------------------- display litros
     case 1:
+
       digitalWrite(27, HIGH);
 
-      //if (newcommand == 1)
+      //if (flag_print == false)
       {
-        //Serial.println("***************************new command***********************************************");
-        //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
         litros = doc_aux["litros"].as<uint32_t>();
+        print_litros = litros;
+
+
         Serial.print("Litros: ");
         Serial.println(litros);
 
-        //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+
         pesos = doc["precio"];
-        //Serial.println(pesos);
-        print_litros = litros;
-        //Serial.println(print_litros);
-        //print_pesos = pesos / 100;
-        //Serial.println(print_pesos);
+        Serial.println(pesos);
+
+        print_pesos = pesos;
+        Serial.println(print_pesos);
 
         new_litros = false;
         newcommand = false;
-        shown = 1;
-
-        //if (!((todo_byte >> 6) & 0x01))
-        //{
-        //  endprocess = 1;
-        //  Serial.println("end process");
-        //  digitalWrite(27, 0);
-        //}
+        //flag_print = true;
+        //shown = 1;
       }
-      if (shown == 1)
+
+      //if (shown == 1)
       {
-        digitalWrite(28, 1);
+        digitalWrite(28, !digitalRead(28));
         shown = 0;
         //uprice = ((uint16_t)client_num[0] << 8) | client_num[1];
         //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
@@ -458,43 +464,50 @@ void loop1()
         //display.print(print_pesos/100);
         //display.displayWindow(450, 212, 250, 50);
         //shown = 0;
-        digitalWrite(28, 0);
+        //digitalWrite(28, 0);
       }
 
-      if (endprocess == 1)
-      {
-        STATE = 2;
-        //digitalWrite(27, 0);
-        Serial.println("goto STATE 2");
-        endprocess = 0;
-      }
+      //if (endprocess == 1)
+      //{
+      //STATE = 2;
+      //digitalWrite(27, 0);
+      //Serial.println("goto STATE 2");
+      //endprocess = 0;
+      //}
 
 
-      digitalWrite(27, LOW);
+      
       break;
     case 2:
 
+
+      digitalWrite(27, !digitalRead(27));
+      
       //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
       //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
 
-      //display.setTextColor(GxEPD_BLACK);
-      //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-      //display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-      //display.setCursor(450, 169);
-      //display.print(print_litros);
-      //display.displayWindow(450, 125, 250, 50);
+      if (shown == 1)
+      {
+        display.setTextColor(GxEPD_BLACK);
+        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+        display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
+        display.setCursor(450, 169);
+        display.print(print_litros);
+        display.displayWindow(450, 125, 250, 50);
 
-      //Show price
-      //display.setTextColor(GxEPD_BLACK);
-      //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-      //display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
-      //display.setCursor(450, 256);
-      //display.print(print_pesos);
-      //display.displayWindow(450, 212, 250, 50);
-      Serial.println("Show price");
-      delay(5000);
-      Serial.println("goto STATE 3");
-      STATE = 3;
+        //Show price
+        display.setTextColor(GxEPD_BLACK);
+        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+        display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
+        display.setCursor(450, 256);
+        display.print(print_pesos);
+        display.displayWindow(450, 212, 250, 50);
+        Serial.println("Show price");
+        //delay(5000);
+        //Serial.println("goto STATE 3");
+        //STATE = 3;
+        shown = 0;
+      }
       break;
     case 3:
 
