@@ -14,11 +14,17 @@
 #include "time.h"
 #include "RTClib.h"
 //#include "clock.h"
+
+
 const unsigned long intervalo = 10000;
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
+
+
 unsigned int litros;
 unsigned int pulsos_litro = 10;
+unsigned int precio;
+float uprice = 9.8; //price of 1 litre
 
 static int p;
 char b[200];
@@ -29,12 +35,15 @@ volatile bool start_print = false;
 volatile bool startCounting = false;
 
 
+volatile uint32_t pesos;
+
+
 StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente para tu objeto JSON
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
 StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
 StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
 String jsonStr;
-unsigned int STATE_DISPLAY = 0;
+unsigned int STATE_DISPLAY = 1;
 
 void setup()
 {
@@ -59,7 +68,7 @@ void loop()
   //doc["litros"] = p++;
 
 
-
+  // ----------------------------------------------- leer
 
   // --------------------- leer display
   // Read from the slave and print out
@@ -77,9 +86,7 @@ void loop()
   jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_display, jsonStr);
-  Serial.print("Display: ");
-  serializeJson(doc_display, Serial);
-  Serial.println();
+
 
   delay(TIME_SPACE);
 
@@ -99,20 +106,43 @@ void loop()
   jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_encoder, jsonStr);
+
+
+  // ----------------------------------- Serial Monitor
+
+  Serial.print("Display: ");
+  serializeJson(doc_display, Serial);
+  Serial.println();
+
+
   Serial.print("Encoder: ");
   serializeJson(doc_encoder, Serial);
   Serial.println();
 
   delay(TIME_SPACE);
 
+  // ----------------------------------------------- procesar
 
-  litros = doc_encoder["current"].as<unsigned int>();
+
+  litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
+  precio = litros * uprice;
   display_reset = false;
 
 
-  if (doc_display["STATE"] ==  0)
+  // if ((doc_display["STATE"] ==  0) || (doc_display["STATE"].inNull()))
+
+
+  //if (doc_display["STATE"] ==  0)
+  //{
+  //  STATE_DISPLAY = 1;
+  //}
+  //else
+  if (!doc_display["STATE"].isNull())
   {
-    STATE_DISPLAY = 1;
+    if (doc_display["STATE"] >  0)
+      STATE_DISPLAY = doc_display["STATE"];
+
+    //if(STATE_DISPLAY == 1)
   }
 
   if (doc_encoder["STATE"] == 3)
@@ -135,7 +165,8 @@ void loop()
         // Ha pasado 1 minuto
         display_reset = true;
         startCounting = false;  // Detener el conteo
-        STATE_DISPLAY = 2;
+        if (STATE_DISPLAY == 3)
+          STATE_DISPLAY = 0;
         Serial.println("Display Reset");
       }
     }
@@ -145,6 +176,10 @@ void loop()
     // Si STATE no es 3, resetear el conteo
     startCounting = false;
   }
+
+
+
+  // ----------------------------------------------- enviar
 
 
   // ---------------------- display doc
@@ -165,12 +200,8 @@ void loop()
   {
     doc["flow"] = doc_encoder["flow"].as<bool>();
     doc["litros"] = litros;
-    doc["precio"] = 9.5;
+    doc["precio"] = precio;
   }
-
-
-
-
   serializeJson(doc, b);
   //Serial.print("Master to display: ");
   //serializeJson(doc, Serial);

@@ -52,11 +52,16 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
 String jsonStr;
 const char* aux_char;
+
 const unsigned long intervalo = 1000;  // Intervalo de tiempo (1 minuto en milisegundos)
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
 
-float uprice = 9.8; //price of 1 litre
+const unsigned long intervalo2 = 250;  // Intervalo de tiempo (1 minuto en milisegundos)
+unsigned long tiempoAnterior2 = 0;
+unsigned long tiempoActual2;
+
+//float uprice = 9.8; //price of 1 litre
 volatile uint32_t litros, print_litros, print_pesos, pesos;
 
 boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0, newcommand = 0, new_litros = 0;
@@ -365,7 +370,6 @@ void setup1()
 void loop1()
 {
 
-  
 
   switch (STATE)
   {
@@ -374,7 +378,7 @@ void loop1()
       digitalWrite(25, HIGH);
       if (flag_print == true)
       {
-        Serial.println("Display Once");
+        Serial.println("Display Main Screen");
         //display.init(0);
         display.setFullWindow();
         display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
@@ -413,7 +417,8 @@ void loop1()
     // -------------------------------------------------------- display litros
     case 1:
 
-      digitalWrite(27, HIGH);
+      digitalWrite(27, LOW);
+      digitalWrite(28, LOW);
 
       //if (flag_print == false)
       {
@@ -425,7 +430,7 @@ void loop1()
         Serial.println(litros);
 
 
-        pesos = doc["precio"];
+        pesos = doc["precio"].as<uint32_t>();
         Serial.print("precio: ");
         Serial.println(pesos);
 
@@ -435,17 +440,21 @@ void loop1()
         new_litros = false;
         newcommand = false;
         //flag_print = true;
-        //shown = 1;
+        shown = 1;
       }
 
       //if (shown == 1)
       {
-        digitalWrite(28, !digitalRead(28));
-        shown = 0;
+        digitalWrite(25, !digitalRead(25));
+        if (litros > 0)
+          digitalWrite(27, !digitalRead(27));
+        //shown = 0;
         //uprice = ((uint16_t)client_num[0] << 8) | client_num[1];
         //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
         //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
         //Show litros
+
+
 
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
@@ -465,27 +474,37 @@ void loop1()
         //digitalWrite(28, 0);
       }
 
-      //if (endprocess == 1)
-      //{
-      //STATE = 2;
-      //digitalWrite(27, 0);
-      //Serial.println("goto STATE 2");
-      //endprocess = 0;
-      //}
+      if ((doc_aux["flow"].as<bool>()) == false)
+      {
+        STATE = 2;
+        //digitalWrite(27, 0);
+        //Serial.println("goto STATE 2");
+        //endprocess = 0;
+      }
 
-      
-      
+
+
       break;
     case 2:
-      digitalWrite(28, HIGH);
-      
-      digitalWrite(27, !digitalRead(27));
-      
+      digitalWrite(28, LOW);
+
+      tiempoActual2 = millis();
+
+      if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+      {
+        // Ha pasado 1 minuto
+        tiempoAnterior2 = tiempoActual2;
+        digitalWrite(27, !digitalRead(27));
+      }
+
+
+
       //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
       //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
 
-      if (shown == 1)
+      //if (shown == 1)
       {
+        Serial.println("Final Numbers");
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
@@ -503,23 +522,35 @@ void loop1()
         Serial.println("Show price");
         //delay(5000);
         //Serial.println("goto STATE 3");
-        //STATE = 3;
-        shown = 0;
+        STATE = 3;
+        //shown = 0;
       }
       break;
     case 3:
 
+      digitalWrite(28, HIGH);
+      digitalWrite(27, LOW);
+      digitalWrite(25, LOW);
+      tiempoActual2 = millis();
+
+      if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+      {
+        // Ha pasado 1 minuto
+        tiempoAnterior2 = tiempoActual2;
+        digitalWrite(28, !digitalRead(28));
+      }
       //display.init(0);
       //display.setFullWindow();
       //display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
       //display.powerOff();
-      sleep_ms(20000);
+      //sleep_ms(20000);
       //display.init(0);
       //display.setFullWindow();
       //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
       //display.powerOff();
-      STATE = 0;
-      Serial.println("goto STATE 0");
+
+      //STATE = 0;
+      //Serial.println("goto STATE 0");
       break;
     default:
       break;
@@ -551,10 +582,12 @@ void print_icons()
   //if ((error_byte >> 6) & 0x01)       // ------------------ valve
   if (doc_aux["valve"].as<bool>() == true)
   {
+    Serial.println("Valve On");
     display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
   }
   else
   {
+    Serial.println("Valve OFF");
     display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
   }
 
@@ -562,40 +595,48 @@ void print_icons()
   if (doc_aux["gps"].as<bool>() == true)    // ------------------ gps
     //if ((error_byte >> 3) & 0x01)
   {
+    Serial.println("GPS On");
     display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
   }
   else
   {
+    Serial.println("GPS OFF");
     display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["clock"].as<bool>() == true)    // ------------------ clock
     // if ((error_byte >> 2) & 0x01)
   {
+    Serial.println("Clock On");
     display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
   }
   else
   {
+    Serial.println("Clock OFF");
     display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["printer"].as<bool>() == true)    // ------------------ printer
     //if ((error_byte >> 5) & 0x01)
   {
+    Serial.println("Printer OK");
     display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
   }
   else
   {
+    Serial.println("Printer Offline");
     display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["paper"].as<bool>() == false)    // ------------------ paper
     //if ((error_byte >> 4) & 0x01)
   {
+    Serial.println("NO PAPER");
     display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
   }
   else
   {
+    Serial.println("Paper READY");
     //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
   }
 }
