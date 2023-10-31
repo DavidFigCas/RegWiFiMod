@@ -29,8 +29,8 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
 
 uint8_t STATE = 0;
-volatile uint32_t current_value;
-volatile uint32_t new_value, delta, old_value = 0;
+volatile int32_t current_value;
+volatile int32_t new_value, delta, old_value = 0;
 bool flow, buttonx, act_button = false;
 unsigned long previousMillis = 0;  // Almacena la última vez que el LED cambió
 const long interval = 500;
@@ -90,6 +90,7 @@ void loop()
   if (newcommand == true )
   {
     deserializeJson(doc_aux, jsonStr);
+    Serial.print("Master: ");
     serializeJson(doc_aux, Serial);
     Serial.println();
     newcommand = false;
@@ -252,6 +253,7 @@ void loop()
     doc["current"] = current_value;
     doc["valve_open"] = bool (digitalRead(SOLENOID));
     //memset(resp, 0, sizeof(resp));
+    Serial.print("Encoder State: ");
     serializeJson(doc, resp);
     Serial.println(resp);
 
