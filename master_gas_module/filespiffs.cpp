@@ -34,11 +34,15 @@ void saveNewlog()
   //newLogEntry["timestamp"] = DateTimeToString(now);
   newLogEntry["folio"] = folio;
   newLogEntry["timestamp"] = now.unixtime();
-  newLogEntry["lat"] = obj["gps"]["lat"];
-  newLogEntry["lon"] = obj["gps"]["lon"];
   newLogEntry["state"] = STATE;
-  newLogEntry["litros"] = litros;
-  newLogEntry["precio"] = precio;
+  newLogEntry["litros"] = litros_check;
+  newLogEntry["precio"] = precio_check;
+  newLogEntry["cliente"] = obj_in["cliente"].as<unsigned int>();
+  if (!obj["gps"]["lat"].isNull())
+  {
+    newLogEntry["lat"] = obj["gps"]["lat"];
+    newLogEntry["lon"] = obj["gps"]["lon"];
+  }
 
   Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   if (obj["test"].as<bool>())

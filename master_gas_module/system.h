@@ -36,6 +36,8 @@
 //15 seconds WDT
 #define WDT_TIMEOUT 150
 
+extern unsigned long startTime;
+
 extern bool factory_press;
 extern unsigned long factory_time;
 extern unsigned long prev_factory_time;

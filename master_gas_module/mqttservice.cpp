@@ -73,6 +73,7 @@ void mqtt_send()
 //--------------------------------------------------- callback
 void callback(char* topic, byte* payload, unsigned int length)
 {
+  updated = true;
   char jsonPayload[length + 1]; // +1 para el carácter nulo
   memcpy(jsonPayload, payload, length);
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
@@ -144,6 +145,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     //serializeJson(obj_list,Serial);
     //Serial.println();
     saveListData();
+    search_nclient(0);
     //STATE |= (1 << 4);                  // NEW LIST
 
   }

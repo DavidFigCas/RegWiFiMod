@@ -1,4 +1,4 @@
-  #include "wifiservice.h"
+#include "wifiservice.h"
 
 bool correct = false;
 int wifi_trys;
@@ -22,8 +22,8 @@ void wifi_init()
     String auxssid = obj["ssid"].as<String>();
     String auxpass = obj["pass"].as<String>();
 
-    WiFi.begin(auxssid.c_str(), auxpass.c_str());  
-    
+    WiFi.begin(auxssid.c_str(), auxpass.c_str());
+
     Serial.print("{\"wifi\":{\"ssid\":\"");
     Serial.print(auxssid);
     Serial.println("\"}}");
@@ -102,10 +102,10 @@ void wifi_init()
   }
   //else if (obj["enable_wifi"].as<bool>() == false)
   //{
-    //
-    //WiFi.disconnect(true);
-    //WiFi.mode(WIFI_OFF);
-    //Serial.println("{\"wifi\":{\"enable\":false}}");
+  //
+  //WiFi.disconnect(true);
+  //WiFi.mode(WIFI_OFF);
+  //Serial.println("{\"wifi\":{\"enable\":false}}");
   //}
 
 
@@ -197,6 +197,9 @@ bool wifi_check()
         flag = true;
         //STATE = 1;
         STATE |= (1 << 6);
+
+        if (updated == false)
+          connectFirebase();
 
 
       }

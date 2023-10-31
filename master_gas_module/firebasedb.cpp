@@ -63,81 +63,81 @@ void fcsDownloadCallback(FCS_DownloadStatusInfo info)
 // -------------------------------------------------------------------------------------- SendData
 void SendData()
 {
- /* if (Firebase.ready() && (WiFi.status() == WL_CONNECTED))
-  {
-    //json.set("updatedBySelf", true);
-    prepareData();
-
-    // ------------------------------------- ergo
-    if (obj["type"].as<String>() == "ergo")
+  /* if (Firebase.ready() && (WiFi.status() == WL_CONNECTED))
     {
+     //json.set("updatedBySelf", true);
+     prepareData();
 
-    }
-    // ------------------------------------- cruz
-    else if (obj["type"].as<String>() == "cruz")
+     // ------------------------------------- ergo
+     if (obj["type"].as<String>() == "ergo")
+     {
+
+     }
+     // ------------------------------------- cruz
+     else if (obj["type"].as<String>() == "cruz")
+     {
+       //------------------ automatic update events, new month
+       if (update_events)
+       {
+         json.clear();
+         String jsonString = "{\"events\":\"32\":0}";
+         FirebaseJson firebaseJson;
+         firebaseJson.setJsonData(jsonString);
+         json.set("events", firebaseJson);
+         json.set("mes_prev", mes);
+         Serial.println("{\"update_events\":true}");
+         if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
+           Serial.printf("%s\n", fbdo.errorReason().c_str());
+         //else
+         update_events = false;
+
+       }*/
+
+  // ------------------------------------- response for new firmware
+  /*if (obj["updated"].as<bool>() == false)
     {
-      //------------------ automatic update events, new month
-      if (update_events)
-      {
-        json.clear();
-        String jsonString = "{\"events\":\"32\":0}";
-        FirebaseJson firebaseJson;
-        firebaseJson.setJsonData(jsonString);
-        json.set("events", firebaseJson);
-        json.set("mes_prev", mes);
-        Serial.println("{\"update_events\":true}");
-        if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
-          Serial.printf("%s\n", fbdo.errorReason().c_str());
-        //else
-        update_events = false;
+    obj["updated"] = true;
+    obj["registered"] = false;
+    saveConfig = true;
+    json.clear();
+    json.set("updated", true);
+    Serial.println("{\"update_firmware\":true}");
+    if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
+      Serial.printf("%s\n", fbdo.errorReason().c_str());
+    //else
 
-      }*/
+    }*/
 
-      // ------------------------------------- response for new firmware
-      /*if (obj["updated"].as<bool>() == false)
-        {
-        obj["updated"] = true;
-        obj["registered"] = false;
-        saveConfig = true;
-        json.clear();
-        json.set("updated", true);
-        Serial.println("{\"update_firmware\":true}");
-        if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
-          Serial.printf("%s\n", fbdo.errorReason().c_str());
-        //else
-
-        }*/
-
-      // ------------------------------------- response for new firmware
-      /*if (obj["restart"].as<bool>() == true)
-      {
-        json.clear();
-        json.set("restart", false);
-        if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
-          Serial.printf("%s\n", fbdo.errorReason().c_str());
-      }
-
-      json.remove("updated");
-      json.remove("restart");
-      json.remove("mes_prev");
-      if (Firebase.RTDB.updateNode(&fbdo, route + "/actual", &json) == false)
-        Serial.printf("%s\n", fbdo.errorReason().c_str());
-
-
-      json.remove("Ts/.sv");
-      json.remove("time");
-      json.remove("mes_prev");
-      if (Firebase.RTDB.updateNode(&fbdo, route + "/data/" + String(now.year()) + "_" + String(now.month()), &json) == false)
-      {
-        Serial.printf("%s\n", fbdo.errorReason().c_str());
-      }
+  // ------------------------------------- response for new firmware
+  /*if (obj["restart"].as<bool>() == true)
+    {
+    json.clear();
+    json.set("restart", false);
+    if (Firebase.RTDB.updateNode(&fbdo, route + "/config", &json) == false)
+      Serial.printf("%s\n", fbdo.errorReason().c_str());
     }
 
-  }
-  else if ((obj["enable_wifi"].as<bool>() == true) && (WiFi.status() == WL_CONNECTED))
-  {
+    json.remove("updated");
+    json.remove("restart");
+    json.remove("mes_prev");
+    if (Firebase.RTDB.updateNode(&fbdo, route + "/actual", &json) == false)
+    Serial.printf("%s\n", fbdo.errorReason().c_str());
+
+
+    json.remove("Ts/.sv");
+    json.remove("time");
+    json.remove("mes_prev");
+    if (Firebase.RTDB.updateNode(&fbdo, route + "/data/" + String(now.year()) + "_" + String(now.month()), &json) == false)
+    {
+    Serial.printf("%s\n", fbdo.errorReason().c_str());
+    }
+    }
+
+    }
+    else if ((obj["enable_wifi"].as<bool>() == true) && (WiFi.status() == WL_CONNECTED))
+    {
     connectFirebase();
-  }*/
+    }*/
 }
 
 
@@ -145,95 +145,95 @@ void SendData()
 void streamCallback(FirebaseStream data)
 {
   // Add config from spiff file
-/*
-  Serial.println("{\"stream\":true}");
+  /*
+    Serial.println("{\"stream\":true}");
 
-  if (obj["test"].as<bool>() == true)
-  {
-    Serial.printf("stream path: %s\nevent path: %s\ndata type: %s\nevent type: %s\ndata:  %s\n\n",
-                  data.streamPath().c_str(),
-                  data.dataPath().c_str(),
-                  data.dataType().c_str(),
-                  data.eventType().c_str(),
-                  data.payload().c_str());
-  }
-
-
-  if ((strcmp(data.dataPath().c_str(), "/") == 0) && (strcmp(data.eventType().c_str(), "patch") != 0))
-  {
-    if (strcmp(data.dataType().c_str(), "null") != 0)
+    if (obj["test"].as<bool>() == true)
     {
-      //Serial.println("All obj");
-      // Llamar a deserializeJson() para decodificar la respuesta
-      deserializeJson(doc, data.payload().c_str());
-      if (obj["test"].as<bool>() == true)
-        serializeJson(obj, Serial);
-      saveConfig = true;
-      //saveConfigData();
-      //loadConfig();
-    }
-    else
-    {
-      obj["registered"] = false;
-      saveConfigData();
-      loadConfig();
-      ESP.restart();
-      //SendData();
+      Serial.printf("stream path: %s\nevent path: %s\ndata type: %s\nevent type: %s\ndata:  %s\n\n",
+                    data.streamPath().c_str(),
+                    data.dataPath().c_str(),
+                    data.dataType().c_str(),
+                    data.eventType().c_str(),
+                    data.payload().c_str());
     }
 
-  }
-  else  if ((strcmp(data.dataPath().c_str(), "/") == 0) && (strcmp(data.eventType().c_str(), "patch") == 0))
-  {
-    if (strcmp(data.dataType().c_str(), "null") != 0)
-    {
-      DynamicJsonDocument doc_patch(1024);
-      deserializeJson(doc_patch, data.payload().c_str());
 
-      if (doc_patch.containsKey("defColor"))
+    if ((strcmp(data.dataPath().c_str(), "/") == 0) && (strcmp(data.eventType().c_str(), "patch") != 0))
+    {
+      if (strcmp(data.dataType().c_str(), "null") != 0)
       {
-        obj["defColor"] = doc_patch["defColor"];
+        //Serial.println("All obj");
+        // Llamar a deserializeJson() para decodificar la respuesta
+        deserializeJson(doc, data.payload().c_str());
+        if (obj["test"].as<bool>() == true)
+          serializeJson(obj, Serial);
         saveConfig = true;
+        //saveConfigData();
+        //loadConfig();
+      }
+      else
+      {
+        obj["registered"] = false;
+        saveConfigData();
+        loadConfig();
+        ESP.restart();
+        //SendData();
       }
 
-      else if (doc_patch.containsKey("last_ac"))
-      {
-        obj["last_ac"] = doc_patch["last_ac"];
-        saveConfig = true;
-      }
-      else if (doc_patch.containsKey("registered"))
-      {
-        obj["registered"] = doc_patch["registered"];
-        if (obj["registered"] == false)
-          obj["restart"] = true;
-        saveConfig = true;
-      }
     }
-  }
-  else  if ((strcmp(data.dataPath().c_str(), "/events") == 0) && (strcmp(data.eventType().c_str(), "patch") == 0))
-  {
-    if (strcmp(data.dataType().c_str(), "null") != 0)
+    else  if ((strcmp(data.dataPath().c_str(), "/") == 0) && (strcmp(data.eventType().c_str(), "patch") == 0))
     {
-      DynamicJsonDocument doc_patch(1024);
-      deserializeJson(doc_patch, data.payload().c_str());
-
-      //Serial.println("Fast Up Events");
-      //Serial.println();
-      //serializeJson(doc_patch, Serial);
-      //Serial.println();
-
-      // Combinar los objetos JSON
-      for (const auto& kv : doc_patch.as<JsonObject>())
+      if (strcmp(data.dataType().c_str(), "null") != 0)
       {
-        obj["events"][kv.key()] = kv.value();
+        DynamicJsonDocument doc_patch(1024);
+        deserializeJson(doc_patch, data.payload().c_str());
+
+        if (doc_patch.containsKey("defColor"))
+        {
+          obj["defColor"] = doc_patch["defColor"];
+          saveConfig = true;
+        }
+
+        else if (doc_patch.containsKey("last_ac"))
+        {
+          obj["last_ac"] = doc_patch["last_ac"];
+          saveConfig = true;
+        }
+        else if (doc_patch.containsKey("registered"))
+        {
+          obj["registered"] = doc_patch["registered"];
+          if (obj["registered"] == false)
+            obj["restart"] = true;
+          saveConfig = true;
+        }
       }
-
-      serializeJson(obj["events"], Serial);
-      Serial.println();
-      saveConfig = true;
-
     }
-  }
-*/
+    else  if ((strcmp(data.dataPath().c_str(), "/events") == 0) && (strcmp(data.eventType().c_str(), "patch") == 0))
+    {
+      if (strcmp(data.dataType().c_str(), "null") != 0)
+      {
+        DynamicJsonDocument doc_patch(1024);
+        deserializeJson(doc_patch, data.payload().c_str());
+
+        //Serial.println("Fast Up Events");
+        //Serial.println();
+        //serializeJson(doc_patch, Serial);
+        //Serial.println();
+
+        // Combinar los objetos JSON
+        for (const auto& kv : doc_patch.as<JsonObject>())
+        {
+          obj["events"][kv.key()] = kv.value();
+        }
+
+        serializeJson(obj["events"], Serial);
+        Serial.println();
+        saveConfig = true;
+
+      }
+    }
+  */
 }
 
 
@@ -262,7 +262,7 @@ void prepareData()
 void connectFirebase()
 {
   // Firebase
-  //esp_task_wdt_reset();
+  esp_task_wdt_reset();
   if (!Firebase.ready()) // Add more filters
   {
     /* Assign the api key (required) */
@@ -287,56 +287,17 @@ void connectFirebase()
     Firebase.reconnectWiFi(true);
 
     unsigned long startTime = millis();
-    while (!Firebase.ready()) {
-      if (millis() - startTime > mainTime) {
-        Serial.println("Failed to connect to Firebase within timeout period");
-        break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
-      }
-      delay(100); // Esperar un poco antes de comprobar de nuevo, para no bloquear completamente el bucle
+    //while (!Firebase.ready())
+    if (!Firebase.ready())
+    {
+      //if (millis() - startTime > mainTime)
+      //{
+      //Serial.println("Failed to connect to Firebase within timeout period");
+      //break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
+      //}
+      //delay(100); // Esperar un poco antes de comprobar de nuevo, para no bloquear completamente el bucle
     }
 
-    /*
-      route = "/panels/" + obj["id"].as<String>();
-
-      // El el dispositivo no esta registrado, o se actualizó
-      if (obj["registered"].as<bool>() == false)
-      {
-      obj["registered"] = true;
-      copyJsonObject(json, obj);
-      if (!Firebase.RTDB.updateNode(&fbdo, route + "/config", &json))
-      {
-        Serial.printf("%s\n", fbdo.errorReason().c_str());
-      }
-      else
-      {
-        Serial.println("{\"registered_rtdb\":true}");
-      }
-      }
-      else
-      {
-      //Si no existe el nodo.
-      if (!Firebase.RTDB.get(&fbdo, route + "/config"))
-      {
-        Serial.println("{\"config_file\":false}");
-        copyJsonObject(json, obj);
-
-        //subimos desde spifss.
-        if (!Firebase.RTDB.updateNode(&fbdo, route + "/config", &json))
-        {
-          Serial.printf("%s\n", fbdo.errorReason().c_str());
-        }
-        else
-        {
-          Serial.println("{\"upload_config\":true}");
-        }
-      }
-      // El nodo existe, bajamos la info
-      else
-      {
-        Serial.println("{\"dowload_config\":true}");
-      }
-      }
-    */
 
 
     // Timeout, prevent to program halt
@@ -350,22 +311,6 @@ void connectFirebase()
 
   }
 
-
-
-  //if ((!fire_stream) /*|| (!fire_events)*/)
-  //{
-  //if (!Firebase.RTDB.beginStream(&stream, route + "/config"))
-  //Serial.printf("config sream begin error, %s\n\n", stream.errorReason().c_str());
-  //else
-  //{
-  //Firebase.RTDB.setStreamCallback(&stream, streamCallback, streamTimeoutCallback);
-  //fire_stream = true;
-  //}
-
-  //}
-
-
-  // Firebase.ready() should be called repeatedly to handle authentication tasks.
 
   if (!updated)
   {
@@ -420,5 +365,5 @@ void copyJsonObject(FirebaseJson & firebaseJson, JsonObject & jsonObject)
     else {
       Serial.printf("Unsupported data type for key: %s\n", it->key().c_str());
     }
-  }*/
+    }*/
 }

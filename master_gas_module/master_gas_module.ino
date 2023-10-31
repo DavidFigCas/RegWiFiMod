@@ -34,7 +34,7 @@ void loop()
   while (Wire.available())
   {
     buff[i] = Wire.read();
-    //Serial.print((char)buff[i]);
+    //Serial  .print((char)buff[i]);
     i++;
   }
   //Serial.println();
@@ -78,71 +78,34 @@ void loop()
   delay(TIME_SPACE);
 
   // ----------------------------------------------- procesar
-
-
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
   litros = (doc_encoder["current"].as<uint32_t>() / pulsos_litro);
   precio = litros * uprice;
   display_reset = false;
 
 
-  // if ((doc_display["STATE"] ==  0) || (doc_display["STATE"].inNull()))
-
-
-  //if (doc_display["STATE"] ==  0)
-  //{
-  //  STATE_DISPLAY = 1;
-  //}
-  //else
-  //if (!doc_display["STATE"].isNull())
-  //{
-  //  if (doc_display["STATE"] >  0)
-  //    STATE_DISPLAY = doc_display["STATE"];
-
-  //if(STATE_DISPLAY == 1)
-  //}
-
   // ------------------------------------- printer
   if (STATE_DISPLAY == 3)
   {
-    Serial.println("Display on 3, reset");
-    /* if (!startCounting2)
-      {
-       // Detectado por primera vez
-       tiempoAnterior2 = millis();
-       startCounting2 = true;
-       Serial.println("Printer START");
-       //Serial.print("Litros: ");
-       //Serial.println(litros);
-       //STATE_DISPLAY = 2;
-      }
-      else
-      {
-       // Ya se ha detectado antes, verificar el intervalo
-       tiempoActual2 = millis();
-       if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
-       {
-         // Ha pasado 1 minuto
-         //display_reset = true;
-         startCounting2 = false;  // Detener el conteo
-         //if (STATE_DISPLAY == 3)
-           STATE_DISPLAY = 0;
-         Serial.println("Printer Finish");
-       }
-      }*/
-    delay(10000);
-    printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
-    STATE_DISPLAY = 0;
-    folio++;
-    obj["folio"] = folio;
-    saveConfig = true;
-    new_log = true;
-    Serial.println("Done reset");
-  }
-  else
-  {
-    // Si STATE no es 3, resetear el conteo
-    // startCounting = false;
+    if (startTime == 0)
+    { // Si es la primera vez que entras al estado
+      startTime = millis();
+      Serial.println("Display on 3, reset");
+    }
+
+    if (millis() - startTime >= 10000)
+    { // Han pasado 10 segundos
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      STATE_DISPLAY = 0;
+      folio++;
+      saveNewlog();
+      obj["folio"] = folio;
+      
+      saveConfig = true;
+      new_log = true;
+      Serial.println("Done reset");
+      startTime = 0; // Resetea el tiempo de inicio para la próxima vez
+    }
   }
 
 
@@ -173,7 +136,7 @@ void loop()
         Serial.println("Display Bing Printer");
         litros_check = litros;
         precio_check = precio;
-        new_log = true;
+        //new_log = true;
       }
     }
   }
@@ -209,17 +172,16 @@ void loop()
     doc_aux["flow"] = doc_encoder["flow"].as<bool>();
     doc_aux["litros"] = litros;
     doc_aux["precio"] = precio;
+    doc_aux["uprice"] = uprice;
   }
 
   doc_aux["STATE"] = STATE_DISPLAY;
-  read_clock();
   doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
 
-  Serial.print("Master to display: ");
+  //Serial.print("Master to display: ");
   //serializeJson(doc, Serial);
-  Serial.print(b);
-  Serial.println();
+  //Serial.println();
 
 
   Wire.beginTransmission(DISPLAY_ADD);
@@ -232,11 +194,9 @@ void loop()
   doc_aux["reset"] = display_reset;
   doc_aux["litros"] = litros;
   serializeJson(doc_aux, b);
-  
-  Serial.print("Master to encoder: ");
-  //serializeJson(doc_aux, Serial);
-  Serial.print(b);
-  Serial.println();
+  //Serial.print("Master to encoder: ");
+  //serializeJson(doc, Serial);
+  //Serial.println();
 
   Wire.beginTransmission(ENCODE_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
@@ -254,11 +214,11 @@ void loop()
 
 
   // ------------------------------------------- New LOG
-  if (new_log == true)
-  {
-    saveNewlog();
-    new_log = false;
-  }
+  //if (new_log == true)
+  //{
+    //saveNewlog();
+    //new_log = false;
+  //}
 
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
@@ -270,8 +230,8 @@ void loop()
     {
       update_clock();
       read_clock();
-      /*if (mqtt_check())
-        {
+      if (mqtt_check())
+      {
         // ------------------------------------------- Send Log
         if (send_log == true)
         {
@@ -292,7 +252,7 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg);
           send_log = false;
         }
-        }*/
+      }
     }
 
 
@@ -328,9 +288,15 @@ void loop()
 
 
 
-
-
-
+  // ----------------------------------------- save new List
+  //if(flag_new_list == true)
+  //{
+  //flag_new_list = false;
+  //Serial.print("Saving List on Loop: ");
+  //serializeJson(doc_list,Serial);
+  //Serial.println();
+  //saveListData();
+  //}
 
 
 
@@ -384,5 +350,5 @@ void loop()
 
     saveConfig = false;
   }
-
+  esp_task_wdt_reset();
 }

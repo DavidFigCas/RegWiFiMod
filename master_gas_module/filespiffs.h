@@ -5,8 +5,8 @@
 
 
 #define FILE_SIZE   1750
-#define LIST_SIZE   1750
-#define LOG_SIZE   1750
+#define LIST_SIZE   4048
+#define LOG_SIZE   4048
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;

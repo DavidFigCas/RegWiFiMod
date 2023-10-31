@@ -16,6 +16,7 @@ unsigned long mainTime = 1000;
 
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
+unsigned long startTime = 0;
 
 
 const char  end1 = '\r';
@@ -371,13 +372,14 @@ void loadConfig()
   //uprice = obj["uprice"];
   //pulsos_litro = obj["pulsos_litro"];
   
-  if (!obj["folio"].isNull())
+  //if (!obj["folio"].isNull())
+  //  folio = obj["folio"];
+  //else
+  //{
     folio = obj["folio"];
-  else
-  {
-    folio = 0;
-    obj["folio"] = 0;
-  }
+    Serial.print("Folio: ");
+    Serial.println(folio);
+  //}
 
 
 
