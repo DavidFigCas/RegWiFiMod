@@ -98,9 +98,8 @@ void loop()
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
       STATE_DISPLAY = 0;
       folio++;
-      saveNewlog();
       obj["folio"] = folio;
-      
+
       saveConfig = true;
       //new_log = true;
       Serial.println("Done reset");
@@ -121,6 +120,9 @@ void loop()
       Serial.print("Litros: ");
       Serial.println(litros);
       STATE_DISPLAY = 2;
+      litros_check = litros;
+      precio_check = precio;
+      saveNewlog();
     }
     else
     {
@@ -134,9 +136,7 @@ void loop()
         //if (STATE_DISPLAY == 3)
         STATE_DISPLAY = 3;
         Serial.println("Display Bing Printer");
-        litros_check = litros;
-        precio_check = precio;
-        //new_log = true;
+
       }
     }
   }
