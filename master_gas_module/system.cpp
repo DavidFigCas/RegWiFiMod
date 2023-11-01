@@ -3,11 +3,16 @@
 
 //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
+
+bool buttonState = LOW;
+bool lastButtonState = LOW;
+unsigned long buttonPressTime = 0;
+const unsigned long longPressDuration = 5000;
+
 bool factory_press = false;
 unsigned long factory_time = 0;
 unsigned long prev_factory_time = 0;
 bool reset_time = false;
-int buttonState = 0;
 volatile bool found_client = false;
 
 

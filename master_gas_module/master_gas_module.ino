@@ -11,17 +11,17 @@ void setup()
   search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+
+  buttonState = LOW;
+  lastButtonState = HIGH;
 }
 
 
 // ------------------------------------------------------ loop
 void loop()
 {
-
-  // Write a value over I2C to the slave
-  //Serial.println("Sending...");
-  //doc["precio"] = p++;
-  //doc["litros"] = p++;
+  // PRead button for report
+  buttonState = digitalRead(BT_REPORT);
 
 
   // ----------------------------------------------- leer
@@ -353,12 +353,33 @@ void loop()
 
 
   // leer boton para imprimir reporte diario
-  if(digitalRead(BT_REPORT) == LOW)
-  {
+  // Si el botón cambia de no presionado a presionado
+  if (lastButtonState == HIGH && buttonState == LOW) {
     Serial.println("PUSH");
-    print_log = true;
+    buttonPressTime = millis();
   }
 
+  // Si el botón cambia de presionado a no presionado
+  if (lastButtonState == LOW && buttonState == HIGH) {
+    if (millis() - buttonPressTime < longPressDuration) {
+      Serial.println("Short press detected!");
+      print_log = true;
+    } else {
+      Serial.println("Long press detected!");
+      print_log = false;
+      clear_log = true;
+    }
+  }
+
+  lastButtonState = buttonState;
   
+  //if (digitalRead(BT_REPORT) == LOW)
+  //{
+    //Serial.println("PUSH");
+
+    //print_log = true;
+  //}
+
+
   esp_task_wdt_reset();
 }

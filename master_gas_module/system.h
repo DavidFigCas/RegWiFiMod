@@ -47,7 +47,10 @@
 
 
 //15 seconds WDT
-
+extern bool buttonState;
+extern bool lastButtonState;
+extern unsigned long buttonPressTime;
+extern const unsigned long longPressDuration;
 
 extern unsigned long startTime;
 
@@ -60,7 +63,6 @@ extern unsigned long mainRefresh;
 extern unsigned long mainTime;
 extern const uint32_t connectTimeoutMs;
 extern unsigned long  s_timestamp;
-extern int buttonState;
 extern volatile bool found_client;
 
 
