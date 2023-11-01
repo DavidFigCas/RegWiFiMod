@@ -1,9 +1,6 @@
 #include "system.h"
 
-#define   PRESS   LOW
-#define FILE_SIZE   1024
-#define LIST_SIZE   4096
-#define LOG_SIZE   4096 
+
 //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
 bool factory_press = false;
@@ -198,6 +195,7 @@ void system_init()
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
+  pinMode(BT_REPORT,INPUT);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change

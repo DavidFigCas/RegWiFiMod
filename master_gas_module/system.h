@@ -7,10 +7,17 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 //#include <LittleFS.h>
-#define WDT_TIMEOUT 150
-#define FILE_SIZE   1024
-#define LIST_SIZE   3048
-#define LOG_SIZE   3048
+
+
+#define   PRESS   LOW
+//#define LIST_SIZE   4096
+//#define LOG_SIZE   4096
+
+#define WDT_TIMEOUT     150
+#define FILE_SIZE       1024
+#define LIST_SIZE       3048
+#define LOG_SIZE        3048
+#define BT_REPORT       0
 
 
 #include "FS.h"
@@ -25,7 +32,7 @@
 #include <Firebase_ESP_Client.h>
 #include <esp_task_wdt.h>
 
-//#include <WiFiManager_RP2040W.h>  
+//#include <WiFiManager_RP2040W.h>
 
 #include "version.h"
 #include "wifiservice.h"

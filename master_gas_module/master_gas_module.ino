@@ -350,5 +350,15 @@ void loop()
 
     saveConfig = false;
   }
+
+
+  // leer boton para imprimir reporte diario
+  if(digitalRead(BT_REPORT) == LOW)
+  {
+    Serial.println("PUSH");
+    print_log = true;
+  }
+
+  
   esp_task_wdt_reset();
 }
