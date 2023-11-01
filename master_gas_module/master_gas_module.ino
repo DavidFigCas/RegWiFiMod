@@ -102,7 +102,7 @@ void loop()
       obj["folio"] = folio;
       
       saveConfig = true;
-      new_log = true;
+      //new_log = true;
       Serial.println("Done reset");
       startTime = 0; // Resetea el tiempo de inicio para la próxima vez
     }
@@ -213,12 +213,14 @@ void loop()
   }
 
 
-  // ------------------------------------------- New LOG
-  //if (new_log == true)
-  //{
+  // ------------------------------------------- Print LOG
+  if (print_log == true)
+  {
     //saveNewlog();
     //new_log = false;
-  //}
+    printing_logs();
+    print_log = false;
+  }
 
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {

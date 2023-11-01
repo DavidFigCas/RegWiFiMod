@@ -8,6 +8,7 @@ const char* publish_topic = "/out";
 const char* subcribe_topic = "/in";
 const char* list_topic = "/list";
 const char* add_topic = "/add";
+const char* print_topic = "/print";
 const char* config_topic = "/config";
 const char* log_topic = "/log";
 const char* gps_topic = "/gps";
@@ -19,6 +20,7 @@ char buffer_msg[LOG_SIZE];
 volatile boolean send_log = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
+volatile boolean print_log = false;
 volatile boolean flag_new_list = false;
 byte STATE, todo_byte;
 bool newcommand;
@@ -192,10 +194,10 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println("prepare send");
       return;
     }
-    else if (strcmp(jsonPayload, "add") == 0) 
+    else if (strcmp(jsonPayload, "print") == 0) 
     {
-      new_log = true;
-      Serial.println("Add new Log");
+      print_log = true;
+      Serial.println("Print All Logs");
       return;
     }
     

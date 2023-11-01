@@ -19,7 +19,8 @@ void printCheck (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint
 
   //Set text double size
   // first command ESC ! <1B>H<21>H<n> Set print mode '0'
-  Serial.println("Printing...");
+  Serial.print("FOLIO:");
+  Serial.println(f);
   tempVar = 0x1B;
   //i2c_write_blocking(i2c0, 0x5D, (const uint8_t *)&tempVar, 1, false);
   Wire.beginTransmission(0x5D);

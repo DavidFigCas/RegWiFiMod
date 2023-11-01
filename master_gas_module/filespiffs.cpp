@@ -30,6 +30,7 @@ File file;
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {
+  Serial.println("Make new LOG");
   newLogEntry = obj_log.createNestedObject();
   //newLogEntry["timestamp"] = DateTimeToString(now);
   newLogEntry["folio"] = folio;
