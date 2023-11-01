@@ -385,10 +385,18 @@ void loop1()
 
 
       //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-      unixtime = doc["time"];
+      unixtime = doc_aux["time"].as<uint32_t>();
+      //serializeJson(doc_aux["time"],Serial);
       stamp.getDateTime(unixtime);
+      Serial.print("TIME");
+      Serial.println(unixtime);
+      Serial.println(stamp.day);
+      Serial.println(stamp.month);
+      Serial.println(stamp.year);
+      Serial.println(stamp.hour);
+      Serial.println(stamp.minute);
 
-
+      display.setTextColor(GxEPD_BLACK);
       display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
       display.setCursor(237, 49);
       display.setFont(&FreeMonoBold9pt7b);
