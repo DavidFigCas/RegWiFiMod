@@ -121,6 +121,11 @@ void recv(int len)
     //Serial.print(F("deserializeJson() failed: "));
     //Serial.println(error.f_str());
   }
+
+  litros = doc_aux["litros"].as<uint32_t>();
+  print_litros = litros;
+  pesos = doc["precio"].as<uint32_t>();
+  print_pesos = pesos;
 }
 
 // Called when the I2C slave is read from
@@ -428,8 +433,6 @@ void loop1()
       digitalWrite(27, LOW);
       digitalWrite(28, LOW);
 
-      litros = doc_aux["litros"].as<uint32_t>();
-      print_litros = litros;
 
 
       Serial.print("Litros: ");
@@ -438,12 +441,9 @@ void loop1()
       Serial.print("\t");
 
 
-      pesos = doc["precio"].as<uint32_t>();
+
       Serial.print("precio: ");
       Serial.println(pesos);
-
-      print_pesos = pesos;
-      //Serial.println(print_pesos);
 
       new_litros = false;
       newcommand = false;
