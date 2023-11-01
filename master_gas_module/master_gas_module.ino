@@ -216,8 +216,6 @@ void loop()
   // ------------------------------------------- Print LOG
   if (print_log == true)
   {
-    //saveNewlog();
-    //new_log = false;
     printing_logs();
     print_log = false;
   }

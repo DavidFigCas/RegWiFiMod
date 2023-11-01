@@ -1,3 +1,4 @@
+#define MAX_DELTA   10
 #define LED_1      25
 #define LED_2     27
 #define LED_3     28
@@ -127,7 +128,7 @@ void loop()
 
     // ------------------------------------- delta is noise?
     delta = new_value - old_value;
-    if (delta < 10)
+    if (delta < MAX_DELTA)
     {
       flow = false;
       digitalWrite(25, LOW);

@@ -1,11 +1,42 @@
 #include "printerservice.h"
 
+void printing_logs()
+{
+  Serial.println("Print ALL LOGS");
+  serializeJson(obj_log,Serial);
+  // Iterar sobre cada objeto en el JsonArray
+  for (JsonObject jsonObject : obj_log) 
+  {
+
+    // Extraer los valores del objeto JSON
+    uint32_t folio = jsonObject["folio"];
+    uint32_t timestamp = jsonObject["timestamp"];
+    uint32_t state = jsonObject["state"];
+    uint32_t litros = jsonObject["litros"];
+    uint32_t precio = jsonObject["precio"];
+    uint32_t cliente = jsonObject["cliente"];
+    float uprice = (float)precio / litros; // Asumiendo que uprice es el precio por litro
+
+    // Convertir el timestamp a fecha y hora usando RTClib
+    DateTime dt(timestamp);
+    int dia_hoy = dt.day();
+    int mes = dt.month();
+    int anio = dt.year();
+    int hora = dt.hour();
+    int minuto = dt.minute();
+
+    // Llamar a la función printCheck con los valores extraídos
+    printCheck(precio, litros, uint32_t(uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+  }
+}
+
+
 
 // --------------------------------------------------------------------------- printCheck
 // printCheck worked. A ticket was printed
 // the function i2c_write_blocking is for RP2040 (RPi Pico)
 //Numero       letra          dia          mes       año       hora       minuto
-void printCheck (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f) 
+void printCheck (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f)
 {
   //char* resultado = "";
   char resultado[150]; // ??
@@ -19,8 +50,10 @@ void printCheck (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint
 
   //Set text double size
   // first command ESC ! <1B>H<21>H<n> Set print mode '0'
+  Serial.println();
   Serial.print("FOLIO:");
   Serial.println(f);
+  Serial.println();
   tempVar = 0x1B;
   //i2c_write_blocking(i2c0, 0x5D, (const uint8_t *)&tempVar, 1, false);
   Wire.beginTransmission(0x5D);
