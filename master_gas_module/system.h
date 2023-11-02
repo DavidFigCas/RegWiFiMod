@@ -1,6 +1,14 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <Arduino.h>
+#include <ArduinoJson.h>
+//#include <vector>
+#include <PubSubClient.h>
+#include <WiFi.h>
+//#include <LittleFS.h>
+
+
 #define   PRESS   LOW
 //#define LIST_SIZE   4096
 //#define LOG_SIZE   4096
@@ -11,12 +19,7 @@
 #define LOG_SIZE        3048
 #define BT_REPORT       0
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-//#include <vector>
-#include <PubSubClient.h>
-#include <WiFi.h>
-//#include <LittleFS.h>
+
 #include "FS.h"
 #include "SPIFFS.h"
 #include <Wire.h>
