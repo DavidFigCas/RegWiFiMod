@@ -402,6 +402,7 @@ void loop()
       folio = 0;
       obj["folio"] = folio;
       saveConfig = true;
+      saveNewlog();
     }
   }
 

@@ -117,10 +117,31 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8
   printString("GAS DE XALAPA S.A. DE C.V.\n\r");
   printString("R.F.C.: GXA 550301 BP3\n\r");
 
+  // Imprimir número de unidad y folio
+  printString("EQUIPO: 002");
+  printString("\n\r");
+  printString("NO. DE SERVICO: ");
+  printNumber(f);
+  printString("\n\r");
+  // Imprimir fecha y hora
+  printString("FECHA:");
+  printDateTime(d, m, y, h, mn);
+  printString("\n\r");
+  //printString("Duración del servicio:");
+
+  // Imprimir precio unitario
+  printString("PRECIO UNITARIO: $");
+  printPrice(unitprice);
+  printString("\n\r");
+
+  // Imprimir litros
   setPrintMode(48); // Configurar modo de impresión
-  printString("TOTAL   $");
+  printString("LITROS: ");
+  printNumber(ltr);
+  printString("Lts\n\r");
 
   // Imprimir número total
+  printString("TOTAL:  $");
   printNumber(num);
   printString("\n\r");
 
@@ -132,31 +153,10 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8
   printString(resultado);
   printString("\n\r");
 
-  // Imprimir precio unitario
-  setPrintMode(0);
-  printString("Precio U. $");
-  printPrice(unitprice);
-  printString("\n\r");
-
-  // Imprimir fecha y hora
-  printDateTime(d, m, y, h, mn);
-
-  // Imprimir número de unidad y folio
-  printString("Unit 002");
-  printString("\n\r");
-  printString("Folio  ");
-  printNumber(f);
-  printString("\n\r");
-
-  // Imprimir litros
-  setPrintMode(48); // Configurar tamaño de texto doble
-  printString("LITROS   ");
-  printNumber(ltr);
-  printString("\n\r");
 
   // Resetear tamaño de texto y finalizar impresión
   setPrintMode(0);
-  printString("Gracias por su preferencia");
+  printString("GRACIAS POR SU PREFERENCIA");
   endPrint();
 }
 
@@ -194,14 +194,14 @@ void convertNumberToWords(uint32_t num, char* resultado) {
   // Utilizar sprintf o strcat según sea necesario
   //////////////////// convert numbers to words: ////////////////////////////////////
   if (num == 0) {
-    strcpy(resultado, "cero");
+    strcpy(resultado, "CERO");
     //resultado = "cero";
   }
   else strcpy(resultado, " ");
   if (num >= 1000) {
     int miles = num / 1000;
     strcat(resultado, unidades[miles]);
-    strcat(resultado, " mil ");
+    strcat(resultado, " MIL ");
     //resultado += unidades[miles];
     //resultado += " mil ";
     num %= 1000;
@@ -210,18 +210,18 @@ void convertNumberToWords(uint32_t num, char* resultado) {
   if (num >= 200) {
     int centenas = num / 100;
     strcat(resultado, unidades[centenas]);
-    strcat(resultado, " cientos ");
+    strcat(resultado, " CIENTOS ");
     //resultado += unidades[centenas];
     //  resultado += " cientos ";
     num %= 100;
   }
   else if (num > 100) {
-    strcat(resultado, "ciento ");
+    strcat(resultado, "CIENTO ");
     //resultado += "ciento ";
     num %= 100;
   }
   else if (num == 100) {
-    strcat(resultado, "cien");
+    strcat(resultado, "CIEN");
     //resultado += "cien";
     num %= 100;
   }
@@ -235,22 +235,22 @@ void convertNumberToWords(uint32_t num, char* resultado) {
     //resultado += " ";
     num %= 10;
     if (num > 0) {
-      strcat(resultado, "y ");
+      strcat(resultado, "Y ");
       //resultado += "y ";
     }
   }
   else if (num > 20) {
-    strcat(resultado, "veinti");
+    strcat(resultado, "VEINTI");
     //resultado += "veinti";
     num %= 10;
   }
   else if (num == 20) {
-    strcat(resultado, "veinte");
+    strcat(resultado, "VEINTE");
     //resultado += "veinte";
     num %= 10;
   }
   else if (num > 15) {
-    strcat(resultado, "dieci");
+    strcat(resultado, "DIECI");
     strcat(resultado, unidades[num - 10]);
     //resultado += "dieci";
     //resultado +=  unidades[num - 10];
@@ -263,7 +263,7 @@ void convertNumberToWords(uint32_t num, char* resultado) {
     num %= 10;
   }
   else if (num == 10) {
-    strcat(resultado, "diez");
+    strcat(resultado, "DIEZ");
     //resultado += "diez";
     num %= 10;
   }
@@ -277,34 +277,25 @@ void convertNumberToWords(uint32_t num, char* resultado) {
   uint32_t size = strlen(resultado);
   strncpy((char*)resultadoBytes, resultado, size);
 
-  /*Wire.beginTransmission(0x5D);
-    Wire.write(resultadoBytes, size);
-    Wire.endTransmission();
-    //sending end of string
-    tempChar = end1;
-    Wire.beginTransmission(0x5D);
-    Wire.write((const uint8_t *)&tempChar, 1);
-    Wire.endTransmission();
-    tempChar = end2;
-    Wire.beginTransmission(0x5D);
-    Wire.write((const uint8_t *)&tempChar, 1);
-    Wire.endTransmission();
-    delay(200);*/
-  ////////////// end of conversion /////////////////////
 }
 
+
+//-------------------------------------------- print price
 void printPrice(uint32_t price) {
   char buffer[20];
   sprintf(buffer, "%u.%02u", price / 100, price % 100);
   printString(buffer);
 }
 
+
+// -------------------------------------------- printDateTime
 void printDateTime(uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn) {
   char buffer[30];
   sprintf(buffer, "%u/%u/%u %u:%u", d, m, y, h, mn);
   printString(buffer);
 }
 
+// -------------------------------------------- endPrint
 void endPrint() {
   Wire.beginTransmission(0x5D);
   Wire.write(0x1B);
