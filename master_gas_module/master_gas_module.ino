@@ -135,6 +135,7 @@ void loop()
       //startCounting = false;
       encoder_reset = false;
       startFlowing = false;
+      readyToPrint = false;
     }
   }
 
@@ -153,14 +154,14 @@ void loop()
       STATE_DISPLAY = 3;
       Serial.println("Display Bing Printer");
       startCounting = false;
-
+      readyToPrint = true;
     }
   }
 
 
-  // ------------------------------------- printer
+  // ------------------------------------- printer ready to print
   // Debe depender del encoder
-  if (STATE_DISPLAY == 3)
+  if (readyToPrint == true)
   {
     if (startTime == 0)
     { // Si es la primera vez que entras al estado
@@ -171,6 +172,7 @@ void loop()
     if (millis() - startTime >= 10000)
     { // Han pasado 10 segundos
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      readyToPrint = false;
       STATE_DISPLAY = 0;
       saveConfig = true;
       //new_log = true;

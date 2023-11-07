@@ -70,6 +70,7 @@ volatile bool start_print = false;
 volatile bool startCounting = false;
 volatile bool startFlowing = false;
 volatile bool stopFlowing = false;
+volatile bool readyToPrint = false;
 
 
 volatile uint32_t pesos;
