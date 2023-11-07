@@ -66,9 +66,9 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  Serial.print("Display: ");
-  serializeJson(doc_display, Serial);
-  Serial.println();
+  //Serial.print("Display: ");
+  //serializeJson(doc_display, Serial);
+  //Serial.println();
 
 
   Serial.print("Encoder: ");
@@ -93,39 +93,49 @@ void loop()
 
 
   // ------------------------------------- encoder Read and stop
-  if (doc_encoder["STATE"] == 1)
+  //if (!doc_encoder["STATE"].isNull())
   {
-    if (!startFlowing)
+    if (doc_encoder["STATE"] == 1)
     {
-      Serial.println("--------------------START FLOWING-----------------");
-      read_clock();
-      start_process_time = now.unixtime();
-      startFlowing = true;
-    }
+      if (!startFlowing)
+      {
+        Serial.println("--------------------START FLOWING-----------------");
+        read_clock();
+        start_process_time = now.unixtime();
+        startFlowing = true;
+        stopFlowing = false;
+      }
+      encoder_reset = false;
 
-  }
-  else if (doc_encoder["STATE"] == 3)
-  {
-    if (!startCounting)
+    }
+    else if (doc_encoder["STATE"] == 3)
     {
-      // Detectado por primera vez
-      tiempoAnterior = millis();
-      startCounting = true;
+      encoder_reset = true;
+      if (!stopFlowing)
+      {
+        // Detectado por primera vez
+        tiempoAnterior = millis();
+        startCounting = true;
+        startFlowing = false;
+        stopFlowing = true;
+        Serial.println("--------------------STOP FLOWING-----------------");
+        STATE_DISPLAY = 2;
+        litros_check = litros;
+        precio_check = precio;
+        //encoder_reset = true;
+        read_clock();
+        saveNewlog();
+      }
+
+    }
+    else if (doc_encoder["STATE"] == 0)
+    {
+      // Si STATE no es 3, resetear el conteo
+      // start_process_time
+      //startCounting = false;
+      encoder_reset = false;
       startFlowing = false;
-      Serial.println("--------------------STOP FLOWING-----------------");
-      STATE_DISPLAY = 2;
-      litros_check = litros;
-      precio_check = precio;
-      read_clock();
-      saveNewlog();
     }
-
-  }
-  else
-  {
-    // Si STATE no es 3, resetear el conteo
-    // start_process_time
-    //startCounting = false;
   }
 
 
@@ -211,7 +221,7 @@ void loop()
 
   // ---------------------- encoder doc
   doc_aux.clear();
-  doc_aux["reset"] = display_reset;
+  doc_aux["reset"] = encoder_reset;
   doc_aux["litros"] = litros;
   serializeJson(doc_aux, b);
   //Serial.print("Master to encoder: ");
@@ -389,6 +399,9 @@ void loop()
       Serial.println("Long press detected!");
       print_log = false;
       clear_log = true;
+      folio = 0;
+      obj["folio"] = folio;
+      saveConfig = true;
     }
   }
 

@@ -65,9 +65,11 @@ String jsonStr;
 unsigned int STATE_DISPLAY = 1;
 
 volatile bool display_reset = false;
+volatile bool encoder_reset = false;
 volatile bool start_print = false;
 volatile bool startCounting = false;
 volatile bool startFlowing = false;
+volatile bool stopFlowing = false;
 
 
 volatile uint32_t pesos;

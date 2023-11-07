@@ -104,9 +104,11 @@ extern String jsonStr;
 extern unsigned int STATE_DISPLAY;
 
 extern volatile bool display_reset;
+extern volatile bool encoder_reset;
 extern volatile bool start_print;
 extern volatile bool startCounting;
 extern volatile bool startFlowing;
+extern volatile bool stopFlowing;
 
 
 extern volatile uint32_t pesos;
