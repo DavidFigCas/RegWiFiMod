@@ -88,6 +88,7 @@ extern unsigned long tiempoActual2;
 extern volatile bool startCounting2;
 
 
+extern uint32_t start_process_time;
 extern uint32_t litros;
 extern unsigned int pulsos_litro;
 extern uint32_t precio;
@@ -105,6 +106,7 @@ extern unsigned int STATE_DISPLAY;
 extern volatile bool display_reset;
 extern volatile bool start_print;
 extern volatile bool startCounting;
+extern volatile bool startFlowing;
 
 
 extern volatile uint32_t pesos;

@@ -31,10 +31,15 @@ File file;
 void saveNewlog()
 {
   Serial.println("Make new LOG");
+  Serial.print("Litros: ");
+  Serial.println(litros);
+  Serial.print("Folio: ");
+  Serial.println(folio);
   newLogEntry = obj_log.createNestedObject();
   //newLogEntry["timestamp"] = DateTimeToString(now);
   newLogEntry["folio"] = folio;
-  newLogEntry["timestamp"] = now.unixtime();
+  newLogEntry["start_timestamp"] = start_process_time;
+  newLogEntry["end_timestamp"] = now.unixtime();
   newLogEntry["state"] = STATE;
   newLogEntry["litros"] = litros_check;
   newLogEntry["precio"] = precio_check;
@@ -49,6 +54,8 @@ void saveNewlog()
   if (obj["test"].as<bool>())
     serializeJsonPretty(obj_log, Serial);
   Serial.println();
+  folio++;
+  obj["folio"] = folio;
 }
 
 // ------------------------------------------------------------------------------------- spiffs_init

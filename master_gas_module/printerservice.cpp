@@ -53,17 +53,17 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uin
   Serial.println(f);
   Serial.println();
   tempVar = 0x1B;
-  //i2c_write_blocking(i2c0, 0x5D, (const uint8_t *)&tempVar, 1, false);
+  //
   Wire.beginTransmission(0x5D);
   Wire.write((const uint8_t *)&tempVar, 1);
   Wire.endTransmission();
   tempVar = 0x21;
-  //i2c_write_blocking(i2c0, 0x5D, (const uint8_t *)&tempVar, 1, false);
+  //
   Wire.beginTransmission(0x5D);
   Wire.write((const uint8_t *)&tempVar, 1);
   Wire.endTransmission();
   tempVar = 48; // char '0'
-  //i2c_write_blocking(i2c0, 0x5D, (const uint8_t *)&tempVar, 1, false);
+  //
   Wire.beginTransmission(0x5D);
   Wire.write((const uint8_t *)&tempVar, 1);
   Wire.endTransmission();
@@ -491,7 +491,8 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uin
     Wire.write((const uint8_t *)&tempVar, 1);
     Wire.endTransmission();*/
   //<1B>H<64>H<n>
-  tempVar = 0x1B;
+  
+  /*tempVar = 0x1B;
   Wire.beginTransmission(0x5D);
   Wire.write((const uint8_t *)&tempVar, 1);
   Wire.endTransmission();
@@ -510,7 +511,7 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uin
   tempChar = end2;
   Wire.beginTransmission(0x5D);
   Wire.write((const uint8_t *)&tempChar, 1);
-  Wire.endTransmission();
+  Wire.endTransmission();*/
 
 }
 

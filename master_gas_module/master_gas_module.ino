@@ -79,12 +79,77 @@ void loop()
 
   // ----------------------------------------------- procesar
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
-  litros = (doc_encoder["current"].as<uint32_t>() / pulsos_litro);
-  precio = litros * uprice;
+  // Encoder value is ready and not null
+  if (!doc_encoder["current"].isNull())
+  {
+    litros = (doc_encoder["current"].as<uint32_t>() / pulsos_litro);
+    precio = litros * uprice;
+  }
+
   display_reset = false;
 
 
+
+
+
+  // ------------------------------------- encoder Read and stop
+  if (doc_encoder["STATE"] == 1)
+  {
+    if (!startFlowing)
+    {
+      Serial.println("--------------------START FLOWING-----------------");
+      read_clock();
+      start_process_time = now.unixtime();
+      startFlowing = true;
+    }
+
+  }
+  else if (doc_encoder["STATE"] == 3)
+  {
+    if (!startCounting)
+    {
+      // Detectado por primera vez
+      tiempoAnterior = millis();
+      startCounting = true;
+      startFlowing = false;
+      Serial.println("--------------------STOP FLOWING-----------------");
+      STATE_DISPLAY = 2;
+      litros_check = litros;
+      precio_check = precio;
+      read_clock();
+      saveNewlog();
+    }
+
+  }
+  else
+  {
+    // Si STATE no es 3, resetear el conteo
+    // start_process_time
+    //startCounting = false;
+  }
+
+
+  // --------------------------------- proces stop, display liters and wait for icon
+  if (startCounting)
+  {
+    // Ya se ha detectado antes, verificar el intervalo
+    tiempoActual = millis();
+    if (tiempoActual - tiempoAnterior >= intervalo)
+    {
+      // Ha pasado 1 minuto
+      display_reset = true;
+      startCounting = false;  // Detener el conteo
+      //if (STATE_DISPLAY == 3)
+      STATE_DISPLAY = 3;
+      Serial.println("Display Bing Printer");
+      startCounting = false;
+
+    }
+  }
+
+
   // ------------------------------------- printer
+  // Debe depender del encoder
   if (STATE_DISPLAY == 3)
   {
     if (startTime == 0)
@@ -97,57 +162,12 @@ void loop()
     { // Han pasado 10 segundos
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
       STATE_DISPLAY = 0;
-      folio++;
-      obj["folio"] = folio;
-
       saveConfig = true;
       //new_log = true;
       Serial.println("Done reset");
       startTime = 0; // Resetea el tiempo de inicio para la próxima vez
     }
   }
-
-
-  // ------------------------------------- encoder Read and stop
-  if (doc_encoder["STATE"] == 3)
-  {
-    if (!startCounting)
-    {
-      // Detectado por primera vez
-      tiempoAnterior = millis();
-      startCounting = true;
-      Serial.println("STOP FLOWING");
-      Serial.print("Litros: ");
-      Serial.println(litros);
-      STATE_DISPLAY = 2;
-      litros_check = litros;
-      precio_check = precio;
-      saveNewlog();
-    }
-    else
-    {
-      // Ya se ha detectado antes, verificar el intervalo
-      tiempoActual = millis();
-      if (tiempoActual - tiempoAnterior >= intervalo)
-      {
-        // Ha pasado 1 minuto
-        display_reset = true;
-        startCounting = false;  // Detener el conteo
-        //if (STATE_DISPLAY == 3)
-        STATE_DISPLAY = 3;
-        Serial.println("Display Bing Printer");
-
-      }
-    }
-  }
-  else
-  {
-    // Si STATE no es 3, resetear el conteo
-    startCounting = false;
-  }
-
-
-
 
 
   // ----------------------------------------------- enviar
@@ -220,40 +240,41 @@ void loop()
     print_log = false;
   }
 
-  if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
+
+  if (((millis() - mainRefresh > mainTime)/* && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())*/))
   {
     mainRefresh = millis();
     //gps_update();
 
     // ----------------------------------------- check internet
-    if (wifi_check())
-    {
-      update_clock();
-      read_clock();
-      if (mqtt_check())
+    /*if (wifi_check())
       {
-        // ------------------------------------------- Send Log
-        if (send_log == true)
-        {
-          Serial.println("mqtt sending");
+       update_clock();
+       read_clock();
+       if (mqtt_check())
+       {
+         // ------------------------------------------- Send Log
+         if (send_log == true)
+         {
+           Serial.println("mqtt sending");
 
-          //saveNewlog();
+           //saveNewlog();
 
-          strcpy(buffer_union_publish, obj["id"].as<const char*>());
-          strcat(buffer_union_publish, publish_topic);
-          strcat(buffer_union_publish, log_topic);
+           strcpy(buffer_union_publish, obj["id"].as<const char*>());
+           strcat(buffer_union_publish, publish_topic);
+           strcat(buffer_union_publish, log_topic);
 
-          JsonArray logObject = obj_log;
-          size_t serializedLength = measureJson(logObject) + 1;
-          char tempBuffer[serializedLength];
-          serializeJson(logObject, tempBuffer, serializedLength);
-          strcpy(buffer_msg, tempBuffer);
+           JsonArray logObject = obj_log;
+           size_t serializedLength = measureJson(logObject) + 1;
+           char tempBuffer[serializedLength];
+           serializeJson(logObject, tempBuffer, serializedLength);
+           strcpy(buffer_msg, tempBuffer);
 
-          Mclient.publish(buffer_union_publish, buffer_msg);
-          send_log = false;
-        }
-      }
-    }
+           Mclient.publish(buffer_union_publish, buffer_msg);
+           send_log = false;
+         }
+       }
+      }*/
 
 
 
@@ -372,12 +393,12 @@ void loop()
   }
 
   lastButtonState = buttonState;
-  
+
   //if (digitalRead(BT_REPORT) == LOW)
   //{
-    //Serial.println("PUSH");
+  //Serial.println("PUSH");
 
-    //print_log = true;
+  //print_log = true;
   //}
 
 

@@ -47,7 +47,7 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
-
+uint32_t start_process_time;
 uint32_t litros;
 uint32_t target_litros;
 unsigned int pulsos_litro = 10;
@@ -67,6 +67,7 @@ unsigned int STATE_DISPLAY = 1;
 volatile bool display_reset = false;
 volatile bool start_print = false;
 volatile bool startCounting = false;
+volatile bool startFlowing = false;
 
 
 volatile uint32_t pesos;
