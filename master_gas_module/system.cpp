@@ -23,12 +23,13 @@ const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 unsigned long startTime = 0;
 
-
+// --------------------------------- printer
 const char  end1 = '\r';
 const char  end2 = '\n';
 uint8_t tempVar = 0;
 char tempChar;
 uint8_t resultadoBytes[200];
+uint32_t pendingPrint = 0;
 
 char resultado[200];
 
@@ -63,6 +64,9 @@ char buff[200];
 int i;
 String jsonStr;
 unsigned int STATE_DISPLAY = 1;
+
+// --------------- oled display
+
 
 volatile bool display_reset = false;
 volatile bool encoder_reset = false;

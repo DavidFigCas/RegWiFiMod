@@ -14,6 +14,7 @@ void setup()
 
   buttonState = LOW;
   lastButtonState = HIGH;
+  printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
 }
 
 
@@ -253,51 +254,42 @@ void loop()
   }
 
 
-  if (((millis() - mainRefresh > mainTime)/* && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())*/))
+  // ---------------------------------------------------------------- internet
+  if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
     //gps_update();
 
     // ----------------------------------------- check internet
-    /*if (wifi_check())
+    if (wifi_check())
+    {
+      update_clock();
+      read_clock();
+      if (mqtt_check())
       {
-       update_clock();
-       read_clock();
-       if (mqtt_check())
-       {
-         // ------------------------------------------- Send Log
-         if (send_log == true)
-         {
-           Serial.println("mqtt sending");
+        // ------------------------------------------- Send Log
+        if (send_log == true)
+        {
+          Serial.println("mqtt sending");
 
-           //saveNewlog();
+          //saveNewlog();
 
-           strcpy(buffer_union_publish, obj["id"].as<const char*>());
-           strcat(buffer_union_publish, publish_topic);
-           strcat(buffer_union_publish, log_topic);
+          strcpy(buffer_union_publish, obj["id"].as<const char*>());
+          strcat(buffer_union_publish, publish_topic);
+          strcat(buffer_union_publish, log_topic);
 
-           JsonArray logObject = obj_log;
-           size_t serializedLength = measureJson(logObject) + 1;
-           char tempBuffer[serializedLength];
-           serializeJson(logObject, tempBuffer, serializedLength);
-           strcpy(buffer_msg, tempBuffer);
+          JsonArray logObject = obj_log;
+          size_t serializedLength = measureJson(logObject) + 1;
+          char tempBuffer[serializedLength];
+          serializeJson(logObject, tempBuffer, serializedLength);
+          strcpy(buffer_msg, tempBuffer);
 
-           Mclient.publish(buffer_union_publish, buffer_msg);
-           send_log = false;
-         }
-       }
-      }*/
+          Mclient.publish(buffer_union_publish, buffer_msg);
+          send_log = false;
+        }
+      }
+    }
 
-
-
-    //Serial.print("STATE: ");
-    //Serial.println(STATE, BIN);
-    //Serial.print("ToDO: ");
-    //Serial.println(todo_byte, BIN);
-    //Serial.print("Client: ");
-    //for (int i = 0; i < 4; i++)
-    //  Serial.print(nclient_data[i]);
-    //Serial.println();
 
   }
 

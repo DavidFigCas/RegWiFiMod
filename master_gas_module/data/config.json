@@ -5,8 +5,8 @@
   "test": true,
   "id": "18",
   "enable_wifi": true,
-  "ssid": "Inventoteca_2G",
-  "pass": "science_7425",
+  "ssid": "Inventoteca_5G",
+  "pass": "1234567890",
   "email": "info@inventoteca.com",
   "firepass": "Homerosim",
   "key": "AIzaSyAOfGOjdpVQZtnhwTjmNRy8mApY993zHfc",
@@ -18,6 +18,6 @@
   "capacity": 10000,
   "percentage": 70.5,
   "uprice": 9.7,
-  "pulsos_litro": 10,
-  "folio": 2
+  "pulsos_litro": 1,
+  "folio": 0
 }
