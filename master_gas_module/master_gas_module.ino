@@ -17,7 +17,7 @@ void setup()
   lastButtonState = HIGH;
 
   oled_display_number(0);    // Draw 'stylized' characters
-  printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+  //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
 
@@ -177,17 +177,19 @@ void loop()
     { // Si es la primera vez que entras al estado
       startTimeToPrint = millis();
       Serial.println("Display on 3, reset");
-    }
+    //}
 
-    if (millis() - startTimeToPrint >= 1000)
-    { // Han pasado 10 segundos
+    //if (millis() - startTimeToPrint >= 1000)
+    //{ // Han pasado 10 segundos
       //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
       saveConfig = true;
       //new_log = true;
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
+      oled_display_number(0);
     }
   }
 

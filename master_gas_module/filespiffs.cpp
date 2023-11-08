@@ -51,7 +51,7 @@ void saveNewlog()
   }
 
   Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
-  if (obj["test"].as<bool>())
+  //if (obj["test"].as<bool>())
     serializeJsonPretty(obj_log, Serial);
   Serial.println();
   folio++;
