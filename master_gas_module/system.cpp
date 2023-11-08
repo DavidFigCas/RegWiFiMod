@@ -19,9 +19,13 @@ volatile bool found_client = false;
 unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
 unsigned long mainTime = 1000;
 
+// firebase
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 unsigned long startTime = 0;
+
+// printer
+uint32_t startTimeToPrint;
 
 // --------------------------------- printer
 const char  end1 = '\r';

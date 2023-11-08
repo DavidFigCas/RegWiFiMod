@@ -83,6 +83,7 @@ extern const char* unidades[];
 extern const char* decenas[];
 extern const char* especiales[];
 //uint32_t unitprice;
+extern uint32_t startTimeToPrint;
 
 
 extern const unsigned long intervalo;

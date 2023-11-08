@@ -173,26 +173,21 @@ void loop()
   // Debe depender del encoder
   if (readyToPrint == true)
   {
-    if (startTime == 0)
+    if (startTimeToPrint == 0)
     { // Si es la primera vez que entras al estado
-      startTime = millis();
+      startTimeToPrint = millis();
       Serial.println("Display on 3, reset");
-      //oled_display_number(0);
     }
 
-    if (millis() - startTime >= 10000)
+    if (millis() - startTimeToPrint >= 1000)
     { // Han pasado 10 segundos
       //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
-      //printCheck(uint32_t (precio_check), uint32_t (litros_check), uint32_t (uprice * 100), uint8_t folio, uint32_t now.unixtime(), uint32_t now.unixtime());
-      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
       saveConfig = true;
       //new_log = true;
-      Serial.println("Done reset");
-      oled_display_number(0);
-      startTime = 0; // Resetea el tiempo de inicio para la próxima vez
-      
+      Serial.println("###################      Done reset    #########################");
+      startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
     }
   }
 
