@@ -8,15 +8,16 @@
 void setup()
 {
   system_init();
+  oled_display_text(VERSION);    // Draw 'stylized' characters
   search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 
   buttonState = LOW;
   lastButtonState = HIGH;
-  oled_display_text(VERSION);    // Draw 'stylized' characters
-  oled_display_number(88888);    // Draw 'stylized' characters
-  printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+
+  oled_display_number(0);    // Draw 'stylized' characters
+  printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
 
@@ -89,7 +90,6 @@ void loop()
     precio = litros * uprice;
   }
 
-  oled_display_number(litros); 
   display_reset = false;
 
 
@@ -110,6 +110,7 @@ void loop()
         stopFlowing = false;
       }
       encoder_reset = false;
+      oled_display_number(litros);
 
     }
     else if (doc_encoder["STATE"] == 3)
@@ -130,7 +131,7 @@ void loop()
         read_clock();
         saveNewlog();
       }
-
+      oled_display_number(litros_check);
     }
     else if (doc_encoder["STATE"] == 0)
     {
@@ -140,7 +141,12 @@ void loop()
       encoder_reset = false;
       startFlowing = false;
       readyToPrint = false;
+
     }
+    //else
+    //{
+
+    //}
   }
 
 
@@ -171,17 +177,22 @@ void loop()
     { // Si es la primera vez que entras al estado
       startTime = millis();
       Serial.println("Display on 3, reset");
+      //oled_display_number(0);
     }
 
     if (millis() - startTime >= 10000)
     { // Han pasado 10 segundos
-      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      //printCheck(uint32_t (precio_check), uint32_t (litros_check), uint32_t (uprice * 100), uint8_t folio, uint32_t now.unixtime(), uint32_t now.unixtime());
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
       saveConfig = true;
       //new_log = true;
       Serial.println("Done reset");
+      oled_display_number(0);
       startTime = 0; // Resetea el tiempo de inicio para la próxima vez
+      
     }
   }
 

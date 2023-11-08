@@ -104,7 +104,9 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uin
 }
 
 // --------------------------------------------------------------------------printCheck
-void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f) {
+//void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f) 
+void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint32_t start_timestamp, uint32_t end_timestamp)
+{
   char resultado[150];
   const char end1 = '\r';
   const char end2 = '\n';
@@ -125,7 +127,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8
   printString("\n\r");
   // Imprimir fecha y hora
   printString("FECHA:");
-  printDateTime(d, m, y, h, mn);
+  //printDateTime(d, m, y, h, mn);
   printString("\n\r");
   //printString("Duración del servicio:");
 

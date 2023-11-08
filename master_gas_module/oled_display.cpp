@@ -55,7 +55,18 @@ void oled_display_number(uint32_t num)
   display.setTextSize(4);
   //display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);        // Draw white text
-  display.setCursor(0, 0);            // Start at top-left corner
+
+  if (num < 10)
+    display.setCursor(102, 0);            //
+  else if (num < 100)
+    display.setCursor(77, 0);            //
+  else if (num < 1000)
+    display.setCursor(51, 0);            //
+  else if (num < 10000)
+    display.setCursor(26, 0);            //
+  else
+    display.setCursor(0, 0);            // Start at top-left corner
+
   display.println(num);
 
   //display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' text
