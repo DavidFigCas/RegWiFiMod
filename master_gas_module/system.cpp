@@ -65,8 +65,6 @@ int i;
 String jsonStr;
 unsigned int STATE_DISPLAY = 1;
 
-// --------------- oled display
-
 
 volatile bool display_reset = false;
 volatile bool encoder_reset = false;
@@ -204,6 +202,7 @@ void system_init()
     init_clock();        // I2C for clock
   }
   gps_init();
+  oled_display_init();
 
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts

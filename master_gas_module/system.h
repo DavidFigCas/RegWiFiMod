@@ -46,6 +46,7 @@
 #include "gps_service.h"
 #include  "printerservice.h"
 #include "firebasedb.h"
+#include "oled_display.h"
 
 
 //15 seconds WDT
