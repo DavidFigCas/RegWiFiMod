@@ -116,8 +116,8 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   Serial.println(f);
 
   setPrintMode(0); // Configurar modo de impresión
-  printString("GAS DE XALAPA S.A. DE C.V.\n\r");
-  printString("R.F.C.: GXA 550301 BP3\n\r");
+  printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r");
+  //printString("R.F.C.: GXA 550301 BP3\n\r");
 
   // Imprimir número de unidad y folio
   printString("EQUIPO: 002");
