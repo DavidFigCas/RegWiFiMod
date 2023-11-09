@@ -1,0 +1,3 @@
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/test_blink/build/pioasm/CMakeFiles/pioasm.dir
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/test_blink/build/pioasm/CMakeFiles/edit_cache.dir
+/home/invento/Documentos/GasWiFiModule/RegWiFiMod/test_blink/build/pioasm/CMakeFiles/rebuild_cache.dir

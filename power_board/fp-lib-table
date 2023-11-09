@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "LTC4368IMS-2#PBF")(type "Legacy")(uri "/home/pingvin/PROJECTS/KiCad_libraries/my_libs/LTC4368IMS-2#PBF.mod")(options "")(descr "")(disabled))
+)
