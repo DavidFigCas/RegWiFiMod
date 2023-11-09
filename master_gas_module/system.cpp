@@ -212,7 +212,7 @@ void system_init()
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
-  pinMode(BT_REPORT,INPUT);
+  pinMode(BT_REPORT,INPUT_PULLUP);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change

@@ -4,6 +4,9 @@ void printing_logs()
 {
   Serial.println("Print ALL LOGS");
   serializeJson(obj_log, Serial);
+
+  uint32_t acumulado;
+
   // Iterar sobre cada objeto en el JsonArray
   for (JsonObject jsonObject : obj_log)
   {
@@ -25,9 +28,12 @@ void printing_logs()
     int hora = dt.hour();
     int minuto = dt.minute();
 
+    acumulado = acumulado + litros;
+
     // Llamar a la función printCheck con los valores extraídos
-    printReport(precio, litros, uint32_t(uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
   }
+
+  printReport(precio, acumulado, uint32_t(uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
 }
 
 // --------------------------------------------------------------------------- printRepot
@@ -36,80 +42,46 @@ void printing_logs()
 //Numero       letra          dia          mes       año       hora       minuto
 void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f)
 {
-  //char* resultado = "";
-  char resultado[150]; // ??
-  //const char* Total = "TOTAL $"; // header of ticket
-  const char  end1 = '\r'; // chars used many times
-  const char  end2 = '\n';
-  uint8_t resultadoBytes[100]; // ??
-  uint8_t tempVar = 0; // hold bytes for commands
-  char tempChar; // ??
-  //  uint32_t tempnum = 0; // ??
+  
+  Serial.print("LITROS: ");
+  Serial.println(ltr);
 
-  //Set text double size
-  // first command ESC ! <1B>H<21>H<n> Set print mode '0'
-  Serial.println();
-  Serial.print("REPORTE:");
-  Serial.println(f);
-  Serial.println();
-  tempVar = 0x1B;
-  //
-  Wire.beginTransmission(0x5D);
-  Wire.write((const uint8_t *)&tempVar, 1);
-  Wire.endTransmission();
-  tempVar = 0x21;
-  //
-  Wire.beginTransmission(0x5D);
-  Wire.write((const uint8_t *)&tempVar, 1);
-  Wire.endTransmission();
-  tempVar = 48; // char '0'
-  //
-  Wire.beginTransmission(0x5D);
-  Wire.write((const uint8_t *)&tempVar, 1);
-  Wire.endTransmission();
-  delay(100);
-  //Send "Total   $" (9 chars)
-  // "converting" data type (chars to bytes)
-  //Serial.println(Total);
-  //strncpy((char*)resultadoBytes, Total, 8);
-  //Serial.print(resultadoBytes);
-  //resultadoBytes[BUFFER_SIZE - 1] = '\0';
-  //i2c_write_blocking(i2c0, 0x5D, resultadoBytes, 9, false);
-  //Wire.beginTransmission(0x5D);
-  //Wire.write((const uint8_t *)&tempVar, 8);
-  //Wire.endTransmission();
+  setPrintMode(0); // Configurar modo de impresión
+  printString("        REPORTE \n\r");
+  //printString("R.F.C.: GXA 550301 BP3\n\r");
 
-  strcpy(resultado, "REPORTE   $");
-  size_t size = strlen(resultado);
-  strncpy((char*)resultadoBytes, resultado, size);
-
-  Wire.beginTransmission(0x5D);
-  Wire.write(resultadoBytes, size);
-  Wire.endTransmission();
-
-  // num is the total cost of gas
-  sprintf(resultado, "%u", num);
-  size = strlen(resultado);
-  strncpy((char*)resultadoBytes, resultado, size);
-  //i2c_write_blocking(i2c0, 0x5D, resultadoBytes, size, false);
-  Wire.beginTransmission(0x5D);
-  Wire.write(resultadoBytes, size);
-  Wire.endTransmission();
-  //sending end of string
-  tempChar = end1;
-  Wire.beginTransmission(0x5D);
-  Wire.write((const uint8_t *)&tempChar, 1);
-  Wire.endTransmission();
+  // Imprimir número de unidad y folio
+  printString("EQUIPO: 002");
+  printString("\n\r");
+  setPrintMode(48); // Configurar modo de impresión
+  printString("LITROS: ");
+  printNumber(ltr);
+  setPrintMode(0); // Configurar modo de impresión
+  printString("\n\r");
+  // Imprimir fecha y hora
+  printString("FECHA DE IMPRESION:");
+  DateTime now;
+  now = rtc.now();
+  //now = DateTime(end_timestamp);
+  int mes = now.month();
+  int anio = now.year();
+  int dia_hoy = now.day();
+  int hora = now.hour();
+  int minuto = now.minute();
+  printDateTime(dia_hoy, mes, anio, hora, minuto);
+  printString("\n\r");
+  //printDateTime(d, m, y, h, mn);
+  printString("\n\r");
 
 }
 
 // --------------------------------------------------------------------------printCheck
-//void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f) 
+//void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f)
 void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint32_t start_timestamp, uint32_t end_timestamp)
 {
-  char resultado[150];
-  const char end1 = '\r';
-  const char end2 = '\n';
+  //char resultado[150];
+  //const char end1 = '\r';
+  //const char end2 = '\n';
 
   // Imprimir Folio
   Serial.print("FOLIO: ");
@@ -127,7 +99,16 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   printString("\n\r");
   // Imprimir fecha y hora
   printString("FECHA:");
-  //printDateTime(d, m, y, h, mn);
+
+  DateTime now;
+  //now = rtc.now();
+  now = DateTime(end_timestamp);
+  int mes = now.month();
+  int anio = now.year();
+  int dia_hoy = now.day();
+  int hora = now.hour();
+  int minuto = now.minute();
+  printDateTime(dia_hoy, mes, anio, hora, minuto);
   printString("\n\r");
   //printString("Duración del servicio:");
 
