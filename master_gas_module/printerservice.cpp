@@ -5,7 +5,7 @@ void printing_logs()
   Serial.println("Print ALL LOGS");
   serializeJson(obj_log, Serial);
 
-  uint32_t acumulado;
+  uint32_t litros_acumulado=0;
   uint32_t servicios=0;
   uint32_t total_ventas=0;
 
@@ -17,27 +17,27 @@ void printing_logs()
     uint32_t folio = jsonObject["folio"];
     uint32_t timestamp = jsonObject["timestamp"];
     uint32_t state = jsonObject["state"];
-    uint32_t litros = jsonObject["litros"];
-    uint32_t precio = jsonObject["precio"];
+    uint32_t litros = jsonObject["litros"].as<uint32_t>();
+    uint32_t precio = jsonObject["precio"].as<uint32_t>();
     uint32_t cliente = jsonObject["cliente"];
     float uprice = (float)precio / litros; // Asumiendo que uprice es el precio por litro
 
     // Convertir el timestamp a fecha y hora usando RTClib
-    DateTime dt(timestamp);
-    int dia_hoy = dt.day();
-    int mes = dt.month();
-    int anio = dt.year();
-    int hora = dt.hour();
-    int minuto = dt.minute();
+    //DateTime dt(timestamp);
+    //int dia_hoy = dt.day();
+    //int mes = dt.month();
+    //int anio = dt.year();
+    //int hora = dt.hour();
+    //int minuto = dt.minute();
 
     servicios++;
-    acumulado = acumulado + litros;
+    litros_acumulado = litros_acumulado + litros;
     total_ventas = total_ventas + precio;
 
     // Llamar a la función printCheck con los valores extraídos
   }
 
-  printReport(servicios, acumulado, total_ventas);
+  printReport(servicios, litros_acumulado, total_ventas);
 }
 
 // --------------------------------------------------------------------------- printRepot
@@ -54,7 +54,9 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
 
   setPrintMode(0); // Configurar modo de impresión
   printString("        REPORTE \n\r");
-  //printString("R.F.C.: GXA 550301 BP3\n\r");
+  printString("VERSION: ");
+  printString(VERSION);
+  printString("\n\r");
 
   // Imprimir número de unidad y folio
   printString("EQUIPO: 002");
@@ -62,10 +64,17 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   setPrintMode(48); // Configurar modo de impresión
   printString("LITROS: ");
   printNumber(ltr);
+  printString("\n\r");
+  printString("SERVICIOS: ");
+  printNumber(num);
+  printString("\n\r");
+  printString("VENTA: ");
+  printNumber(total);
+  printString("\n\r");
   setPrintMode(0); // Configurar modo de impresión
   printString("\n\r");
   // Imprimir fecha y hora
-  printString("FECHA DE IMPRESION:");
+  printString("FECHA:");
   DateTime now;
   now = rtc.now();
   //now = DateTime(end_timestamp);
@@ -74,7 +83,7 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  printDateTime(dia_hoy, mes, anio, hora, minuto);
+  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
   endPrint();
   //printString("\n\r");
   
