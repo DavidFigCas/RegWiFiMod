@@ -6,6 +6,8 @@ void printing_logs()
   serializeJson(obj_log, Serial);
 
   uint32_t acumulado;
+  uint32_t servicios=0;
+  uint32_t total_ventas=0;
 
   // Iterar sobre cada objeto en el JsonArray
   for (JsonObject jsonObject : obj_log)
@@ -28,23 +30,27 @@ void printing_logs()
     int hora = dt.hour();
     int minuto = dt.minute();
 
+    servicios++;
     acumulado = acumulado + litros;
+    total_ventas = total_ventas + precio;
 
     // Llamar a la función printCheck con los valores extraídos
   }
 
-  printReport(precio, acumulado, uint32_t(uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+  printReport(servicios, acumulado, total_ventas);
 }
 
 // --------------------------------------------------------------------------- printRepot
 // printCheck worked. A ticket was printed
 // the function i2c_write_blocking is for RP2040 (RPi Pico)
 //Numero       letra          dia          mes       año       hora       minuto
-void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f)
+void printReport (uint32_t num, uint32_t ltr, uint32_t total)
 {
   
   Serial.print("LITROS: ");
   Serial.println(ltr);
+  Serial.print("SERVICIOS: ");
+  Serial.println(num);
 
   setPrintMode(0); // Configurar modo de impresión
   printString("        REPORTE \n\r");
@@ -69,9 +75,9 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uin
   int hora = now.hour();
   int minuto = now.minute();
   printDateTime(dia_hoy, mes, anio, hora, minuto);
-  printString("\n\r");
-  //printDateTime(d, m, y, h, mn);
-  printString("\n\r");
+  endPrint();
+  //printString("\n\r");
+  
 
 }
 
