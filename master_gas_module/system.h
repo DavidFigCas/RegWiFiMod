@@ -11,6 +11,11 @@
 #define LOG_SIZE        3048
 #define BT_REPORT       0
 
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
 //#include <vector>
@@ -28,8 +33,8 @@
 #include <TinyGPSPlus.h>
 #include <Firebase_ESP_Client.h>
 #include <esp_task_wdt.h>
-
-//#include <WiFiManager_RP2040W.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #include "version.h"
 #include "wifiservice.h"
@@ -41,6 +46,7 @@
 #include "gps_service.h"
 #include  "printerservice.h"
 #include "firebasedb.h"
+#include "oled_display.h"
 
 
 //15 seconds WDT
@@ -63,12 +69,13 @@ extern unsigned long  s_timestamp;
 extern volatile bool found_client;
 
 
-
+// --------------------------------- printer
 extern const char  end1;
 extern const char  end2;
 extern uint8_t tempVar;
 extern char tempChar;
 extern uint8_t resultadoBytes[200];
+extern uint32_t pendingPrint;
 
 extern char resultado[200];
 
@@ -76,6 +83,7 @@ extern const char* unidades[];
 extern const char* decenas[];
 extern const char* especiales[];
 //uint32_t unitprice;
+extern uint32_t startTimeToPrint;
 
 
 extern const unsigned long intervalo;
@@ -88,6 +96,7 @@ extern unsigned long tiempoActual2;
 extern volatile bool startCounting2;
 
 
+extern uint32_t start_process_time;
 extern uint32_t litros;
 extern unsigned int pulsos_litro;
 extern uint32_t precio;
@@ -103,8 +112,12 @@ extern String jsonStr;
 extern unsigned int STATE_DISPLAY;
 
 extern volatile bool display_reset;
+extern volatile bool encoder_reset;
 extern volatile bool start_print;
 extern volatile bool startCounting;
+extern volatile bool startFlowing;
+extern volatile bool stopFlowing;
+extern volatile bool readyToPrint;
 
 
 extern volatile uint32_t pesos;

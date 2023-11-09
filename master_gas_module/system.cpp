@@ -19,22 +19,27 @@ volatile bool found_client = false;
 unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
 unsigned long mainTime = 1000;
 
+// firebase
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 unsigned long startTime = 0;
 
+// printer
+uint32_t startTimeToPrint;
 
+// --------------------------------- printer
 const char  end1 = '\r';
 const char  end2 = '\n';
 uint8_t tempVar = 0;
 char tempChar;
 uint8_t resultadoBytes[200];
+uint32_t pendingPrint = 0;
 
 char resultado[200];
 
-const char* unidades[] = {"", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
-const char* decenas[] = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"};
-const char* especiales[] = {"diez", "once", "doce", "trece", "catorce", "quince"};
+const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
+const char* decenas[] = {"", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
+const char* especiales[] = {"DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"};
 //uint32_t unitprice;
 
 
@@ -47,7 +52,7 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
-
+uint32_t start_process_time;
 uint32_t litros;
 uint32_t target_litros;
 unsigned int pulsos_litro = 10;
@@ -64,9 +69,14 @@ int i;
 String jsonStr;
 unsigned int STATE_DISPLAY = 1;
 
+
 volatile bool display_reset = false;
+volatile bool encoder_reset = false;
 volatile bool start_print = false;
 volatile bool startCounting = false;
+volatile bool startFlowing = false;
+volatile bool stopFlowing = false;
+volatile bool readyToPrint = false;
 
 
 volatile uint32_t pesos;
@@ -83,6 +93,7 @@ void register_client()
   target_litros = obj_in["litros"];
   uprice = (obj_in["precio"].as<float>());
   factor = (obj_in["factor"].as<float>());
+  pulsos_litro =  (obj_in["pulsos_litro"].as<uint32_t>());
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 
@@ -196,6 +207,7 @@ void system_init()
     init_clock();        // I2C for clock
   }
   gps_init();
+  oled_display_init();
 
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts

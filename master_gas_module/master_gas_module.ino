@@ -8,12 +8,16 @@
 void setup()
 {
   system_init();
+  oled_display_text(VERSION);    // Draw 'stylized' characters
   search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 
   buttonState = LOW;
   lastButtonState = HIGH;
+
+  oled_display_number(0);    // Draw 'stylized' characters
+  //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
 
@@ -66,9 +70,9 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  Serial.print("Display: ");
-  serializeJson(doc_display, Serial);
-  Serial.println();
+  //Serial.print("Display: ");
+  //serializeJson(doc_display, Serial);
+  //Serial.println();
 
 
   Serial.print("Encoder: ");
@@ -79,75 +83,115 @@ void loop()
 
   // ----------------------------------------------- procesar
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
-  litros = (doc_encoder["current"].as<uint32_t>() / pulsos_litro);
-  precio = litros * uprice;
+  // Encoder value is ready and not null
+  if (!doc_encoder["current"].isNull())
+  {
+    litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
+    precio = litros * uprice;
+  }
+
   display_reset = false;
 
 
-  // ------------------------------------- printer
-  if (STATE_DISPLAY == 3)
-  {
-    if (startTime == 0)
-    { // Si es la primera vez que entras al estado
-      startTime = millis();
-      Serial.println("Display on 3, reset");
-    }
 
-    if (millis() - startTime >= 10000)
-    { // Han pasado 10 segundos
-      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
-      STATE_DISPLAY = 0;
-      folio++;
-      obj["folio"] = folio;
-
-      saveConfig = true;
-      //new_log = true;
-      Serial.println("Done reset");
-      startTime = 0; // Resetea el tiempo de inicio para la próxima vez
-    }
-  }
 
 
   // ------------------------------------- encoder Read and stop
-  if (doc_encoder["STATE"] == 3)
+  //if (!doc_encoder["STATE"].isNull())
   {
-    if (!startCounting)
+    if (doc_encoder["STATE"] == 1)
     {
-      // Detectado por primera vez
-      tiempoAnterior = millis();
-      startCounting = true;
-      Serial.println("STOP FLOWING");
-      Serial.print("Litros: ");
-      Serial.println(litros);
-      STATE_DISPLAY = 2;
-      litros_check = litros;
-      precio_check = precio;
-      saveNewlog();
-    }
-    else
-    {
-      // Ya se ha detectado antes, verificar el intervalo
-      tiempoActual = millis();
-      if (tiempoActual - tiempoAnterior >= intervalo)
+      if (!startFlowing)
       {
-        // Ha pasado 1 minuto
-        display_reset = true;
-        startCounting = false;  // Detener el conteo
-        //if (STATE_DISPLAY == 3)
-        STATE_DISPLAY = 3;
-        Serial.println("Display Bing Printer");
-
+        Serial.println("--------------------START FLOWING-----------------");
+        read_clock();
+        start_process_time = now.unixtime();
+        startFlowing = true;
+        stopFlowing = false;
       }
+      encoder_reset = false;
+      oled_display_number(litros);
+
+    }
+    else if (doc_encoder["STATE"] == 3)
+    {
+      encoder_reset = true;
+      if (!stopFlowing)
+      {
+        // Detectado por primera vez
+        tiempoAnterior = millis();
+        startCounting = true;
+        startFlowing = false;
+        stopFlowing = true;
+        Serial.println("--------------------STOP FLOWING-----------------");
+        STATE_DISPLAY = 2;
+        litros_check = litros;
+        precio_check = precio;
+        //encoder_reset = true;
+        read_clock();
+        saveNewlog();
+      }
+      oled_display_number(litros_check);
+    }
+    else if (doc_encoder["STATE"] == 0)
+    {
+      // Si STATE no es 3, resetear el conteo
+      // start_process_time
+      //startCounting = false;
+      encoder_reset = false;
+      startFlowing = false;
+      readyToPrint = false;
+
+    }
+    //else
+    //{
+
+    //}
+  }
+
+
+  // --------------------------------- proces stop, display liters and wait for icon
+  if (startCounting)
+  {
+    // Ya se ha detectado antes, verificar el intervalo
+    tiempoActual = millis();
+    if (tiempoActual - tiempoAnterior >= intervalo)
+    {
+      // Ha pasado 1 minuto
+      display_reset = true;
+      startCounting = false;  // Detener el conteo
+      //if (STATE_DISPLAY == 3)
+      STATE_DISPLAY = 3;
+      Serial.println("Display Bing Printer");
+      startCounting = false;
+      readyToPrint = true;
     }
   }
-  else
+
+
+  // ------------------------------------- printer ready to print
+  // Debe depender del encoder
+  if (readyToPrint == true)
   {
-    // Si STATE no es 3, resetear el conteo
-    startCounting = false;
+    if (startTimeToPrint == 0)
+    { // Si es la primera vez que entras al estado
+      startTimeToPrint = millis();
+      Serial.println("Display on 3, reset");
+    //}
+
+    //if (millis() - startTimeToPrint >= 1000)
+    //{ // Han pasado 10 segundos
+      //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+      readyToPrint = false;
+      STATE_DISPLAY = 0;
+      saveConfig = true;
+      //new_log = true;
+      Serial.println("###################      Done reset    #########################");
+      startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
+      oled_display_number(0);
+    }
   }
-
-
-
 
 
   // ----------------------------------------------- enviar
@@ -191,7 +235,7 @@ void loop()
 
   // ---------------------- encoder doc
   doc_aux.clear();
-  doc_aux["reset"] = display_reset;
+  doc_aux["reset"] = encoder_reset;
   doc_aux["litros"] = litros;
   serializeJson(doc_aux, b);
   //Serial.print("Master to encoder: ");
@@ -220,6 +264,8 @@ void loop()
     print_log = false;
   }
 
+
+  // ---------------------------------------------------------------- internet
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
@@ -255,16 +301,6 @@ void loop()
       }
     }
 
-
-
-    //Serial.print("STATE: ");
-    //Serial.println(STATE, BIN);
-    //Serial.print("ToDO: ");
-    //Serial.println(todo_byte, BIN);
-    //Serial.print("Client: ");
-    //for (int i = 0; i < 4; i++)
-    //  Serial.print(nclient_data[i]);
-    //Serial.println();
 
   }
 
@@ -368,16 +404,20 @@ void loop()
       Serial.println("Long press detected!");
       print_log = false;
       clear_log = true;
+      folio = 0;
+      obj["folio"] = folio;
+      saveConfig = true;
+      saveNewlog();
     }
   }
 
   lastButtonState = buttonState;
-  
+
   //if (digitalRead(BT_REPORT) == LOW)
   //{
-    //Serial.println("PUSH");
+  //Serial.println("PUSH");
 
-    //print_log = true;
+  //print_log = true;
   //}
 
 
