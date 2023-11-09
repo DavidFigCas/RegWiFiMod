@@ -93,6 +93,7 @@ void register_client()
   target_litros = obj_in["litros"];
   uprice = (obj_in["precio"].as<float>());
   factor = (obj_in["factor"].as<float>());
+  pulsos_litro =  (obj_in["pulsos_litro"].as<uint32_t>());
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
 

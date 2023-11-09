@@ -86,7 +86,7 @@ void loop()
   // Encoder value is ready and not null
   if (!doc_encoder["current"].isNull())
   {
-    litros = (doc_encoder["current"].as<uint32_t>() / pulsos_litro);
+    litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
     precio = litros * uprice;
   }
 
