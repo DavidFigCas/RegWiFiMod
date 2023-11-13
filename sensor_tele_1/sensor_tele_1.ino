@@ -8,8 +8,11 @@ int DB = D4;               // Salida 2 para motor
 int ENA = D1;              // Pin ENA del puente H
 int ENB = D2;              // Pin ENA del puente H
 int tiempoEspera = 3000;  // Tiempo de espera en milisegundos
+int tiempoMovimiento = 60000;  // Tiempo de espera en milisegundos
 int vel = 64;            // Valor de velocidad inicial
-int state = 0;
+volatile int state = 0;
+volatile unsigned long previousMillis = 0;
+volatile unsigned long currentMillis = 0;
 
 
 void setup()
@@ -31,28 +34,47 @@ void setup()
 void loop()
 {
   Serial.println(state);
+  currentMillis = millis();
   switch (state)
   {
     case 0:
       direccion(DERECHA);
+      if (currentMillis - previousMillis >= tiempoMovimiento)
+      {
+        state = 1;
+        previousMillis = currentMillis; // Save the start time
+      }
+      
       break;
 
     // ----------------------------- sensor de derecha presionado
     case 1:
       detenerMotor();
-      delay(tiempoEspera);
-      state = 2;
+      if (currentMillis - previousMillis >= tiempoEspera)
+      {
+        previousMillis = currentMillis; // Save the start time
+        state = 2;
+      }
       break;
 
 
     case 2:
       direccion(IZQUIERDA); // Cambiar a una dirección
+      if (currentMillis - previousMillis >= tiempoMovimiento)
+      {
+        state = 3;
+        previousMillis = currentMillis; // Save the start time
+      }
+      
       break;
 
     case 3:
       detenerMotor();
-      delay(tiempoEspera);
-      state = 0;
+      if (currentMillis - previousMillis >= tiempoEspera)
+      {
+        previousMillis = currentMillis; // Save the start time
+        state = 0;
+      }
       break;
 
   }
@@ -61,14 +83,21 @@ void loop()
 
 ICACHE_RAM_ATTR void botonDerPresionado()
 {
-  if ((state == 0))
+  if (state == 0)
+  {
     state = 1;
+    previousMillis = currentMillis; // Save the start time
+  }
+
 }
 
 ICACHE_RAM_ATTR void botonIzqPresionado()
 {
-  if ((state == 2))
+  if (state == 2)
+  {
     state = 3;
+    previousMillis = currentMillis; // Save the start time
+  }
 }
 
 void detenerMotor()
