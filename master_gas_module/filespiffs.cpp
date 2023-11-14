@@ -41,7 +41,7 @@ void saveNewlog()
   newLogEntry["folio"] = folio;
   newLogEntry["start_timestamp"] = start_process_time;
   newLogEntry["end_timestamp"] = now.unixtime();
-  newLogEntry["state"] = STATE;
+  //newLogEntry["state"] = STATE;
   newLogEntry["litros"] = litros_check;
   newLogEntry["precio"] = precio_check;
   newLogEntry["cliente"] = obj_in["cliente"].as<unsigned int>();
@@ -52,6 +52,9 @@ void saveNewlog()
   }
 
   status_doc["last_service"] = newLogEntry;
+  //status_doc["last_service"]["factor"] = obj["factor"];
+  //status_doc["last_service"]["uprice"] = uprice;
+  
   Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   //if (obj["test"].as<bool>())
     serializeJsonPretty(obj_log, Serial);

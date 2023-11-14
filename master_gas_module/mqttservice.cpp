@@ -77,7 +77,7 @@ void mqtt_send()
 //--------------------------------------------------- callback
 void callback(char* topic, byte* payload, unsigned int length)
 {
-  updated = true;
+  //updated = true;
   char jsonPayload[length + 1]; // +1 para el carácter nulo
   memcpy(jsonPayload, payload, length);
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final

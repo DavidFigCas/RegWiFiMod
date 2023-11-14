@@ -199,8 +199,10 @@ bool wifi_check()
         STATE |= (1 << 6);
 
         // ------------------------ actualemnte falla firebase
-        //if (updated == false)
+        if (updated == false)
+        {
           connectFirebase();
+        }
 
 
       }
