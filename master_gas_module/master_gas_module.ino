@@ -26,6 +26,7 @@ void loop()
 {
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
+  read_clock();
 
 
   // ----------------------------------------------- leer
@@ -290,7 +291,6 @@ void loop()
     if (wifi_check())
     {
       update_clock();
-      read_clock();
       if (mqtt_check())
       {
         // ------------------------------------------- Send Log

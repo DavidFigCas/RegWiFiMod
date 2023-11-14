@@ -59,7 +59,8 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   printString("\n\r");
 
   // Imprimir número de unidad y folio
-  printString("EQUIPO: 002");
+  printString("EQUIPO: ");
+  printNumber(obj["id"]);
   printString("\n\r");
   setPrintMode(48); // Configurar modo de impresión
   printString("LITROS: ");
@@ -107,7 +108,8 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   //printString("R.F.C.: GXA 550301 BP3\n\r");
 
   // Imprimir número de unidad y folio
-  printString("EQUIPO: 002");
+  printString("EQUIPO: ");
+  printNumber(obj["id"]);
   printString("\n\r");
   printString("NO. DE SERVICO: ");
   printNumber(f);
