@@ -9,6 +9,7 @@
 #define FILE_SIZE       1024
 #define LIST_SIZE       3048
 #define LOG_SIZE        3048
+#define STATUS_SIZE     2048
 #define BT_REPORT       0
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels

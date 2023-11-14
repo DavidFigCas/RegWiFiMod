@@ -6,6 +6,7 @@
 
 extern JsonObject obj;
 extern StaticJsonDocument<FILE_SIZE> doc;
+extern StaticJsonDocument<FILE_SIZE> status_doc;
 
 extern JsonArray obj_list;
 extern JsonObject obj_in;

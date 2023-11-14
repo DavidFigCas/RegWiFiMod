@@ -93,9 +93,13 @@ void register_client()
   target_litros = obj_in["litros"];
   uprice = (obj_in["precio"].as<float>());
   factor = (obj_in["factor"].as<float>());
-  pulsos_litro =  (obj_in["pulsos_litro"].as<uint32_t>());
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
+
+  status_doc["client"]["litros"] = target_litros;
+  status_doc["client"]["precio"] = uprice;
+  status_doc["client"]["factor"] = factor;
+  status_doc["client"]["nombre"] = client_name;
 
   Serial.println();
   Serial.print("NAME: ");
@@ -212,7 +216,7 @@ void system_init()
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
-  pinMode(BT_REPORT,INPUT_PULLUP);
+  pinMode(BT_REPORT, INPUT_PULLUP);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
@@ -328,7 +332,7 @@ void loadConfig()
   //--------------- LOAD REGISTERS
   String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
   updated = obj["updated"].as<bool>();
-  
+
   size_t length = email.length();
 
   /* if (length <= sizeof(name_data)) {
@@ -389,15 +393,19 @@ void loadConfig()
 
   //uprice = obj["uprice"];
   //pulsos_litro = obj["pulsos_litro"];
-  
+
   //if (!obj["folio"].isNull())
   //  folio = obj["folio"];
   //else
   //{
-    folio = obj["folio"];
-    Serial.print("Folio: ");
-    Serial.println(folio);
+  folio = obj["folio"];
+  status_doc["folio"] = folio;
+  Serial.print("Folio: ");
+  Serial.println(folio);
   //}
+
+  pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
+  status_doc["pulsos_litro"] = pulsos_litro;
 
 
 

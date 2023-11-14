@@ -2,6 +2,7 @@
 
 JsonObject obj;
 StaticJsonDocument<FILE_SIZE> doc;
+StaticJsonDocument<FILE_SIZE> status_doc;
 //DynamicJsonDocument doc(FILE_SIZE);
 
 JsonArray obj_list;
