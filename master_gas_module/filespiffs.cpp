@@ -51,6 +51,7 @@ void saveNewlog()
     newLogEntry["lon"] = obj["gps"]["lon"];
   }
 
+  status_doc["last_service"] = newLogEntry;
   Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   //if (obj["test"].as<bool>())
     serializeJsonPretty(obj_log, Serial);

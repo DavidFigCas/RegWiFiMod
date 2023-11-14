@@ -67,6 +67,7 @@ void init_clock()
 
 
     now = rtc.now();
+    status_doc["time"] = now.unixtime();
 
     // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
     const uint32_t unixTime2050 = 2524608000;
