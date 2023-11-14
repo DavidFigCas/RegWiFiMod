@@ -46,9 +46,11 @@ void loop()
   jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_display, jsonStr);
-  status_doc["display"].clear();
-  status_doc["display"] = doc_display.as<JsonVariant>();
-  
+  if (doc_display.isNull())
+    status_doc["display"] = false;
+  else
+    status_doc["display"] = true;
+
 
 
   delay(TIME_SPACE);
@@ -69,9 +71,12 @@ void loop()
   jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_encoder, jsonStr);
-  status_doc["encoder"].clear();
-  status_doc["encoder"] = doc_encoder.as<JsonVariant>();
   
+  if (doc_encoder.isNull())
+    status_doc["encoder"] = false;
+  else
+    status_doc["encoder"] = true;
+
 
 
   // ----------------------------------- Serial Monitor
@@ -187,10 +192,10 @@ void loop()
     { // Si es la primera vez que entras al estado
       startTimeToPrint = millis();
       Serial.println("Display on 3, reset");
-    //}
+      //}
 
-    //if (millis() - startTimeToPrint >= 1000)
-    //{ // Han pasado 10 segundos
+      //if (millis() - startTimeToPrint >= 1000)
+      //{ // Han pasado 10 segundos
       //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
@@ -279,7 +284,7 @@ void loop()
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
     mainRefresh = millis();
-    //gps_update();
+    gps_update();
 
     // ----------------------------------------- check internet
     if (wifi_check())

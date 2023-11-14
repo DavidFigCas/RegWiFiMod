@@ -200,6 +200,8 @@ void system_init()
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
 
+  status_doc["ver"] = VERSION;
+
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system

@@ -18,7 +18,7 @@ void gps_update()
   strcat(buffer_union_publish, publish_topic);
   strcat(buffer_union_publish, gps_topic);
 
-  JsonObject gpsObject = obj["gps"].as<JsonObject>();
+  //JsonObject gpsObject = obj["gps"].as<JsonObject>();
 
   smartDelay(mainTime);
 
@@ -76,18 +76,20 @@ void gps_update()
   serializeJson(obj["gps"], Serial);
   Serial.println();
 
-  gpsObject = obj["gps"].as<JsonObject>();
-  gpsObject["state"] = STATE;
-  gpsObject["percentage"] = obj["percentage"];
-  gpsObject["capacity"] = obj["capacity"];
+  status_doc["gps"] = obj["gps"].as<JsonObject>();
+
+  //gpsObject = obj["gps"].as<JsonObject>();
+  //gpsObject["state"] = STATE;
+  //gpsObject["percentage"] = obj["percentage"];
+  //gpsObject["capacity"] = obj["capacity"];
   //gpsObject["time"] = now;
 
-  size_t serializedLength = measureJson(gpsObject) + 1;
-  char tempBuffer[serializedLength];
-  serializeJson(gpsObject, tempBuffer, serializedLength);
-  strcpy(buffer_msg, tempBuffer);
+  //size_t serializedLength = measureJson(gpsObject) + 1;
+  //char tempBuffer[serializedLength];
+  //serializeJson(gpsObject, tempBuffer, serializedLength);
+  //strcpy(buffer_msg, tempBuffer);
 
-  Mclient.publish(buffer_union_publish, buffer_msg);
+  //Mclient.publish(buffer_union_publish, buffer_msg);
 }
 
 // This custom version of delay() ensures that the gps object
