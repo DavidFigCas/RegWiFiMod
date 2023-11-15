@@ -17,6 +17,8 @@ void setup()
   lastButtonState = HIGH;
 
   oled_display_number(0);    // Draw 'stylized' characters
+
+
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
@@ -27,6 +29,8 @@ void loop()
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
   read_clock();
+
+  
 
 
   // ----------------------------------------------- leer
@@ -72,7 +76,7 @@ void loop()
   jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_encoder, jsonStr);
-  
+
   if (doc_encoder.isNull())
     status_doc["encoder"] = false;
   else

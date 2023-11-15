@@ -1,36 +1,39 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
+#include <Wire.h>;
+#include <LiquidCrystal_I2C.h>;
 
-// 0x27 es la dirección I2C comúnmente utilizada. Si no funciona, intenta con 0x20.
-LiquidCrystal_I2C lcd(0x27, 16, 4); // Ajusta a 20,4 si es una pantalla de 20x4 caracteres.
 
-void setup() {
-  lcd.init();  // Inicialización de la pantalla
-  lcd.backlight(); // Encender el fondo retroiluminado
-  lcd.clear(); // Limpiar la pantalla
+//0x27 esla direccion I2C comunmente arduno detecta la interfaz, en caso de no funcionar
+//la pantalla intentar con a direccion 0x20
+LiquidCrystal_I2C lcd(0x27,20,4); //16,4 es el tamaño de la pantalla
+
+
+void setup()
+{
+lcd.backlight(); //inicio de fondo retroalimentado
+lcd.init(); //inicializacion de la pantalla
+lcd.clear();//limpieza de la pantalla
 }
 
-void loop() {
-  // Primera Línea
-  lcd.setCursor(0, 0); // Establecer cursor en la primera línea
-  lcd.print("1234567890123456"); // Escribir en la primera línea
-  delay(2000);
+void loop()
+{
+//lcd.clear(); //limpiar la lcd antes de escribir
 
-  // Segunda Línea
-  lcd.clear(); // Limpiar la pantalla antes de escribir en la segunda línea
-  lcd.setCursor(17, 0); // Establecer cursor en la segunda línea
-  lcd.print("Serial I2C"); // Escribir en la segunda línea
-  delay(2000);
+lcd.setCursor(0,0);//posicionamiento en la primera linea
+lcd.print("0"); //escritura en la primera linea
+delay(2000);
 
-  // Tercera Línea
-  lcd.clear(); // Limpiar la pantalla antes de escribir en la tercera línea
-  lcd.setCursor(0, 2); // Establecer cursor en la tercera línea
-  lcd.print("y LCD"); // Escribir en la tercera línea
-  delay(2000);
+lcd.setCursor(-3,1); //salto a la segunda linea
+lcd.print("1"); //escritura en la segunda linea
+delay(2000);
 
-  // Cuarta Línea
-  lcd.clear(); // Limpiar la pantalla antes de escribir en la cuarta línea
-  lcd.setCursor(0, 3); // Establecer cursor en la cuarta línea
-  lcd.print("LCM12864"); // Escribir en la cuarta línea
-  delay(2000);
+/*
+lcd.setCursor(2,2); //salto a la tercera linea
+lcd.print("2"); //escritura en la tercera linea
+delay(2000);
+
+lcd.setCursor(3,3); //salto a la cuarta linea
+lcd.print("3"); //escritura en la cuarta linea
+delay(2000);
+*/
+delay(2000); //tiempo de espera para que reinicie el ciclo
 }

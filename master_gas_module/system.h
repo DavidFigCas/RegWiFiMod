@@ -36,6 +36,8 @@
 #include <esp_task_wdt.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <LiquidCrystal_I2C.h>
+
 
 #include "version.h"
 #include "wifiservice.h"
@@ -48,6 +50,7 @@
 #include  "printerservice.h"
 #include "firebasedb.h"
 #include "oled_display.h"
+#include  "glcd_display.h"
 
 
 //15 seconds WDT

@@ -214,6 +214,7 @@ void system_init()
   }
   gps_init();
   oled_display_init();
+  init_glcd();
 
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
