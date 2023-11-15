@@ -3,7 +3,7 @@
   "mqtt_server": "inventoteca.com",
   "mqtt_port": 1883,
   "test": true,
-  "id": "18",
+  "id": "0",
   "enable_wifi": true,
   "ssid": "Inventoteca_2G",
   "pass": "science_7425",

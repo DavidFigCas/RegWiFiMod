@@ -120,7 +120,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       int litros = jsonObject["litros"];
       float precio = jsonObject["precio"];
       float factor = jsonObject["factor"];
-      uint32_t pulsos_litro = jsonObject["pulsos_litro"];
+      //uint32_t pulsos_litro = jsonObject["pulsos_litro"];
 
       Serial.println();
       Serial.print("Nombre: ");
@@ -135,8 +135,8 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println(litros);
       Serial.print("Precio: ");
       Serial.println(precio);
-      Serial.print("Pusos/litro: ");
-      Serial.println(pulsos_litro);
+      //Serial.print("Pusos/litro: ");
+      //Serial.println(pulsos_litro);
       Serial.print("Factor: ");
       Serial.println(factor);
       Serial.println();

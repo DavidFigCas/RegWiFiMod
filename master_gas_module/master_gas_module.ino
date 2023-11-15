@@ -428,7 +428,7 @@ void loop()
     Serial.println("{\"upload_config\":true}");
     saveConfigData();
     loadConfig();
-    //  
+    //
     //}
 
     saveConfig = false;
@@ -443,13 +443,22 @@ void loop()
   }
 
   // Si el botón cambia de presionado a no presionado
-  if (lastButtonState == LOW && buttonState == HIGH) 
+  if (lastButtonState == LOW && buttonState == HIGH)
   {
-    if (millis() - buttonPressTime < longPressDuration) 
+    if (millis() - buttonPressTime < longPressDuration)
     {
       Serial.println("Short press detected!");
       print_log = true;
-    } 
+    }
+    else if (millis() - buttonPressTime >= (2 * longPressDuration)) // Reinicio de fabrica
+    {
+      Serial.println("Super Long press detected!");
+      obj.clear();
+      obj = getJSonFromFile(&doc, filedefault);
+      Serial.println("{\"default_config\":true}");
+      saveConfigData();
+      ESP.restart();
+    }
     else if (millis() - buttonPressTime >= longPressDuration) // Reinicia el log
     {
       Serial.println("Long press detected!");
@@ -461,16 +470,7 @@ void loop()
       //saveNewlog();
     }
 
-    else if (millis() - buttonPressTime >= 2*longPressDuration) // Reinicio de fabrica
-    {
-      Serial.println("Super Long press detected!");
-      //print_log = false;
-      //clear_log = true;
-      //folio = 0;
-      //obj["folio"] = folio;
-      //saveConfig = true;
-      //saveNewlog();
-    }
+
   }
 
   lastButtonState = buttonState;

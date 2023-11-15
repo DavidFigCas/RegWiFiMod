@@ -55,7 +55,7 @@ volatile bool startCounting2 = false;
 uint32_t start_process_time;
 uint32_t litros;
 uint32_t target_litros;
-unsigned int pulsos_litro = 10;
+float pulsos_litro = 1;
 uint32_t precio;
 float uprice = 9.8; //price of 1 litre
 float factor;
@@ -412,7 +412,8 @@ void loadConfig()
   Serial.println(folio);
   //}
 
-  pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
+  //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
+  pulsos_litro =  obj["pulsos_litro"];
   status_doc["pulsos_litro"] = pulsos_litro;
 
 
