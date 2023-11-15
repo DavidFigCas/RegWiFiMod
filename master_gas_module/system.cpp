@@ -348,6 +348,7 @@ void loadConfig()
 
   // ------------- ID
   String s_aux = obj["id"].as<String>();
+  status_doc["id"] = obj["id"];
   int len = s_aux.length();
   // check for id or mac is the config.json file
   if ((len == 0))
@@ -394,13 +395,8 @@ void loadConfig()
   }
   mainRefresh = mainTime + 1;
 
-  //uprice = obj["uprice"];
-  //pulsos_litro = obj["pulsos_litro"];
 
-  //if (!obj["folio"].isNull())
-  //  folio = obj["folio"];
-  //else
-  //{
+  //El folio lo puede sacar del ultimo servicio
   folio = obj["folio"];
   status_doc["folio"] = folio;
   Serial.print("Folio: ");

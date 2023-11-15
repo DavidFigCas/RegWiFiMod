@@ -183,29 +183,59 @@ void callback(char* topic, byte* payload, unsigned int length)
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
   {
+    StaticJsonDocument<LIST_SIZE> conf_mqtt_doc;
     Serial.println("Config Update");
-    updated = false;
+
+    DeserializationError error = deserializeJson(conf_mqtt_doc, jsonPayload);
+
+    if (error) {
+      Serial.print("deserialize conf_mqtt_doc failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    // Recorrer cada par clave-valor en el JSON recibido
+    for (JsonPair p : conf_mqtt_doc.as<JsonObject>())
+    {
+      const char* key = p.key().c_str(); // Obtener la clave
+      JsonVariant value = p.value();     // Obtener el valor
+
+      // Verificar si la clave y el valor no son null
+      if (key != NULL && !value.isNull())
+      {
+        obj[key] = value;
+      }
+    }
+
+    // Serializar y mostrar el JSON actualizado
+    serializeJson(conf_mqtt_doc, Serial);
+    Serial.println();
+
+    saveConfig = true;
+
+    //Serial.println("Config Update");
+    //updated = false;
     return;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
   {
-    if (strcmp(jsonPayload, "delete") == 0) 
+    if (strcmp(jsonPayload, "delete") == 0)
     {
       clear_log = true;
       return;
-    } else if (strcmp(jsonPayload, "get") == 0) 
+    } else if (strcmp(jsonPayload, "get") == 0)
     {
       send_log = true;
       Serial.println("prepare send");
       return;
     }
-    else if (strcmp(jsonPayload, "print") == 0) 
+    else if (strcmp(jsonPayload, "print") == 0)
     {
       print_log = true;
       Serial.println("Print All Logs");
       return;
     }
-    
+
   }
   return;
 }

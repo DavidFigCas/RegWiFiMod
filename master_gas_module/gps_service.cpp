@@ -17,6 +17,7 @@ void gps_update()
   strcpy(buffer_union_publish, obj["id"].as<const char*>());
   strcat(buffer_union_publish, publish_topic);
   strcat(buffer_union_publish, gps_topic);
+  
 
   //JsonObject gpsObject = obj["gps"].as<JsonObject>();
 

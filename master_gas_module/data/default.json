@@ -17,7 +17,6 @@
   "dayOff" : 0,
   "capacity": 10000,
   "percentage": 70.5,
-  "uprice": 9.7,
   "pulsos_litro": 1,
   "folio": 0,
   "gps": {"lat": 19.03793, "lon": -98.20346}

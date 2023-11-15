@@ -86,18 +86,18 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  Serial.print("Display: ");
+ /* Serial.print("Display: ");
   serializeJson(doc_display, Serial);
   Serial.println();
 
 
   Serial.print("Encoder: ");
   serializeJson(doc_encoder, Serial);
-  Serial.println();
+  Serial.println();*/
 
-  Serial.print("main_status: ");
-  serializeJson(status_doc, Serial);
-  Serial.println();
+  //Serial.print("main_status: ");
+  //serializeJson(status_doc, Serial);
+  //Serial.println();
 
   delay(TIME_SPACE);
 
