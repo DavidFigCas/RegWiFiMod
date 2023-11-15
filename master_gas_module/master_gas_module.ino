@@ -30,7 +30,7 @@ void loop()
   buttonState = digitalRead(BT_REPORT);
   read_clock();
 
-  
+
 
 
   // ----------------------------------------------- leer
@@ -86,14 +86,14 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
- /* Serial.print("Display: ");
-  serializeJson(doc_display, Serial);
-  Serial.println();
+  /* Serial.print("Display: ");
+    serializeJson(doc_display, Serial);
+    Serial.println();
 
 
-  Serial.print("Encoder: ");
-  serializeJson(doc_encoder, Serial);
-  Serial.println();*/
+    Serial.print("Encoder: ");
+    serializeJson(doc_encoder, Serial);
+    Serial.println();*/
 
   //Serial.print("main_status: ");
   //serializeJson(status_doc, Serial);
@@ -128,9 +128,15 @@ void loop()
         start_process_time = now.unixtime();
         startFlowing = true;
         stopFlowing = false;
+        lcd.backlight();
       }
       encoder_reset = false;
+
+      //displays
       oled_display_number(litros);
+      lcd.setCursor(0, 0); // Establecer cursor en la primera línea
+      lcd.print("LITROS:  "); // Escribir en la primera línea
+      lcd.print(litros); // Escribir en la primera línea
 
     }
     else if (doc_encoder["STATE"] == 3)
@@ -210,6 +216,7 @@ void loop()
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
       oled_display_number(0);
+      lcd.noBacklight();
     }
   }
 
@@ -421,7 +428,7 @@ void loop()
     Serial.println("{\"upload_config\":true}");
     saveConfigData();
     loadConfig();
-    //ESP.restart();
+    //  
     //}
 
     saveConfig = false;
@@ -436,18 +443,33 @@ void loop()
   }
 
   // Si el botón cambia de presionado a no presionado
-  if (lastButtonState == LOW && buttonState == HIGH) {
-    if (millis() - buttonPressTime < longPressDuration) {
+  if (lastButtonState == LOW && buttonState == HIGH) 
+  {
+    if (millis() - buttonPressTime < longPressDuration) 
+    {
       Serial.println("Short press detected!");
       print_log = true;
-    } else {
+    } 
+    else if (millis() - buttonPressTime >= longPressDuration) // Reinicia el log
+    {
       Serial.println("Long press detected!");
       print_log = false;
       clear_log = true;
       folio = 0;
       obj["folio"] = folio;
       saveConfig = true;
-      saveNewlog();
+      //saveNewlog();
+    }
+
+    else if (millis() - buttonPressTime >= 2*longPressDuration) // Reinicio de fabrica
+    {
+      Serial.println("Super Long press detected!");
+      //print_log = false;
+      //clear_log = true;
+      //folio = 0;
+      //obj["folio"] = folio;
+      //saveConfig = true;
+      //saveNewlog();
     }
   }
 

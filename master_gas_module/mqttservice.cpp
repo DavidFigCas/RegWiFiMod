@@ -35,13 +35,10 @@ void mqtt_init()
   //if (obj["enable_mqtt"].as<bool>())
   {
 
-    Serial.println("{\"mqtt\":\"init\"}"); Mclient.setBufferSize(LIST_SIZE);
+    Serial.println("{\"mqtt\":\"init\"}");
+    Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
-    //client.setServer(obj["mqtt"]["broker"].as<const char*>(),1883);
-    //client.setServer("inventoteca.com", 1883);
     Mclient.setCallback(callback);
-    // Serial.println(obj["mqtt"]["port"].as<unsigned int>());
-    // client_id = obj["id"].as<String>();
 
   }
 
@@ -212,9 +209,6 @@ void callback(char* topic, byte* payload, unsigned int length)
     Serial.println();
 
     saveConfig = true;
-
-    //Serial.println("Config Update");
-    //updated = false;
     return;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
@@ -255,14 +249,39 @@ bool reconnect()
   if (!Mclient.connected())
   {
     Serial.print("Attempting MQTT connection...");
-    String clientId = "ESP8266Client-";
+    String clientId = "GasCar-";
     clientId += String(random(0xffff), HEX);
 
-    if (Mclient.connect(clientId.c_str()))
-      //if (Mclient.connect(obj["id"].as<const char*>()/*, mqttUser, mqttPassword*/))
-      // if (Mclient.connect(macAddress))
+    // Verificar si las claves 'mqtt_user' y 'mqtt_password' existen y no son null
+    if (obj.containsKey("mqtt_user") && !obj["mqtt_user"].isNull() && obj.containsKey("mqtt_pass") && !obj["mqtt_pass"].isNull())
     {
-      Serial.println("connected");
+
+      const char* mqtt_user = obj["mqtt_user"].as<const char*>();
+      const char* mqtt_pass = obj["mqtt_pass"].as<const char*>();
+
+      // Configurar usuario y contraseña
+      if (Mclient.connect(obj["id"].as<const char*>(), mqtt_user, mqtt_pass))
+      {
+        Serial.println("connected whit user/pass");
+        Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
+        STATE |= (1 << 0);                  // MQTT state OK
+        recsta =  true;
+      }
+      else
+      {
+        Serial.print("failed, rc=");
+        Serial.print(Mclient.state());
+        Serial.println(" try in the next");
+
+        STATE &= ~(1 << 0);                 // MQTT error
+        recsta =  false;
+      }
+    }
+    else
+    {
+      if (Mclient.connect(clientId.c_str()))
+    {
+      Serial.println("connected, NO user/pass");
       Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
       STATE |= (1 << 0);                  // MQTT state OK
       recsta =  true;
@@ -276,6 +295,9 @@ bool reconnect()
       STATE &= ~(1 << 0);                 // MQTT error
       recsta =  false;
     }
+    }
+
+
   }
   return recsta;
 }

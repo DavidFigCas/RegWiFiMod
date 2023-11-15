@@ -332,6 +332,15 @@ void loadConfig()
 
 
 
+  if(/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
+  {
+    obj["reboot"] = false;
+    Serial.println("{\"reboot_upload\":true}");
+    saveConfigData();
+    Serial.println("{\"reboot\":true}");
+    ESP.restart();
+  }
+
   //--------------- LOAD REGISTERS
   String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
   updated = obj["updated"].as<bool>();
