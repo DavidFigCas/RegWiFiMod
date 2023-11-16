@@ -54,7 +54,7 @@ void wifi_init()
 
     //WiFiManager
     if (!WMISBLOCKING) {
-    wifiManager.setConfigPortalBlocking(false);
+      wifiManager.setConfigPortalBlocking(false);
     }
 
     //set config save notify callback
@@ -76,20 +76,22 @@ void wifi_init()
     //sets timeout until configuration portal gets turned off
     //useful to make it all retry or go to sleep
     //in seconds
-    wifiManager.setTimeout(120);
+    //wifiManager.setTimeout(120);
 
     //fetches ssid and pass and tries to connect
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
-    if (!wifiManager.autoConnect("GasSolutions", "12345678")) {
-    Serial.println("failed to connect previous network and hit timeout");
-    delay(3000);
-    //reset and try again, or maybe put it to deep sleep
-    //ESP.restart();
-    //delay(5000);
+    if (!wifiManager.autoConnect("GasSolutions", "12345678")) 
+    {
+      Serial.println("failed to connect previous network and hit timeout");
+      delay(3000);
+      //reset and try again, or maybe put it to deep sleep
+      //ESP.restart();
+      //delay(5000);
     }
-    //else
+
+    else
     {
       //if you get here you have connected to the WiFi
       Serial.println("{\"wifi\":\"first connection\"}");
@@ -120,10 +122,10 @@ bool wifi_check()
 {
   bool flag;
   // put your main code here, to run repeatedly:
-  //if (!WMISBLOCKING) {
-  //  Serial.println("{\"wifi\":\"manager process\"}");
-  //wifiManager.process();
-  //}
+  if (!WMISBLOCKING) {
+    Serial.println("{\"wifi\":\"manager process\"}");
+  wifiManager.process();
+  }
 
   // is configuration portal requested?
   //if (ALLOWONDEMAND && digitalRead(ONDDEMANDPIN) == LOW )

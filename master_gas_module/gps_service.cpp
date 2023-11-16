@@ -77,8 +77,10 @@ void gps_update()
   serializeJson(obj["gps"], Serial);
   Serial.println();
 
-  //status_doc["gps"] = obj["gps"].as<JsonObject>();
-  status_doc["gps"] = obj["gps"];
+  
+  status_doc["gps"].clear();
+  //status_doc["gps"] = obj["gps"];
+  status_doc["gps"] = obj["gps"].as<JsonObject>();
 }
 
 // This custom version of delay() ensures that the gps object

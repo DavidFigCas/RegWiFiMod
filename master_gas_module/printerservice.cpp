@@ -84,7 +84,8 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
+  //printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
+  printDateTime(dia_hoy, mes, anio, hora, minuto);
   endPrint();
   //printString("\n\r");
   
@@ -291,7 +292,7 @@ void printPrice(uint32_t price) {
 // -------------------------------------------- printDateTime
 void printDateTime(uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn) {
   char buffer[30];
-  sprintf(buffer, "%u/%u/%u %u:%u", d, m, y, h, mn);
+  sprintf(buffer, "%u/%u/%u %u:%u", d, m, (y-2000), h, mn);
   printString(buffer);
 }
 
