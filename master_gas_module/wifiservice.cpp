@@ -5,7 +5,7 @@ int wifi_trys;
 boolean isSaved = false;
 bool ALLOWONDEMAND   = true; // enable on demand
 bool WMISBLOCKING    = true;
-//WiFiManager wifiManager;
+WiFiManager wifiManager;
 //WiFiManager_RP2040W wifiManager;
 //std::vector<WiFiManagerParameter*> customParams;
 
@@ -53,15 +53,15 @@ void wifi_init()
       }*/
 
     //WiFiManager
-    //if (!WMISBLOCKING) {
-    //  wifiManager.setConfigPortalBlocking(false);
-    //}
+    if (!WMISBLOCKING) {
+    wifiManager.setConfigPortalBlocking(false);
+    }
 
     //set config save notify callback
-    //    wifiManager.setSaveParamsCallback(saveConfigCallback);
-    //wifiManager.setSaveConfigCallback(saveWifiCallback);
-    //wifiManager.setWebServerCallback(bindServerCallback);
-    //wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
+    wifiManager.setSaveParamsCallback(saveConfigCallback);
+    wifiManager.setSaveConfigCallback(saveWifiCallback);
+    wifiManager.setWebServerCallback(bindServerCallback);
+    wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
 
     //set static ip
     //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
@@ -76,19 +76,19 @@ void wifi_init()
     //sets timeout until configuration portal gets turned off
     //useful to make it all retry or go to sleep
     //in seconds
-    //wifiManager.setTimeout(120);
+    wifiManager.setTimeout(120);
 
     //fetches ssid and pass and tries to connect
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
-    //if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
-    //Serial.println("failed to connect previous network and hit timeout");
-    //delay(3000);
+    if (!wifiManager.autoConnect("GasSolutions", "12345678")) {
+    Serial.println("failed to connect previous network and hit timeout");
+    delay(3000);
     //reset and try again, or maybe put it to deep sleep
     //ESP.restart();
     //delay(5000);
-    //}
+    }
     //else
     {
       //if you get here you have connected to the WiFi

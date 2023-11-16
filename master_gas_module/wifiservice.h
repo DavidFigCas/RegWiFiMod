@@ -6,7 +6,7 @@
 extern bool correct;
 extern int wifi_trys;
 extern boolean isSaved;
-//extern WiFiManager wifiManager;
+extern WiFiManager wifiManager;
 //extern WiFiManager_RP2040W wifiManager;
 extern bool ALLOWONDEMAND; // enable on demand
 extern bool WMISBLOCKING;

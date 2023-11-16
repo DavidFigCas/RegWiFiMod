@@ -22,6 +22,8 @@
 //#include <vector>
 #include <PubSubClient.h>
 #include <WiFi.h>
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+
 //#include <LittleFS.h>
 #include "FS.h"
 #include "SPIFFS.h"
