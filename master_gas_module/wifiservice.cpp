@@ -17,6 +17,21 @@ bool wifiAP(bool force)
   String ap_ssid = obj["ap"].as<String>();
   String ap_pass = obj["ap_pass"].as<String>();
 
+  for (JsonPair kv : doc.as<JsonObject>()) 
+  {
+    String keyString = kv.key().c_str();
+    char* key = new char[keyString.length() + 1];
+    strcpy(key, keyString.c_str());
+
+    String value = kv.value().as<String>();
+    char* valueCStr = new char[value.length() + 1];
+    strcpy(valueCStr, value.c_str());
+
+    WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 10);
+    customParams.push_back(p);
+    wifiManager.addParameter(p);
+  }
+
   if (!obj["ap"].isNull())
   {
 
@@ -92,7 +107,7 @@ void wifi_init()
 
     // ---- load parameter for config portal
 
-    for (JsonPair kv : doc.as<JsonObject>()) {
+   /* for (JsonPair kv : doc.as<JsonObject>()) {
       String keyString = kv.key().c_str();
       char* key = new char[keyString.length() + 1];
       strcpy(key, keyString.c_str());
@@ -104,7 +119,7 @@ void wifi_init()
       WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 10);
       customParams.push_back(p);
       wifiManager.addParameter(p);
-    }
+    }*/
 
     //WiFiManager
     //if (!WMISBLOCKING) {
