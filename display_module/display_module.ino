@@ -362,7 +362,7 @@ void setup1()
   display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
   //delay(500);
   display.setFullWindow();
-  
+
 
   display.firstPage();
   do
@@ -394,38 +394,44 @@ void loop1()
       Serial.println("Display Main Screen");
       //display.init(0);
       display.setFullWindow();
-      display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+      //display.firstPage();
+      //do
+      {
+        display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+      }
+      //while (display.nextPage());
 
-      print_icons();
+      //print_icons();
 
 
       //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
       unixtime = doc_aux["time"].as<uint32_t>();
       //serializeJson(doc_aux["time"],Serial);
       stamp.getDateTime(unixtime);
-      Serial.print("TIME");
-      Serial.println(unixtime);
-      Serial.println(stamp.day);
-      Serial.println(stamp.month);
-      Serial.println(stamp.year);
-      Serial.println(stamp.hour);
-      Serial.println(stamp.minute);
 
-      display.setTextColor(GxEPD_BLACK);
-      display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-      display.setCursor(237, 49);
-      display.setFont(&FreeMonoBold9pt7b);
-      display.print(stamp.day);
-      display.print("/");
-      display.print(stamp.month);
-      display.print("/");
-      display.print(stamp.year);
-      display.print("  ");
-      display.print(stamp.hour);
-      display.print(":");
-      display.print(stamp.minute);
-      display.displayWindow(237, 10, 490, 45);
-      display.powerOff();
+      /*Serial.print("TIME");
+        Serial.println(unixtime);
+        Serial.println(stamp.day);
+        Serial.println(stamp.month);
+        Serial.println(stamp.year);
+        Serial.println(stamp.hour);
+        Serial.println(stamp.minute);
+
+        display.setTextColor(GxEPD_BLACK);
+        display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+        display.setCursor(237, 49);
+        display.setFont(&FreeMonoBold9pt7b);
+        display.print(stamp.day);
+        display.print("/");
+        display.print(stamp.month);
+        display.print("/");
+        display.print(stamp.year);
+        display.print("  ");
+        display.print(stamp.hour);
+        display.print(":");
+        display.print(stamp.minute);
+        display.displayWindow(237, 10, 490, 45);
+        display.powerOff();*/
 
 
       Serial.println("goto STATE 1");
@@ -466,12 +472,35 @@ void loop1()
           digitalWrite(27, !digitalRead(27));
 
         //Show litros
+        String litStr = String(litros); // Convierte el número a String
+        int16_t tbx, tby; uint16_t tbw, tbh;
+        // Obtener las dimensiones del texto
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-        display.setCursor(450, 169);
-        display.print(print_litros);
-        display.displayWindow(450, 125, 250, 50);
+        display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+        // Ajustar la ventana parcial alrededor del texto
+        int16_t x = (display.width() - tbw) / 2;
+        int16_t y = (display.height() - tbh) / 2;
+        uint16_t w = tbw + 10; // Un poco de margen
+        uint16_t h = tbh + 10;
+
+        display.setPartialWindow(x, y, w, h);
+        display.firstPage();
+
+
+        do {
+          //display.setCursor(450 - tbx, 169 - tby); // Ajustar la posición del cursor
+          //display.setCursor(450, 169);
+          display.setCursor(x - tbx, y - tby); // Ajustar la posición del cursor
+          //display.print(numStr);
+          display.print(litStr);
+          //display.displayWindow(450, 125, 250, 50);
+        } while (display.nextPage());
+
+        //display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
+
+
 
         //Show price
         //display.setTextColor(GxEPD_BLACK);
