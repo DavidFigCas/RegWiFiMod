@@ -60,7 +60,7 @@ void oled_display_number(float num)
 
   display.setCursor(0, 0); 
 
-  if (num < 10)
+  /*if (num < 10)
     display.setCursor(102, 0);            //
   else if (num < 100)
     display.setCursor(77, 0);            //
@@ -69,9 +69,10 @@ void oled_display_number(float num)
   else if (num < 10000)
     display.setCursor(26, 0);            //
   else
-    display.setCursor(0, 0);            // Start at top-left corner
+    display.setCursor(0, 0);            // Start at top-left corner*/
 
-  display.println(uint32_t(num));
+  //display.println(uint32_t(num));
+   display.println(num);
 
   //display.setTextColor(SSD1306_BLACK, SSD1306_WHITE); // Draw 'inverse' text
   //display.println(3.141592);

@@ -39,6 +39,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <LiquidCrystal_I2C.h>
+#include <cmath> // 
 
 
 #include "version.h"
@@ -105,7 +106,7 @@ extern volatile bool startCounting2;
 extern uint32_t start_process_time;
 extern float litros;
 extern float pulsos_litro;
-extern uint32_t precio;
+extern float precio;
 extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;

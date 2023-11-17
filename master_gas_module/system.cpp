@@ -56,7 +56,7 @@ uint32_t start_process_time;
 float litros;
 uint32_t target_litros;
 float pulsos_litro = 1;
-uint32_t precio;
+float precio;
 float uprice = 9.8; //price of 1 litre
 float factor;
 uint32_t litros_check;

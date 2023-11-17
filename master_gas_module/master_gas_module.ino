@@ -151,7 +151,8 @@ void loop()
         stopFlowing = true;
         Serial.println("--------------------STOP FLOWING-----------------");
         STATE_DISPLAY = 2;
-        litros_check = litros;
+        litros_check = ceil(litros);
+        precio = litros_check * uprice;
         precio_check = precio;
         //encoder_reset = true;
         read_clock();
