@@ -345,6 +345,11 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg_status);
           //send_log = false;
         }
+        if (send_list == true)
+        {
+          mqtt_send_list();
+          send_list = false;
+        }
       }
     }
 
@@ -353,14 +358,15 @@ void loop()
 
 
   // ----------------------------------------- save new List
-  //if(flag_new_list == true)
-  //{
-  //flag_new_list = false;
-  //Serial.print("Saving List on Loop: ");
-  //serializeJson(doc_list,Serial);
-  //Serial.println();
-  //saveListData();
-  //}
+  if (flag_new_list == true)
+  {
+    flag_new_list = false;
+    
+    Serial.print("Saving List on Loop: ");
+    //serializeJson(doc_list,Serial);
+    //Serial.println();
+    //saveListData();
+  }
 
 
 

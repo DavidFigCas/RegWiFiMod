@@ -8,6 +8,7 @@ const char* publish_topic = "/out";
 const char* subcribe_topic = "/in";
 const char* list_topic = "/list";
 const char* add_topic = "/add";
+const char* get_topic = "/get";
 const char* print_topic = "/print";
 const char* config_topic = "/config";
 const char* log_topic = "/log";
@@ -18,8 +19,9 @@ char buffer_union_publish[LOG_SIZE];
 char buffer_union_subcribe[LOG_SIZE];
 char buffer_msg[LOG_SIZE];
 char buffer_msg_status[STATUS_SIZE];
-//const char* client_id = "maquina00018";
+char buffer_msg_list[LIST_SIZE];
 volatile boolean send_log = false;
+volatile boolean send_list = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
 volatile boolean print_log = false;
@@ -71,10 +73,30 @@ void mqtt_send()
   Mclient.publish(buffer_union_publish, buffer_msg);
 }
 
+//---------------------------------------------------- mqtt_send_list
+void mqtt_send_list()
+{
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, list_topic);
+
+  JsonArray logObject = obj_list;
+  size_t serializedLength = measureJson(logObject) + 1;
+  char tempBuffer[serializedLength];
+  serializeJson(logObject, tempBuffer, serializedLength);
+  strcpy(buffer_msg_list, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg_list);
+
+  Serial.println("{\"mqtt_list\":\"sending\"}");
+
+
+}
+
 //--------------------------------------------------- callback
 void callback(char* topic, byte* payload, unsigned int length)
 {
-  //updated = true;
+  esp_task_wdt_reset();
   char jsonPayload[length + 1]; // +1 para el carácter nulo
   memcpy(jsonPayload, payload, length);
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
@@ -111,6 +133,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     }
 
     // Iterar sobre los elementos del array
+    //obj_list.clear();
     obj_list = doc_m.as<JsonArray>();
     for (JsonObject jsonObject : obj_list)
     {
@@ -143,30 +166,21 @@ void callback(char* topic, byte* payload, unsigned int length)
 
     //
     // Flag save ListData
-    flag_new_list = true;
+    
     //Serial.print("New List Data: ");
     //serializeJson(obj_list,Serial);
     //Serial.println();
+
+    //esp_task_wdt_reset();
     saveListData();
     search_nclient(0);
 
-    strcpy(buffer_union_publish, obj["id"].as<const char*>());
-    strcat(buffer_union_publish, publish_topic);
-    strcat(buffer_union_publish, list_topic);
-
-    JsonArray logObject = obj_list;
-    size_t serializedLength = measureJson(logObject) + 1;
-    char tempBuffer[serializedLength];
-    serializeJson(logObject, tempBuffer, serializedLength);
-    strcpy(buffer_msg, tempBuffer);
-
-    Mclient.publish(buffer_union_publish, buffer_msg);
-
-    Serial.println("{\"mqtt_list\":\"sending\"}");
+    //send_list = true;
+    //flag_new_list = true;
+    mqtt_send_list();
 
 
     return;
-    //STATE |= (1 << 4);                  // NEW LIST
 
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), add_topic)) == 0)
@@ -192,6 +206,11 @@ void callback(char* topic, byte* payload, unsigned int length)
     //obj_list.add(doc_m.as<JsonObject>());
     //saveListData();
     return;
+  }
+  else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), get_topic)) == 0)
+  {
+    send_list = true;
+    Serial.println("Consult List");
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
   {
