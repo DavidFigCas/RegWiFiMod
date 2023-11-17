@@ -362,9 +362,19 @@ void setup1()
   display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
   //delay(500);
   display.setFullWindow();
-  display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+  
 
-  display.powerOff();
+  display.firstPage();
+  do
+  {
+    //display.fillScreen(GxEPD_WHITE);
+    display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+  }
+  while (display.nextPage());
+
+
+  //display.powerOff();
+  display.hibernate();
   digitalWrite(25, LOW);
 }
 
