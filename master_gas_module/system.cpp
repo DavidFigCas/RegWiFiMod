@@ -53,7 +53,7 @@ unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
 uint32_t start_process_time;
-uint32_t litros;
+float litros;
 uint32_t target_litros;
 float pulsos_litro = 1;
 uint32_t precio;
@@ -100,6 +100,7 @@ void register_client()
   status_doc["client"]["precio"] = uprice;
   status_doc["client"]["factor"] = factor;
   status_doc["client"]["nombre"] = client_name;
+  status_doc["client"]["id"] = obj_in["cliente"];
 
   Serial.println();
   Serial.print("NAME: ");

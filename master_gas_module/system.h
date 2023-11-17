@@ -103,7 +103,7 @@ extern volatile bool startCounting2;
 
 
 extern uint32_t start_process_time;
-extern uint32_t litros;
+extern float litros;
 extern float pulsos_litro;
 extern uint32_t precio;
 extern float uprice; //price of 1 litre

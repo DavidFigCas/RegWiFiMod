@@ -307,7 +307,7 @@ void loop()
         // ------------------------------------------- Send Log
         if (send_log == true)
         {
-          Serial.println("mqtt sending");
+          Serial.println("{\"mqtt_log\":\"sending\"}");
 
           //saveNewlog();
 
@@ -328,7 +328,7 @@ void loop()
         // ------------------------------------------- Send Log
         //if (send_log == true)
         {
-          Serial.println("mqtt status sending");
+          Serial.println("{\"mqtt_status\":\"sending\"}");
 
           //saveNewlog();
 
@@ -350,25 +350,6 @@ void loop()
 
 
   }
-
-
-  // ---------------------------------------------- I2C new command
-
-
-  //  if (new_litros)
-  //{
-  //Serial.println("NEW Litros: ");
-  //Serial.println(nclient);
-  //for (int i = 0; i < 4; i++)
-  //{
-  //Serial.println(litros_num[i]);
-  //}
-  //new_litros = 0;
-  //}
-
-  // ------------------------------- gps
-
-
 
 
   // ----------------------------------------- save new List
@@ -440,6 +421,7 @@ void loop()
   if (lastButtonState == HIGH && buttonState == LOW) {
     Serial.println("PUSH");
     buttonPressTime = millis();
+    wifiAP(true);
   }
 
   // Si el botón cambia de presionado a no presionado

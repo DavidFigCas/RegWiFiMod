@@ -28,7 +28,7 @@ void gps_update()
     STATE &= ~(1 << 5);                 // GPS error
     STATE &= ~(1 << 1);                 // GPS error
     Serial.println(F("{\"gps_status\": \"error_last_seen\"}"));
-    obj["gps"]["status"] = "error_last_seen";
+    obj["gps_status"] = "error_last_seen";
 
   }
   else if ((gps.hdop.isValid()) && (gps.location.isValid()))
@@ -48,7 +48,7 @@ void gps_update()
       // Send Previous GPS
       STATE |= (1 << 5);                  // GPS connected
       STATE &= ~(1 << 1);                 // GPS not ready
-      obj["gps"]["status"] = "heating up";
+      obj["gps_status"] = "heating up";
       Serial.println(F("{\"gps_status\": \"heating up\"}"));
 
     }
@@ -57,9 +57,9 @@ void gps_update()
       STATE |= (1 << 5);                  // GPS connected
       STATE |= (1 << 1);                  // GPS state OK
 
-      obj["gps"]["status"] = "ready";
-      obj["gps"]["lat"] = gps.location.lat();
-      obj["gps"]["lon"] = gps.location.lng();
+      obj["gps_status"] = "ready";
+      obj["lat"] = gps.location.lat();
+      obj["lon"] = gps.location.lng();
 
       saveConfig = true;
       Serial.println();
@@ -68,19 +68,24 @@ void gps_update()
   else
   {
     // Send Previous GPS
-    obj["gps"]["status"] = "calculating";
+    obj["gps_status"] = "calculating";
     Serial.println(F("{\"gps_status\": \"calculating\"}"));
     STATE |= (1 << 5);                  // GPS connected
     STATE &= ~(1 << 1);                 // GPS not ready
   }
 
-  serializeJson(obj["gps"], Serial);
-  Serial.println();
+  Serial.print("{\"lat\":");
+  serializeJson(obj["lat"], Serial);
+  Serial.print(",\"lon\":");
+  serializeJson(obj["lon"], Serial);
+  Serial.println("}");
 
   
-  status_doc["gps"].clear();
+  //status_doc["gps"].clear();
   //status_doc["gps"] = obj["gps"];
-  status_doc["gps"] = obj["gps"].as<JsonObject>();
+  status_doc["gps_status"] = obj["gps_status"];
+  status_doc["lat"] = obj["lat"];
+  status_doc["lon"] = obj["lon"];
 }
 
 // This custom version of delay() ensures that the gps object

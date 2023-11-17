@@ -112,7 +112,8 @@ void callback(char* topic, byte* payload, unsigned int length)
 
     // Iterar sobre los elementos del array
     obj_list = doc_m.as<JsonArray>();
-    for (JsonObject jsonObject : obj_list) {
+    for (JsonObject jsonObject : obj_list)
+    {
       const char* nombre = jsonObject["nombre"];
       int cliente = jsonObject["cliente"];
       float lat = jsonObject["lat"];
@@ -135,8 +136,6 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println(litros);
       Serial.print("Precio: ");
       Serial.println(precio);
-      //Serial.print("Pusos/litro: ");
-      //Serial.println(pulsos_litro);
       Serial.print("Factor: ");
       Serial.println(factor);
       Serial.println();
@@ -150,6 +149,22 @@ void callback(char* topic, byte* payload, unsigned int length)
     //Serial.println();
     saveListData();
     search_nclient(0);
+
+    strcpy(buffer_union_publish, obj["id"].as<const char*>());
+    strcat(buffer_union_publish, publish_topic);
+    strcat(buffer_union_publish, list_topic);
+
+    JsonArray logObject = obj_list;
+    size_t serializedLength = measureJson(logObject) + 1;
+    char tempBuffer[serializedLength];
+    serializeJson(logObject, tempBuffer, serializedLength);
+    strcpy(buffer_msg, tempBuffer);
+
+    Mclient.publish(buffer_union_publish, buffer_msg);
+
+    Serial.println("{\"mqtt_list\":\"sending\"}");
+
+
     return;
     //STATE |= (1 << 4);                  // NEW LIST
 
@@ -280,21 +295,21 @@ bool reconnect()
     else
     {
       if (Mclient.connect(clientId.c_str()))
-    {
-      Serial.println("connected, NO user/pass");
-      Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
-      STATE |= (1 << 0);                  // MQTT state OK
-      recsta =  true;
-    }
-    else
-    {
-      Serial.print("failed, rc=");
-      Serial.print(Mclient.state());
-      Serial.println(" try in the next");
+      {
+        Serial.println("connected, NO user/pass");
+        Mclient.subscribe(strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), wild_topic));
+        STATE |= (1 << 0);                  // MQTT state OK
+        recsta =  true;
+      }
+      else
+      {
+        Serial.print("failed, rc=");
+        Serial.print(Mclient.state());
+        Serial.println(" try in the next");
 
-      STATE &= ~(1 << 0);                 // MQTT error
-      recsta =  false;
-    }
+        STATE &= ~(1 << 0);                 // MQTT error
+        recsta =  false;
+      }
     }
 
 

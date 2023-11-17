@@ -6,10 +6,64 @@ boolean isSaved = false;
 bool ALLOWONDEMAND   = true; // enable on demand
 bool WMISBLOCKING    = true;
 WiFiManager wifiManager;
-//WiFiManager_RP2040W wifiManager;
-//std::vector<WiFiManagerParameter*> customParams;
+std::vector<WiFiManagerParameter*> customParams;
 
 
+
+// ------------------------------------------------ wifiAP
+bool wifiAP(bool force)
+{
+  bool ap_ready = false;
+  String ap_ssid = obj["ap"].as<String>();
+  String ap_pass = obj["ap_pass"].as<String>();
+
+  if (!obj["ap"].isNull())
+  {
+
+    if (force == true)
+    {
+      wifiManager.startConfigPortal(ap_ssid.c_str(), ap_pass.c_str());
+      Serial.print("{\"Server_force\":");
+      Serial.print("true");
+      Serial.println("}");
+      ap_ready = true;
+    }
+    else
+    {
+      ap_ready = wifiManager.autoConnect(ap_ssid.c_str(), ap_pass.c_str());
+      Serial.print("{\"Server_force\":");
+      Serial.print("false");
+      Serial.println("}");
+    }
+
+  }
+  else
+  {
+    if (force == true)
+    {
+      wifiManager.startConfigPortal("GasSolutions", "12345678");
+      Serial.print("{\"Server_force_wdefault\":");
+      Serial.print("true");
+      Serial.println("}");
+      ap_ready = true;
+    }
+    else
+    {
+      ap_ready = wifiManager.autoConnect("GasSolutions", "12345678");
+      Serial.print("{\"Server_force_wdefault\":");
+      Serial.print("false");
+      Serial.println("}");
+    }
+
+  }
+  Serial.print("{\"AP_ready\":");
+  Serial.print(bool(ap_ready));
+  Serial.println("}");
+  return ap_ready;
+}
+
+
+// --------------------------------------------------- wifiINIT
 void wifi_init()
 {
 
@@ -38,7 +92,7 @@ void wifi_init()
 
     // ---- load parameter for config portal
 
-    /*for (JsonPair kv : doc.as<JsonObject>()) {
+    for (JsonPair kv : doc.as<JsonObject>()) {
       String keyString = kv.key().c_str();
       char* key = new char[keyString.length() + 1];
       strcpy(key, keyString.c_str());
@@ -47,15 +101,15 @@ void wifi_init()
       char* valueCStr = new char[value.length() + 1];
       strcpy(valueCStr, value.c_str());
 
-      WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 1);
+      WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 10);
       customParams.push_back(p);
       wifiManager.addParameter(p);
-      }*/
+    }
 
     //WiFiManager
-    if (!WMISBLOCKING) {
-      wifiManager.setConfigPortalBlocking(false);
-    }
+    //if (!WMISBLOCKING) {
+    wifiManager.setConfigPortalBlocking(false);
+    //}
 
     //set config save notify callback
     wifiManager.setSaveParamsCallback(saveConfigCallback);
@@ -82,7 +136,10 @@ void wifi_init()
     //if it does not connect it starts an access point with the specified name
     //here  "AutoConnectAP"
     //and goes into a blocking loop awaiting configuration
-    if (!wifiManager.autoConnect("GasSolutions", "12345678")) 
+
+
+    //if (!wifiManager.autoConnect("GasSolutions", "12345678"))
+    if (!wifiAP(false))
     {
       Serial.println("failed to connect previous network and hit timeout");
       delay(3000);
@@ -122,10 +179,10 @@ bool wifi_check()
 {
   bool flag;
   // put your main code here, to run repeatedly:
-  if (!WMISBLOCKING) {
-    Serial.println("{\"wifi\":\"manager process\"}");
+  //if (!WMISBLOCKING) {
+  Serial.println("{\"wifi\":\"manager process\"}");
   wifiManager.process();
-  }
+  // }
 
   // is configuration portal requested?
   //if (ALLOWONDEMAND && digitalRead(ONDDEMANDPIN) == LOW )
@@ -231,6 +288,15 @@ bool wifi_check()
 // ------------------------- callback notifying us of the need to save config
 void saveConfigCallback () {
   Serial.println("Should save config");
+
+  for (WiFiManagerParameter* p : customParams) {
+    // Suponiendo que cada p->getID() es único y coincide con las claves en 'doc'
+    const char* paramId = p->getID();
+    const char* paramValue = p->getValue();
+
+    // Actualizar o añadir el valor en el documento JSON
+    doc[paramId] = paramValue;
+  }
   saveConfig = true;
   //return;
 }
@@ -247,4 +313,5 @@ void handleRoute() {
 
 void saveWifiCallback() {
   Serial.println("[CALLBACK] saveCallback fired");
+  saveConfig = true;
 }

@@ -84,8 +84,8 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  //printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
-  printDateTime(dia_hoy, mes, anio, hora, minuto);
+  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
+  //printDateTime(dia_hoy, mes, anio, hora, minuto);
   endPrint();
   //printString("\n\r");
   
@@ -106,7 +106,6 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
 
   setPrintMode(0); // Configurar modo de impresión
   printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r");
-  //printString("R.F.C.: GXA 550301 BP3\n\r");
 
   // Imprimir número de unidad y folio
   printString("EQUIPO: ");
@@ -126,7 +125,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  printDateTime(dia_hoy, mes, anio, hora, minuto);
+  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
   printString("\n\r");
   //printString("Duración del servicio:");
 
@@ -292,7 +291,7 @@ void printPrice(uint32_t price) {
 // -------------------------------------------- printDateTime
 void printDateTime(uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn) {
   char buffer[30];
-  sprintf(buffer, "%u/%u/%u %u:%u", d, m, (y-2000), h, mn);
+  sprintf(buffer, "%u/%u/%u %u:%u", d, m, y, h, mn);
   printString(buffer);
 }
 
