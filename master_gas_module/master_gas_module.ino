@@ -243,7 +243,9 @@ void loop()
   {
     doc_aux["flow"] = doc_encoder["flow"].as<bool>();
     doc_aux["litros"] = litros;
+    doc_aux["litros_check"] = litros_check;
     doc_aux["precio"] = precio;
+    doc_aux["precio_check"] = precio_check;
     doc_aux["uprice"] = uprice;
   }
 

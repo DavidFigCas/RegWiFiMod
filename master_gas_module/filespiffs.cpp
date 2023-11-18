@@ -33,7 +33,17 @@ void saveNewlog()
 {
   Serial.println("Make new LOG");
   Serial.print("Litros: ");
-  Serial.println(litros);
+  Serial.print(litros);
+  Serial.print("\t");
+  Serial.print("Litros_check: ");
+  Serial.print(litros_check);
+  Serial.print("\t");
+  Serial.print("Precio: ");
+  Serial.print(precio);
+  Serial.print("\t");
+  Serial.print("Precio_check: ");
+  Serial.print(precio_check);
+  Serial.print("\t");
   Serial.print("Folio: ");
   Serial.println(folio);
   newLogEntry = obj_log.createNestedObject();

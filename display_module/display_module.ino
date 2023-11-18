@@ -134,9 +134,9 @@ void recv(int len)
   }
 
   litros = doc_aux["litros"];
-  print_litros = ceil(litros);
+  print_litros = doc_aux["litros_check"];
   pesos = doc["precio"].as<uint32_t>();
-  print_pesos = pesos;
+  print_pesos = doc_aux["precio_check"];
 }
 
 // Called when the I2C slave is read from
@@ -467,10 +467,23 @@ void loop1()
 
       Serial.print("\t");
 
+      print_litros = ceil(litros);
+      print_pesos = pesos;
+      
+      Serial.print("Print_Litros: ");
+      Serial.print(print_litros);
 
+      Serial.print("\t");
 
       Serial.print("precio: ");
+      Serial.print(pesos);
+
+      Serial.print("\t");
+
+      Serial.print("Print_Precio: ");
       Serial.println(pesos);
+
+      //print_litros
 
       new_litros = false;
       newcommand = false;
@@ -516,6 +529,7 @@ void loop1()
       }
 
       shown = true;
+      //print_litros = ceil(litros);
 
       break;
 
@@ -541,6 +555,19 @@ void loop1()
       if (shown == true)
       {
         Serial.println("Final Numbers");
+        //Serial.print("Litros: ");
+        //Serial.print(litros);
+
+        //Serial.print("\t");
+
+        //print_litros = ceil(litros);
+        Serial.print("Print_Litros: ");
+        Serial.print(print_litros);
+
+        Serial.print("\t");
+
+        Serial.print("precio: ");
+        Serial.println(print_pesos);
 
 
         String litStr = String(print_litros);  // Convierte el número a String
@@ -564,7 +591,7 @@ void loop1()
         } while (display.nextPage());
 
 
-        String pesosStr = String(pesos);  // Convierte el número a String
+        String pesosStr = String(print_pesos);  // Convierte el número a String
         display.getTextBounds(pesosStr, 0, 0, &tbx, &tby, &tbw, &tbh);
         w = tbw + 10; // Un poco de margen
         h = tbh + 10;
