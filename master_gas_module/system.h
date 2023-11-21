@@ -17,6 +17,18 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
+// --------------------------------sd card
+//#define UART_BAUD           9600
+//#define PIN_DTR             25
+//#define PIN_TX              27
+//#define PIN_RX              26
+//#define PWR_PIN             4
+
+#define SD_MISO             2
+#define SD_MOSI             15
+#define SD_SCLK             14
+#define SD_CS               13
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
 //#include <vector>
@@ -40,6 +52,8 @@
 #include <Adafruit_SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 #include <cmath> // 
+#include "SD.h"
+#include "SPI.h"
 
 
 #include "version.h"
@@ -54,6 +68,7 @@
 #include "firebasedb.h"
 #include "oled_display.h"
 #include  "glcd_display.h"
+#include  "sd_card_service.h"
 
 
 //15 seconds WDT
@@ -138,4 +153,7 @@ void loadConfig();
 void system_init();
 void search_nclient(uint32_t aux_client);
 void register_client();
+void saveNewlog();
+
+
 #endif

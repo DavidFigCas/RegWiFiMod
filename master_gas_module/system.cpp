@@ -81,6 +81,60 @@ volatile bool readyToPrint = false;
 
 volatile uint32_t pesos;
 
+// -------------------------------------------------------------- save_newlog
+void saveNewlog()
+{
+  Serial.println("Make new LOG");
+  Serial.print("Litros: ");
+  Serial.print(litros);
+  Serial.print("\t");
+  Serial.print("Litros_check: ");
+  Serial.print(litros_check);
+  Serial.print("\t");
+  Serial.print("Precio: ");
+  Serial.print(precio);
+  Serial.print("\t");
+  Serial.print("Precio_check: ");
+  Serial.print(precio_check);
+  Serial.print("\t");
+  Serial.print("Folio: ");
+  Serial.println(folio);
+  newLogEntry = obj_log.createNestedObject();
+  //newLogEntry["timestamp"] = DateTimeToString(now);
+  newLogEntry["folio"] = folio;
+  newLogEntry["start_timestamp"] = start_process_time;
+  newLogEntry["end_timestamp"] = now.unixtime();
+  //newLogEntry["state"] = STATE;
+  newLogEntry["litros"] = litros_check;
+  newLogEntry["precio"] = precio_check;
+  newLogEntry["cliente"] = obj_in["cliente"].as<unsigned int>();
+  if (!obj["gps"]["lat"].isNull())
+  {
+    newLogEntry["lat"] = obj["gps"]["lat"];
+    newLogEntry["lon"] = obj["gps"]["lon"];
+  }
+
+  status_doc["last_service"] = newLogEntry;
+  //status_doc["last_service"]["factor"] = obj["factor"];
+  //status_doc["last_service"]["uprice"] = uprice;
+  
+  //Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
+  //String log_str;
+  //serializeJson(status_doc, log_str);
+  //Serial.println(log_str);
+  //writeFile(SD, "/log.json", log_str.c_str());
+  //writeFile(SD, "/log.json", "Hola");
+
+  //writeFile(SD, "/log.json", "Hello ");
+  //appendFile(SD, "/log.json", "World!\n");
+  
+  //if (obj["test"].as<bool>())
+    //serializeJsonPretty(obj_log, Serial);
+    //Serial.println();
+  
+  folio++;
+  obj["folio"] = folio;
+}
 
 // ------------------------------------------------------------ register_client
 void register_client()
@@ -203,6 +257,8 @@ void system_init()
 
   status_doc["ver"] = VERSION;
 
+  
+  
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system
@@ -213,6 +269,8 @@ void system_init()
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
+
+  SD_Init();
   gps_init();
   oled_display_init();
   init_glcd();

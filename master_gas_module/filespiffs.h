@@ -39,7 +39,7 @@ bool spiffs_init();
 bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
 //JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
 JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename);
-void saveNewlog();
+//void saveNewlog();
 
 
 #endif  // FILESPIFFS_H

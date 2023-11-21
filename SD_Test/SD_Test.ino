@@ -189,7 +189,8 @@ void setup() {
   Serial.begin(115200);
 
   SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-  if (!SD.begin(SD_CS)) {
+  if (!SD.begin(SD_CS)) 
+  {
     Serial.println("> It looks like you haven't inserted the SD card..");
   } else {
     uint32_t cardSize = SD.cardSize() / (1024 * 1024);

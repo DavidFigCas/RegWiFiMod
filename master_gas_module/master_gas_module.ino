@@ -157,6 +157,7 @@ void loop()
         //encoder_reset = true;
         read_clock();
         saveNewlog();
+
       }
       oled_display_number(litros_check);
     }
@@ -298,6 +299,9 @@ void loop()
   // ---------------------------------------------------------------- internet
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
+    writeFile(SD, "/log.txt", "Hello ");
+    appendFile(SD, "/log.txt", "World!\n");
+
     mainRefresh = millis();
     gps_update();
 
@@ -364,7 +368,7 @@ void loop()
   if (flag_new_list == true)
   {
     flag_new_list = false;
-    
+
     Serial.print("Saving List on Loop: ");
     //serializeJson(doc_list,Serial);
     //Serial.println();
