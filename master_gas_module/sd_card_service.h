@@ -4,6 +4,7 @@
 #include "system.h"
 
 bool SD_Init(void);
+JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError);
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 void createDir(fs::FS &fs, const char * path);
 void removeDir(fs::FS &fs, const char * path);

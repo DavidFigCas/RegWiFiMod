@@ -299,8 +299,8 @@ void loop()
   // ---------------------------------------------------------------- internet
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
-    writeFile(SD, "/log.txt", "Hello ");
-    appendFile(SD, "/log.txt", "World!\n");
+    //writeFile(SD, "/log.txt", "Hello ");
+    //appendFile(SD, "/log.txt", "World!\n");
 
     mainRefresh = millis();
     gps_update();
@@ -332,7 +332,7 @@ void loop()
           send_log = false;
         }
 
-        // ------------------------------------------- Send Log
+        // ------------------------------------------- Send STATUS
         //if (send_log == true)
         {
           Serial.println("{\"mqtt_status\":\"sending\"}");
@@ -352,6 +352,8 @@ void loop()
           Mclient.publish(buffer_union_publish, buffer_msg_status);
           //send_log = false;
         }
+
+         // ------------------------------------------- Send LIST
         if (send_list == true)
         {
           mqtt_send_list();

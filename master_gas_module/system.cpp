@@ -119,10 +119,10 @@ void saveNewlog()
   //status_doc["last_service"]["uprice"] = uprice;
   
   //Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
-  //String log_str;
-  //serializeJson(status_doc, log_str);
+  String log_str;
+  serializeJson(status_doc, log_str);
   //Serial.println(log_str);
-  //writeFile(SD, "/log.json", log_str.c_str());
+  writeFile(SD, "/log.json", log_str.c_str());
   //writeFile(SD, "/log.json", "Hola");
 
   //writeFile(SD, "/log.json", "Hello ");
