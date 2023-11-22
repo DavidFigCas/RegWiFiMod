@@ -59,8 +59,8 @@ bool SD_Init(void)
   //readFile(SD, "/hello.txt");
   //deleteFile(SD, "/foo.txt");
   //renameFile(SD, "/hello.txt", "/foo.txt");
-  readFile(SD, "/log.json");
-  testFileIO(SD, "/log.json");
+  //readFile(SD, "/log.json");
+  //testFileIO(SD, "/log.json");
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
   
@@ -69,11 +69,11 @@ bool SD_Init(void)
 
 
  // ------------------------------------------------------------------------------------------------ getJsonFromSD
-JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError)
+JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path, bool forceCleanONJsonError)
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
-  file = SPIFFS.open(filename);
+  file = SPIFFS.open(path);
   if (file)
   {
     //Serial.println("Opening File");

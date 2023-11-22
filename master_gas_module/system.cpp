@@ -84,7 +84,7 @@ volatile uint32_t pesos;
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {
-   Serial.println("Make new LOG");
+  Serial.println("Make new LOG");
   Serial.print("Litros: ");
   Serial.println(litros);
   Serial.print("Folio: ");
@@ -236,7 +236,7 @@ void system_init()
 
   status_doc["ver"] = VERSION;
 
-  
+  SD_Init();
   
   if (spiffs_init())
   {
@@ -249,7 +249,7 @@ void system_init()
     init_clock();        // I2C for clock
   }
 
-  SD_Init();
+  
   gps_init();
   oled_display_init();
   init_glcd();
@@ -340,7 +340,7 @@ void reset_config()
   //obj["count_wifi"] = 0;
   //obj["registered_wifi"] = false;
   obj = getJSonFromFile(SPIFFS,&doc, filedefault);
-  Serial.println(saveJSonToAFile(SPIFFS,&obj, filename) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
+  Serial.println(saveJSonToAFile(SPIFFS,&obj, fileconfig) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
   delay(2000);
   //ESP.restart();
   // rp2040.reboot();
@@ -408,7 +408,7 @@ void loadConfig()
 
     //obj["id"].set( WiFi.macAddress());
 
-    Serial.println(saveJSonToAFile(SPIFFS,&obj, filename) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
+    Serial.println(saveJSonToAFile(SPIFFS,&obj, fileconfig) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
   }
 
 

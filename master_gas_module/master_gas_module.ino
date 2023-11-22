@@ -157,6 +157,7 @@ void loop()
         //encoder_reset = true;
         read_clock();
         saveNewlog();
+        saveConfig = true;
 
       }
       oled_display_number(litros_check);
@@ -213,7 +214,7 @@ void loop()
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
-      saveConfig = true;
+      //saveConfig = true;
       //new_log = true;
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
