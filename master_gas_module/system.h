@@ -20,7 +20,7 @@
 // --------------------------------sd card
 //#define UART_BAUD           9600
 //#define PIN_DTR             25
-//#define PIN_TX              27
+//#define PIN_TX              27  
 //#define PIN_RX              26
 //#define PWR_PIN             4
 

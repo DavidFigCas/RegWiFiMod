@@ -105,8 +105,9 @@ void saveNewlog()
   }
 
   status_doc["last_service"] = newLogEntry;
-  
-  Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
+
+  Serial.println(saveJSonArrayToAFile(SPIFFS, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
+  Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
   //if (obj["test"].as<bool>())
     serializeJsonPretty(obj_log, Serial);
   Serial.println();
