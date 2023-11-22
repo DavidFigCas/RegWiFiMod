@@ -84,19 +84,9 @@ volatile uint32_t pesos;
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {
-  Serial.println("Make new LOG");
+   Serial.println("Make new LOG");
   Serial.print("Litros: ");
-  Serial.print(litros);
-  Serial.print("\t");
-  Serial.print("Litros_check: ");
-  Serial.print(litros_check);
-  Serial.print("\t");
-  Serial.print("Precio: ");
-  Serial.print(precio);
-  Serial.print("\t");
-  Serial.print("Precio_check: ");
-  Serial.print(precio_check);
-  Serial.print("\t");
+  Serial.println(litros);
   Serial.print("Folio: ");
   Serial.println(folio);
   newLogEntry = obj_log.createNestedObject();
@@ -104,7 +94,7 @@ void saveNewlog()
   newLogEntry["folio"] = folio;
   newLogEntry["start_timestamp"] = start_process_time;
   newLogEntry["end_timestamp"] = now.unixtime();
-  //newLogEntry["state"] = STATE;
+  newLogEntry["state"] = STATE;
   newLogEntry["litros"] = litros_check;
   newLogEntry["precio"] = precio_check;
   newLogEntry["cliente"] = obj_in["cliente"].as<unsigned int>();
@@ -115,23 +105,11 @@ void saveNewlog()
   }
 
   status_doc["last_service"] = newLogEntry;
-  //status_doc["last_service"]["factor"] = obj["factor"];
-  //status_doc["last_service"]["uprice"] = uprice;
   
-  //Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
-  String log_str;
-  serializeJson(status_doc, log_str);
-  //Serial.println(log_str);
-  writeFile(SD, "/log.json", log_str.c_str());
-  //writeFile(SD, "/log.json", "Hola");
-
-  //writeFile(SD, "/log.json", "Hello ");
-  //appendFile(SD, "/log.json", "World!\n");
-  
+  Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   //if (obj["test"].as<bool>())
-    //serializeJsonPretty(obj_log, Serial);
-    //Serial.println();
-  
+    serializeJsonPretty(obj_log, Serial);
+  Serial.println();
   folio++;
   obj["folio"] = folio;
 }
@@ -360,8 +338,8 @@ void reset_config()
   //obj["enable_wifi"] = true;
   //obj["count_wifi"] = 0;
   //obj["registered_wifi"] = false;
-  obj = getJSonFromFile(&doc, filedefault);
-  Serial.println(saveJSonToAFile(&obj, filename) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
+  obj = getJSonFromFile(SPIFFS,&doc, filedefault);
+  Serial.println(saveJSonToAFile(SPIFFS,&obj, filename) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
   delay(2000);
   //ESP.restart();
   // rp2040.reboot();
@@ -429,7 +407,7 @@ void loadConfig()
 
     //obj["id"].set( WiFi.macAddress());
 
-    Serial.println(saveJSonToAFile(&obj, filename) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
+    Serial.println(saveJSonToAFile(SPIFFS,&obj, filename) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
   }
 
 

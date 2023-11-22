@@ -30,15 +30,15 @@ extern volatile bool saveConfig;
 
 extern File file;
 
-JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_SIZE> *doc, String filename,bool forceCleanONJsonError = true);
+JsonObject getJSonFromFile(fs::FS &fs,StaticJsonDocument<FILE_SIZE> *doc, String filename,bool forceCleanONJsonError = true);
 /*static*/ void Cfg_get(/*struct jsonrpc_request * r*/);
-bool saveJSonToAFile(JsonObject * doc, String filename);
+bool saveJSonToAFile(fs::FS &fs,JsonObject * doc, String filename);
 void saveConfigData();
 void saveListData();
 bool spiffs_init();
-bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
+bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, String filename);
 //JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
-JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename);
+JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_list, String filename);
 //void saveNewlog();
 
 

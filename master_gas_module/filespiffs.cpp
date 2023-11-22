@@ -62,9 +62,9 @@ bool spiffs_init()
 {
   // open file to load config
 
-  obj = getJSonFromFile(&doc, filename);
-  obj_list = getJSonArrayFromFile(&doc_list, filelist);
-  obj_log = getJSonArrayFromFile(&doc_log, filelog);
+  obj = getJSonFromFile(SPIFFS,&doc, filename);
+  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist);
+  obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
 
 
   if (obj_list.isNull())
@@ -77,8 +77,8 @@ bool spiffs_init()
   if (obj.size() == 0)
   {
     Serial.println("{\"config_file\":\"empty\"}");
-    obj = getJSonFromFile(&doc, filedefault);
-    Serial.println(saveJSonToAFile(&obj, filename) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
+    obj = getJSonFromFile(SPIFFS,&doc, filedefault);
+    Serial.println(saveJSonToAFile(SPIFFS,&obj, filename) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
   }
 
   //if (obj["test"].as<bool>() == true)
@@ -99,14 +99,15 @@ bool spiffs_init()
 
 
 // ----------------------------------------------------------------------------------------- saveJSonToAFile
-bool saveJSonToAFile(JsonObject * doc, String filename) {
+bool saveJSonToAFile(fs::FS &fs,JsonObject * doc, String filename) 
+{
   //SD.remove(filename);
 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
   //file = LittleFS.open(filename, "w");
-  file = SPIFFS.open(filename, FILE_WRITE);
+  file = fs.open(filename, FILE_WRITE);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);
@@ -133,11 +134,11 @@ bool saveJSonToAFile(JsonObject * doc, String filename) {
 
 // ------------------------------------------------------------------------------------------------ getJsonFromFile
 
-JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError)
+JsonObject getJSonFromFile(fs::FS &fs, StaticJsonDocument<FILE_SIZE> *doc, String filename, bool forceCleanONJsonError)
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
-  file = SPIFFS.open(filename);
+  file = fs.open(filename);
   if (file)
   {
     //Serial.println("Opening File");
@@ -186,7 +187,7 @@ JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_
 // --------------------------------------------------------------------------------------------- saveConfigData
 void saveConfigData()
 {
-  Serial.println(saveJSonToAFile(&obj, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
+  Serial.println(saveJSonToAFile(SPIFFS, &obj, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
   if (obj["test"].as<bool>())
     serializeJson(obj, Serial);
 }
@@ -195,7 +196,7 @@ void saveConfigData()
 void saveListData()
 {
   //serializeJson(obj_list, Serial);
-  Serial.println(saveJSonArrayToAFile(&obj_list, filelist) ? "{\"list_update_spiffs\":true}" : "{\"list_update_spiffs\":false}");
+  Serial.println(saveJSonArrayToAFile(SPIFFS, &obj_list, filelist) ? "{\"list_update_spiffs\":true}" : "{\"list_update_spiffs\":false}");
   if (obj["test"].as<bool>())
     serializeJson(obj_list, Serial);
 }
@@ -203,13 +204,11 @@ void saveListData()
 
 // ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
 
-JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename)
-//JsonArray getJSonArrayFromFile(DynamicJsonDocument *doc_list, String filename, bool forceCleanONJsonError)
-
+JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_list, String filename)
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
-  file = SPIFFS.open(filename);
+  file = fs.open(filename);
   if (file)
   {
     //Serial.println("Opening File");
@@ -253,7 +252,7 @@ JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String f
 
 
 // --------------------------------------------------------------------------------------------------- saveJSonArrayToAFile
-bool saveJSonArrayToAFile(JsonArray * doc_list, String filename)
+bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, String filename)
 {
   //SD.remove(filename);
 

@@ -60,7 +60,7 @@ bool SD_Init(void)
   //deleteFile(SD, "/foo.txt");
   //renameFile(SD, "/hello.txt", "/foo.txt");
   //readFile(SD, "/foo.txt");
-  testFileIO(SD, "/log.txt");
+  testFileIO(SD, "/log.json");
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
   

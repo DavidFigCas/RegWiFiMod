@@ -283,7 +283,7 @@ void loop()
   if (clear_log == true)
   {
     obj_log.clear();
-    Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
     clear_log = false;
   }
 
@@ -451,7 +451,7 @@ void loop()
     {
       Serial.println("Super Long press detected!");
       obj.clear();
-      obj = getJSonFromFile(&doc, filedefault);
+      obj = getJSonFromFile(SPIFFS,&doc, filedefault);
       Serial.println("{\"default_config\":true}");
       saveConfigData();
       ESP.restart();
