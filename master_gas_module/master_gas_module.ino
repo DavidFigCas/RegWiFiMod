@@ -8,7 +8,6 @@
 void setup()
 {
   system_init();
-  oled_display_text(VERSION);    // Draw 'stylized' characters
   search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios

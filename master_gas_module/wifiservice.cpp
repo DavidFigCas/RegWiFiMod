@@ -272,9 +272,10 @@ bool wifi_check()
         //STATE = 1;
         STATE |= (1 << 6);
 
-        // ------------------------ actualemnte falla firebase
+        // ------------------------ firebase connection
         if (updated == false)
         {
+          oled_display_text("NEW FIRMWARE");
           connectFirebase();
         }
 

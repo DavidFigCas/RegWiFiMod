@@ -36,6 +36,9 @@ void fcsDownloadCallback(FCS_DownloadStatusInfo info)
   else if (info.status == fb_esp_fcs_download_status_download)
   {
     Serial.printf("Done %d%s, Time %d ms\n", (int)info.progress, "%", info.elapsedTime);
+    char bufferf[100];
+    sprintf(bufferf, "Done %d%s", (int)info.progress, "%");
+    oled_display_text(bufferf);
   }
   else if (info.status == fb_esp_fcs_download_status_complete)
   {

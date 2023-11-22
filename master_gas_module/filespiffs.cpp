@@ -92,10 +92,10 @@ bool spiffs_init()
     serializeJsonPretty(obj_log, Serial);
     Serial.println();
 
-    Serial.println("SPIFFS");
+    //Serial.println("SPIFFS");
 
-    obj_log = getJSonArrayFromFile(SPIFFS, &doc_log, filelog);
-    serializeJsonPretty(obj_log, Serial);
+    //obj_log = getJSonArrayFromFile(SPIFFS, &doc_log, filelog);
+    //serializeJsonPretty(obj_log, Serial);
   }
 
 
@@ -269,7 +269,8 @@ bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, const char * path)
 
   //file = LittleFS.open(filename, "w");
   file = fs.open(path, FILE_WRITE);
-  if (file) {
+  //if (file) 
+  {
    Serial.print(F("Filename --> "));
    Serial.println(path);
 
@@ -283,11 +284,13 @@ bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, const char * path)
     Serial.println(F("done."));
 
     return true;
-  } else {
+  } 
+  //else 
+  //{
     // if the file didn't open, print an error:
-    Serial.print(F("Error opening "));
-    Serial.println(path);
+    //Serial.print(F("Error opening "));
+    //Serial.println(path);
 
-    return false;
-  }
+   // return false;
+  //}
 }

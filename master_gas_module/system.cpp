@@ -106,10 +106,10 @@ void saveNewlog()
 
   status_doc["last_service"] = newLogEntry;
 
-  Serial.println(saveJSonArrayToAFile(SPIFFS, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
+  //Serial.println(saveJSonArrayToAFile(SPIFFS, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
   //if (obj["test"].as<bool>())
-    serializeJsonPretty(obj_log, Serial);
+  serializeJsonPretty(obj_log, Serial);
   Serial.println();
   folio++;
   obj["folio"] = folio;
@@ -227,17 +227,21 @@ void search_nclient(uint32_t aux_client)
 // ----------------------------------------------------------- init
 void system_init()
 {
+  
   delay(100);
   Serial.begin(115200);
-  delay(5000);
-  I2C_Init(); Serial.println("i2c_Init");// Slave mode
+  //delay(5000);
+  I2C_Init(); 
+  Serial.println("i2c_Init");
+  oled_display_init();
+  SD_Init();
+  
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
 
   status_doc["ver"] = VERSION;
+  oled_display_text(VERSION);    // Draw 'stylized' characters
 
-  SD_Init();
-  
   if (spiffs_init())
   {
     loadConfig();       // Load and update behaivor of system
@@ -250,8 +254,9 @@ void system_init()
   }
 
   
+
   gps_init();
-  oled_display_init();
+  
   init_glcd();
 
   // WatchDog Timer
@@ -339,8 +344,8 @@ void reset_config()
   //obj["enable_wifi"] = true;
   //obj["count_wifi"] = 0;
   //obj["registered_wifi"] = false;
-  obj = getJSonFromFile(SPIFFS,&doc, filedefault);
-  Serial.println(saveJSonToAFile(SPIFFS,&obj, fileconfig) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
+  obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+  Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
   delay(2000);
   //ESP.restart();
   // rp2040.reboot();
@@ -370,7 +375,7 @@ void loadConfig()
 
 
 
-  if(/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
+  if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
   {
     obj["reboot"] = false;
     Serial.println("{\"reboot_upload\":true}");
@@ -408,7 +413,7 @@ void loadConfig()
 
     //obj["id"].set( WiFi.macAddress());
 
-    Serial.println(saveJSonToAFile(SPIFFS,&obj, fileconfig) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
+    Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
   }
 
 
