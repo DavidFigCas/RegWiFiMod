@@ -5,7 +5,7 @@ TinyGPSPlus gps;
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
 }
 

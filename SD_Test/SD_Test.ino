@@ -25,7 +25,7 @@
 // Define deep sleep options
 uint64_t uS_TO_S_FACTOR = 1000000;  // Conversion factor for micro seconds to seconds
 // Sleep for 10 minutes = 600 seconds
-uint64_t TIME_TO_SLEEP = 600;
+uint64_t TIME_TO_SLEEP = 10;
 
 // Replace with your network credentials
 const char* ssid     = "Inventoteca_2G";
@@ -83,8 +83,8 @@ void setup() {
   timeClient.setTimeOffset(3600);
 
   // Initialize SD card
-  SD.begin(SD_CS);  
-  if(!SD.begin(SD_CS)) {
+  //SD.begin(SD_CS);  
+  if(!SD.begin()) {
     Serial.println("Card Mount Failed");
     return;
   }
@@ -94,8 +94,7 @@ void setup() {
     return;
   }
   Serial.println("Initializing SD card...");
-  SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-  if (!SD.begin(SD_CS))
+  if (!SD.begin())
   {
     Serial.println("ERROR - SD card initialization failed!");
     return;    // init failed
@@ -120,21 +119,23 @@ void setup() {
   // Start the DallasTemperature library
   sensors.begin(); 
 
+  
+  
+  // Start deep sleep
+  //Serial.println("DONE! Going to sleep now.");
+  //esp_deep_sleep_start(); 
+}
+
+void loop() {
+  // The ESP32 will be in deep sleep
+  // it never reaches the loop()
   getReadings();
   getTimeStamp();
   logSDCard();
   
   // Increment readingID on every new reading
   readingID++;
-  
-  // Start deep sleep
-  Serial.println("DONE! Going to sleep now.");
-  esp_deep_sleep_start(); 
-}
-
-void loop() {
-  // The ESP32 will be in deep sleep
-  // it never reaches the loop()
+  delay(10000);
 }
 
 // Function to get temperature

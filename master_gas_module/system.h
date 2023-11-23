@@ -72,6 +72,10 @@
 
 
 //15 seconds WDT
+
+// sd card
+extern bool sd_ready;
+
 extern bool buttonState;
 extern bool lastButtonState;
 extern unsigned long buttonPressTime;
@@ -150,6 +154,7 @@ void reset_config();
 bool strToBool(String str);
 float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
 void loadConfig();
+/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/);
 void system_init();
 void search_nclient(uint32_t aux_client);
 void register_client();

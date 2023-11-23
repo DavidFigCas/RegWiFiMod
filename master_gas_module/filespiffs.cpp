@@ -48,70 +48,17 @@ bool spiffs_init()
     return false;
   } else {
     Serial.println("{\"spiffs\":true}");
-    Cfg_get(/*NULL*/);  // Load File from spiffs
-    loadConfig();       // Load and update behaivor of system
     return true;
   }
-}
-
-
-
-// --------------------------------------------------------------------------------------------------- Cfg_get
-/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/)
-//  {"method":"Config.Get"}
-{
-  // open file to load config
-
-  obj = getJSonFromFile(SPIFFS, &doc, fileconfig);
-  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist);
-  obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
-
-
-  if (obj_list.isNull())
-  {
-    Serial.println("Rehaciendo null");
-    obj_list = doc_list.to<JsonArray>();
-  }
-
-
-  if (obj.size() == 0)
-  {
-    Serial.println("{\"config_file\":\"empty\"}");
-    obj = getJSonFromFile(SPIFFS, &doc, filedefault);
-    Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
-  }
-
-  //if (obj["test"].as<bool>() == true)
-  {
-    // Comment for production
-    serializeJson(obj, Serial);
-    Serial.println();
-    serializeJsonPretty(obj_list, Serial);
-    Serial.println();
-
-    serializeJsonPretty(obj_log, Serial);
-    Serial.println();
-
-    //Serial.println("SPIFFS");
-
-    //obj_log = getJSonArrayFromFile(SPIFFS, &doc_log, filelog);
-    //serializeJsonPretty(obj_log, Serial);
-  }
-
-
-
 }
 
 
 // ----------------------------------------------------------------------------------------- saveJSonToAFile
 bool saveJSonToAFile(fs::FS &fs, JsonObject * doc, const char * path)
 {
-  //SD.remove(filename);
-
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  //Serial.println(F("Open file in write mode"));
-  //file = LittleFS.open(filename, "w");
+  Serial.println(F("Open file in write mode"));
   file = fs.open(path, FILE_WRITE);
   if (file) {
     Serial.print(F("Filename --> "));
@@ -131,7 +78,7 @@ bool saveJSonToAFile(fs::FS &fs, JsonObject * doc, const char * path)
     // if the file didn't open, print an error:
     Serial.print(F("Error opening "));
     Serial.println(path);
-
+    file.close();
     return false;
   }
 }
@@ -143,10 +90,12 @@ JsonObject getJSonFromFile(fs::FS &fs, StaticJsonDocument<FILE_SIZE> *doc, const
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
+
   file = fs.open(path);
   if (file)
   {
-    //Serial.println("Opening File");
+    Serial.print("Opening File");
+    Serial.println(path);
 
     size_t size = file.size();
     //Serial.println(size);
@@ -183,6 +132,7 @@ JsonObject getJSonFromFile(fs::FS &fs, StaticJsonDocument<FILE_SIZE> *doc, const
 
     //Serial.println(F("Empty json created"));
     Serial.println("{\"empty_json\": true}");
+    file.close();
     return doc->to<JsonObject>();
   }
 
@@ -209,14 +159,14 @@ void saveListData()
 
 // ------------------------------------------------------------------------------------------------ getJsonArrayFromFile
 
-JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_list, const char * path)
+JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_gen, const char * path)
 {
   // open the file for reading:
-  //file = LittleFS.open(filename, "r");
   file = fs.open(path);
   if (file)
   {
-    Serial.println("Opening File");
+    Serial.print("Opening File Array:");
+    Serial.println(path);
 
     size_t size = file.size();
     //Serial.println(size);
@@ -227,7 +177,7 @@ JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_li
       //return false;
     }
 
-    DeserializationError error = deserializeJson(*doc_list, file);
+    DeserializationError error = deserializeJson(*doc_gen, file);
     if (error)
     {
       // if the file didn't open, print an error:
@@ -236,61 +186,56 @@ JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_li
 
       //if (forceCleanONJsonError)
       {
-        return doc_list->to<JsonArray>();
+        return doc_gen->to<JsonArray>();
       }
     }
 
     // close the file:
     file.close();
-
-    return doc_list->as<JsonArray>();
-  } 
-  else 
+    return doc_gen->as<JsonArray>();
+  }
+  else
   {
     // if the file didn't open, print an error:
     Serial.print(F("Error opening (or file not exists) "));
     Serial.println(path);
 
     Serial.println(F("Empty json created"));
-    return doc_list->to<JsonArray>();
+    file.close();
+    return doc_gen->to<JsonArray>();
   }
+
 
 }
 
 
 // --------------------------------------------------------------------------------------------------- saveJSonArrayToAFile
-bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, const char * path)
+bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_gen2, const char * path)
 {
-  //SD.remove(filename);
-
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  Serial.println(F("Open file in write mode"));
-
-  //file = LittleFS.open(filename, "w");
+  Serial.println(F("Open file Array in write mode"));
   file = fs.open(path, FILE_WRITE);
-  //if (file) 
+  if (file)
   {
-   Serial.print(F("Filename --> "));
-   Serial.println(path);
+    Serial.print(F("Filename --> "));
+    Serial.println(path);
 
     Serial.print(F("Start write..."));
 
-    serializeJson(*doc_list, file);
+    serializeJson(*doc_gen2, file);
 
-    //Serial.print(F("..."));
+    Serial.print(F("..."));
     // close the file:
     file.close();
     Serial.println(F("done."));
 
     return true;
-  } 
-  //else 
-  //{
+  }
+  else
+  {
     // if the file didn't open, print an error:
-    //Serial.print(F("Error opening "));
-    //Serial.println(path);
-
-   // return false;
-  //}
+    Serial.print(F("Error opening "));
+    Serial.println(path);
+    file.close();
+    return false;
+  }
 }

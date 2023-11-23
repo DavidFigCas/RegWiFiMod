@@ -31,7 +31,6 @@ extern volatile bool saveConfig;
 extern File file;
 
 JsonObject getJSonFromFile(fs::FS &fs,StaticJsonDocument<FILE_SIZE> *doc, const char * path,bool forceCleanONJsonError = true);
-/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/);
 bool saveJSonToAFile(fs::FS &fs,JsonObject * doc, const char * path);
 void saveConfigData();
 void saveListData();

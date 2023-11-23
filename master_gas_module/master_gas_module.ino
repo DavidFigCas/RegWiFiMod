@@ -299,8 +299,9 @@ void loop()
   // ---------------------------------------------------------------- internet
   if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
   {
-    //writeFile(SD, "/log.txt", "Hello ");
-    //appendFile(SD, "/log.txt", "World!\n");
+    //check SD
+    if (!sd_ready)
+      SD_Init();
 
     mainRefresh = millis();
     gps_update();
@@ -353,7 +354,7 @@ void loop()
           //send_log = false;
         }
 
-         // ------------------------------------------- Send LIST
+        // ------------------------------------------- Send LIST
         if (send_list == true)
         {
           mqtt_send_list();
@@ -451,7 +452,7 @@ void loop()
     {
       Serial.println("Super Long press detected!");
       obj.clear();
-      obj = getJSonFromFile(SPIFFS,&doc, filedefault);
+      obj = getJSonFromFile(SPIFFS, &doc, filedefault);
       Serial.println("{\"default_config\":true}");
       saveConfigData();
       ESP.restart();

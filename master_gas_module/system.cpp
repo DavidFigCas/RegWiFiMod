@@ -3,6 +3,9 @@
 
 //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
+// sd card
+bool sd_ready = false;
+
 
 bool buttonState = LOW;
 bool lastButtonState = LOW;
@@ -108,9 +111,14 @@ void saveNewlog()
 
   //Serial.println(saveJSonArrayToAFile(SPIFFS, &obj_log, filelog) ? "{\"log_update_spiffs\":true}" : "{\"log_update_spiffs\":false}");
   Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
+
+
   //if (obj["test"].as<bool>())
-  serializeJsonPretty(obj_log, Serial);
-  Serial.println();
+  {
+    serializeJsonPretty(obj_log, Serial);
+    Serial.println();
+  }
+
   folio++;
   obj["folio"] = folio;
 }
@@ -227,15 +235,15 @@ void search_nclient(uint32_t aux_client)
 // ----------------------------------------------------------- init
 void system_init()
 {
-  
-  delay(100);
+
+  //delay(100);
   Serial.begin(115200);
   //delay(5000);
-  I2C_Init(); 
+  I2C_Init();
   Serial.println("i2c_Init");
   oled_display_init();
   SD_Init();
-  
+
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
 
@@ -244,6 +252,7 @@ void system_init()
 
   if (spiffs_init())
   {
+    Cfg_get(/*NULL*/);  // Load File from spiffs
     loadConfig();       // Load and update behaivor of system
     mqtt_init();
     wifi_init();
@@ -253,10 +262,10 @@ void system_init()
     init_clock();        // I2C for clock
   }
 
-  
+
 
   gps_init();
-  
+
   init_glcd();
 
   // WatchDog Timer
@@ -365,6 +374,55 @@ void reset_config()
     return false;
   }
   }*/
+
+
+// --------------------------------------------------------------------------------------------------- Cfg_get
+/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/)
+//  {"method":"Config.Get"}
+{
+  // open file to load config
+
+  obj = getJSonFromFile(SPIFFS, &doc, fileconfig);
+  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist);
+  obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
+
+
+  if (obj_list.isNull())
+  {
+    Serial.println("Rehaciendo null");
+    obj_list = doc_list.to<JsonArray>();
+  }
+
+
+  if (obj.size() == 0)
+  {
+    Serial.println("{\"config_file\":\"empty\"}");
+    obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+    Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
+  }
+
+  //if (obj["test"].as<bool>() == true)
+  {
+    // Comment for production
+    serializeJson(obj, Serial);
+    Serial.println();
+    serializeJsonPretty(obj_list, Serial);
+    Serial.println();
+
+    serializeJsonPretty(obj_log, Serial);
+    Serial.println();
+
+    //Serial.println("SPIFFS");
+
+    //obj_log = getJSonArrayFromFile(SPIFFS, &doc_log, filelog);
+    //serializeJsonPretty(obj_log, Serial);
+  }
+
+
+
+}
+
+
 
 // ---------------------------------------------------------------------------------------------------- loadConfig
 // Update a new config in the file an change behivor

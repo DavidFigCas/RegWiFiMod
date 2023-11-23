@@ -3,10 +3,11 @@
 // --------------------------------------------------------- SD_Init
 bool SD_Init(void)
 {
-  bool sd_ready = false;
+   sd_ready = false;
   
-  SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-  if (!SD.begin(SD_CS))
+  //SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
+  //if (!SD.begin(SD_CS))
+  if (!SD.begin())
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
     sd_ready = false;
@@ -53,7 +54,7 @@ bool SD_Init(void)
   //createDir(SD, "/mydir");
   //listDir(SD, "/", 0);
   //removeDir(SD, "/mydir");
-  listDir(SD, "/", 2);
+  listDir(SD, "/", 0);
   //writeFile(SD, "/log.json", "Hello ");
   //appendFile(SD, "/log.json", "World!\n");
   //readFile(SD, "/hello.txt");
@@ -73,7 +74,7 @@ JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path,
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
-  file = SPIFFS.open(path);
+  /*file = SPIFFS.open(path);
   if (file)
   {
     //Serial.println("Opening File");
@@ -114,7 +115,7 @@ JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path,
     //Serial.println(F("Empty json created"));
     Serial.println("{\"empty_json\": true}");
     return doc->to<JsonObject>();
-  }
+  }*/
 
 }
 
