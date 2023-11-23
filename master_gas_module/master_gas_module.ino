@@ -283,7 +283,19 @@ void loop()
   if (clear_log == true)
   {
     obj_log.clear();
-    Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    if (saveJSonArrayToAFile(SD, &obj_log, filelog))
+    {
+      Serial.println("{\"log_clear_SD\":true}");
+      //clear_log = false;
+      ESP.restart();
+    }
+    else
+    {
+      Serial.println("{\"log_clear_SD\":false}");
+      sd_ready = false;
+      
+    }
     clear_log = false;
   }
 
