@@ -5,9 +5,9 @@ void printing_logs()
   Serial.println("Print ALL LOGS");
   serializeJson(obj_log, Serial);
 
-  uint32_t litros_acumulado=0;
-  uint32_t servicios=0;
-  uint32_t total_ventas=0;
+  uint32_t litros_acumulado = 0;
+  uint32_t servicios = 0;
+  uint32_t total_ventas = 0;
 
   // Iterar sobre cada objeto en el JsonArray
   for (JsonObject jsonObject : obj_log)
@@ -46,7 +46,7 @@ void printing_logs()
 //Numero       letra          dia          mes       año       hora       minuto
 void printReport (uint32_t num, uint32_t ltr, uint32_t total)
 {
-  
+
   Serial.print("LITROS: ");
   Serial.println(ltr);
   Serial.print("SERVICIOS: ");
@@ -84,17 +84,17 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
+  printDateTime(dia_hoy, mes, (anio - 2000), hora, minuto);
   //printDateTime(dia_hoy, mes, anio, hora, minuto);
   endPrint();
   //printString("\n\r");
-  
+
 
 }
 
 // --------------------------------------------------------------------------printCheck
 //void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn, uint8_t f)
-void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint32_t start_timestamp, uint32_t end_timestamp)
+void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint32_t start_timestamp, uint32_t end_timestamp)
 {
   //char resultado[150];
   //const char end1 = '\r';
@@ -108,8 +108,17 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r");
 
   // Imprimir número de unidad y folio
+  String id_str = obj["id"].as<String>();
+  Serial.print("ID: ");
+  Serial.println(id_str);
+
   printString("EQUIPO: ");
-  printNumber(obj["id"]);
+  printString(id_str.c_str());
+
+
+
+
+
   printString("\n\r");
   printString("NO. DE SERVICO: ");
   printNumber(f);
@@ -125,7 +134,12 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   int dia_hoy = now.day();
   int hora = now.hour();
   int minuto = now.minute();
-  printDateTime(dia_hoy, mes, (anio-2000), hora, minuto);
+
+  Serial.print("Time: ");
+  Serial.println(now.unixtime());
+
+
+  printDateTime(dia_hoy, mes, (anio - 2000), hora, minuto);
   printString("\n\r");
   //printString("Duración del servicio:");
 
@@ -140,10 +154,16 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   printNumber(ltr);
   printString("Lts\n\r");
 
+  Serial.print("Litros: ");
+  Serial.println(ltr);
+
   // Imprimir número total
   printString("TOTAL:  $");
   printNumber(num);
   printString("\n\r");
+
+  Serial.print("Total: ");
+  Serial.println(num);
 
   // Convertir y imprimir número en palabras
   setPrintMode(0); // Configurar modo de impresión
@@ -158,6 +178,8 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint8_t f, uint3
   setPrintMode(0);
   printString("GRACIAS POR SU PREFERENCIA");
   endPrint();
+  
+  return;
 }
 
 

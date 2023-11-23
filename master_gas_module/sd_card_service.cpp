@@ -56,7 +56,7 @@ bool SD_Init(void)
   //createDir(SD, "/mydir");
   //listDir(SD, "/", 0);
   //removeDir(SD, "/mydir");
-  listDir(SD, "/", 0);
+  listDir(SD, "/", 2);
   //writeFile(SD, "/log.json", "Hello ");
   //appendFile(SD, "/log.json", "World!\n");
   //readFile(SD, "/hello.txt");

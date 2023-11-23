@@ -103,7 +103,7 @@ extern char tempChar;
 extern uint8_t resultadoBytes[200];
 extern uint32_t pendingPrint;
 
-extern char resultado[200];
+extern char resultado[300];
 
 extern const char* unidades[];
 extern const char* decenas[];
@@ -135,7 +135,7 @@ extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;
 
-extern int folio;
+extern uint32_t folio;
 extern char b[200];
 extern char buff[200];
 extern int i;

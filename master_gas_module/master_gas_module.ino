@@ -89,10 +89,9 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  Serial.print("Display: ");
-  serializeJson(doc_display, Serial);
-  Serial.println();
-
+  //Serial.print("Display: ");
+  //serializeJson(doc_display, Serial);
+  //Serial.println();
 
   //Serial.print("Encoder: ");
   //serializeJson(doc_encoder, Serial);

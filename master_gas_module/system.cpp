@@ -38,7 +38,7 @@ char tempChar;
 uint8_t resultadoBytes[200];
 uint32_t pendingPrint = 0;
 
-char resultado[200];
+char resultado[300];
 
 const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
 const char* decenas[] = {"", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
@@ -70,7 +70,7 @@ float factor;
 uint32_t litros_check;
 uint32_t precio_check;
 
-int folio;
+uint32_t folio;
 char b[200];
 char buff[200];
 int i;
