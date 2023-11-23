@@ -5,7 +5,7 @@ TinyGPSPlus gps;
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  //Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
 }
 
@@ -17,11 +17,19 @@ void gps_update()
   strcpy(buffer_union_publish, obj["id"].as<const char*>());
   strcat(buffer_union_publish, publish_topic);
   strcat(buffer_union_publish, gps_topic);
-  
 
-  //JsonObject gpsObject = obj["gps"].as<JsonObject>();
+  // -------------------------get GPS until a time
+  smartDelay(1000);
 
-  smartDelay(mainTime);
+  /*printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
+    printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
+    printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
+    printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
+    printInt(gps.location.age(), gps.location.isValid(), 5);
+    printDateTime(gps.date, gps.time);
+    printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+    printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
+    Serial.println();*/
 
   if ((millis() > 1000 && gps.charsProcessed() < 10))
   {
@@ -41,6 +49,7 @@ void gps_update()
     //printDateTime(gps.date, gps.time);
     //printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
     //printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
+    //Serial.println();
 
     int hdopValue = int(gps.hdop.hdop());
     if (hdopValue >= 10)
@@ -61,8 +70,35 @@ void gps_update()
       obj["lat"] = gps.location.lat();
       obj["lon"] = gps.location.lng();
 
-      saveConfig = true;
-      Serial.println();
+      // Guarda cada minuto la posicion
+      // ----------------------------------------------- 1 minute refresh
+      if (millis() - previousMillisGPS >= intervalGPS)
+      {
+        // Guarda la última vez que actualizaste el evento
+        previousMillisGPS = millis();
+
+        String gps_str;
+        StaticJsonDocument<100> gps_doc;
+        gps_doc["lon"] = gps.location.lng();
+        gps_doc["lat"] = gps.location.lat();
+        gps_doc["time"] = now.unixtime();
+
+        serializeJsonPretty(gps_doc,gps_str);
+
+        // ------------------------------------------- log de GPS existe?
+        if (testFileIO(SD, "/gps.json") == true)
+        {
+          appendFile(SD, "/gps.json", gps_str.c_str());
+        }
+        else
+        {
+          writeFile(SD, "/gps.json", gps_str.c_str());
+
+        }
+        //saveConfig = true;
+
+      }
+
     }
   }
   else
@@ -70,6 +106,9 @@ void gps_update()
     // Send Previous GPS
     obj["gps_status"] = "calculating";
     Serial.println(F("{\"gps_status\": \"calculating\"}"));
+
+
+
     STATE |= (1 << 5);                  // GPS connected
     STATE &= ~(1 << 1);                 // GPS not ready
   }
@@ -80,7 +119,7 @@ void gps_update()
   serializeJson(obj["lon"], Serial);
   Serial.println("}");
 
-  
+
   //status_doc["gps"].clear();
   //status_doc["gps"] = obj["gps"];
   status_doc["gps_status"] = obj["gps_status"];
@@ -94,11 +133,15 @@ void gps_update()
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
+  //Serial.println("Get GPS");
   //do
   //{
-    //while (Serial1.available())
-      //gps.encode(Serial1.read());
+  while ((Serial2.available() && (millis() - start < ms)))
+  {
+    gps.encode(Serial2.read());
+  }
   //} while (millis() - start < ms);
+  //Serial.println("new GPS data");
 }
 
 // ----------------------------------------------------- printFloat

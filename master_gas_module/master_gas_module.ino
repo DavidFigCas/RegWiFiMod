@@ -17,6 +17,15 @@ void setup()
 
   oled_display_number(0);    // Draw 'stylized' characters
 
+  // Reset Display state
+  doc_aux["STATE"] = 0;
+  doc_aux["time"] = now.unixtime();
+  serializeJson(doc_aux, b);
+  Wire.beginTransmission(DISPLAY_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+  delay(TIME_SPACE);
+
 
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
@@ -27,11 +36,6 @@ void loop()
 {
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
-  read_clock();
-
-
-
-
   // ----------------------------------------------- leer
 
   // --------------------- leer display
@@ -85,14 +89,14 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  /* Serial.print("Display: ");
-    serializeJson(doc_display, Serial);
-    Serial.println();
+  Serial.print("Display: ");
+  serializeJson(doc_display, Serial);
+  Serial.println();
 
 
-    Serial.print("Encoder: ");
-    serializeJson(doc_encoder, Serial);
-    Serial.println();*/
+  //Serial.print("Encoder: ");
+  //serializeJson(doc_encoder, Serial);
+  //Serial.println();
 
   //Serial.print("main_status: ");
   //serializeJson(status_doc, Serial);
@@ -294,7 +298,7 @@ void loop()
     {
       Serial.println("{\"log_clear_SD\":false}");
       sd_ready = false;
-      
+
     }
     clear_log = false;
   }
@@ -309,72 +313,78 @@ void loop()
 
 
   // ---------------------------------------------------------------- internet
-  if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
+  if (millis() - mainRefresh > mainTime)
   {
+    mainRefresh = millis();
+    read_clock();
+    gps_update();
     //check SD
     if (!sd_ready)
       SD_Init();
 
-    mainRefresh = millis();
-    gps_update();
 
-    // ----------------------------------------- check internet
-    if (wifi_check())
+    // -------------------------------------------solo si no esta en proceso de surtido
+
+    if (((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull()))
     {
-      update_clock();
-      if (mqtt_check())
+
+      // ----------------------------------------- check internet
+      if (wifi_check())
       {
-        // ------------------------------------------- Send Log
-        if (send_log == true)
+        update_clock();
+        if (mqtt_check())
         {
-          Serial.println("{\"mqtt_log\":\"sending\"}");
+          // ------------------------------------------- Send Log
+          if (send_log == true)
+          {
+            Serial.println("{\"mqtt_log\":\"sending\"}");
 
-          //saveNewlog();
+            //saveNewlog();
 
-          strcpy(buffer_union_publish, obj["id"].as<const char*>());
-          strcat(buffer_union_publish, publish_topic);
-          strcat(buffer_union_publish, log_topic);
+            strcpy(buffer_union_publish, obj["id"].as<const char*>());
+            strcat(buffer_union_publish, publish_topic);
+            strcat(buffer_union_publish, log_topic);
 
-          JsonArray logObject = obj_log;
-          size_t serializedLength = measureJson(logObject) + 1;
-          char tempBuffer[serializedLength];
-          serializeJson(logObject, tempBuffer, serializedLength);
-          strcpy(buffer_msg, tempBuffer);
+            JsonArray logObject = obj_log;
+            size_t serializedLength = measureJson(logObject) + 1;
+            char tempBuffer[serializedLength];
+            serializeJson(logObject, tempBuffer, serializedLength);
+            strcpy(buffer_msg, tempBuffer);
 
-          Mclient.publish(buffer_union_publish, buffer_msg);
-          send_log = false;
-        }
+            Mclient.publish(buffer_union_publish, buffer_msg);
+            send_log = false;
+          }
 
-        // ------------------------------------------- Send STATUS
-        //if (send_log == true)
-        {
-          Serial.println("{\"mqtt_status\":\"sending\"}");
+          // ------------------------------------------- Send STATUS
+          //if (send_log == true)
+          {
+            Serial.println("{\"mqtt_status\":\"sending\"}");
 
-          //saveNewlog();
+            //saveNewlog();
 
-          strcpy(buffer_union_publish, obj["id"].as<const char*>());
-          strcat(buffer_union_publish, publish_topic);
-          strcat(buffer_union_publish, status_topic);
+            strcpy(buffer_union_publish, obj["id"].as<const char*>());
+            strcat(buffer_union_publish, publish_topic);
+            strcat(buffer_union_publish, status_topic);
 
-          //JsonArray logObject = obj_log;
-          //size_t serializedLength = measureJson(logObject) + 1;
-          char tempBuffer[STATUS_SIZE];
-          serializeJson(status_doc, tempBuffer);
-          strcpy(buffer_msg_status, tempBuffer);
+            //JsonArray logObject = obj_log;
+            //size_t serializedLength = measureJson(logObject) + 1;
+            char tempBuffer[STATUS_SIZE];
+            serializeJson(status_doc, tempBuffer);
+            strcpy(buffer_msg_status, tempBuffer);
 
-          Mclient.publish(buffer_union_publish, buffer_msg_status);
-          //send_log = false;
-        }
+            Mclient.publish(buffer_union_publish, buffer_msg_status);
+            //send_log = false;
+          }
 
-        // ------------------------------------------- Send LIST
-        if (send_list == true)
-        {
-          mqtt_send_list();
-          send_list = false;
+          // ------------------------------------------- Send LIST
+          if (send_list == true)
+          {
+            mqtt_send_list();
+            send_list = false;
+          }
         }
       }
     }
-
 
   }
 
@@ -393,9 +403,10 @@ void loop()
 
 
   // ----------------------------------------- save new data
-  if (saveConfig)  // Data change
+  if (saveConfig == true)  // Data change
   {
-    //saveConfig = false;
+    saveConfig = false;
+
     //Serial.println("{\"upload_config_from_loop\":true}");
     //saveConfigData();
 
@@ -440,7 +451,6 @@ void loop()
     //
     //}
 
-    saveConfig = false;
   }
 
 

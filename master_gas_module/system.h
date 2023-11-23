@@ -121,6 +121,11 @@ extern unsigned long tiempoAnterior2;
 extern unsigned long tiempoActual2;
 extern volatile bool startCounting2;
 
+// ---------------------------------------- intervalos para gps
+extern unsigned long previousMillisGPS;  // Variable para almacenar la última vez que se ejecutó el evento
+extern const long intervalGPS;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
+extern unsigned long currentMillisGPS; 
+
 
 extern uint32_t start_process_time;
 extern float litros;

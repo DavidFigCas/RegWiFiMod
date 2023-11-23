@@ -55,6 +55,11 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
+// ---------------------------------------- intervalos para gps
+unsigned long previousMillisGPS = 0;  // Variable para almacenar la última vez que se ejecutó el evento
+const long intervalGPS = 60000;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
+unsigned long currentMillisGPS; 
+
 uint32_t start_process_time;
 float litros;
 uint32_t target_litros;
@@ -251,13 +256,13 @@ void system_init()
   I2C_Init();
   Serial.println("i2c_Init");
   oled_display_init();
+  oled_display_text(VERSION);    // Draw 'stylized' characters
   SD_Init();
 
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
 
   status_doc["ver"] = VERSION;
-  oled_display_text(VERSION);    // Draw 'stylized' characters
 
   if (spiffs_init())
   {

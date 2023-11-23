@@ -3,21 +3,22 @@
 // --------------------------------------------------------- SD_Init
 bool SD_Init(void)
 {
-   sd_ready = false;
-  
+
+
   //SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
   //if (!SD.begin(SD_CS))
-  if (!SD.begin())
+  sd_ready = SD.begin();
+  if (!sd_ready)
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
-    sd_ready = false;
+    //sd_ready = false;
   }
   else
   {
     uint32_t cardSize = SD.cardSize() / (1024 * 1024);
     String str = "> SDCard Size: " + String(cardSize) + "MB";
     Serial.println(str);
-    sd_ready = true;
+    //sd_ready = true;
   }
 
   uint8_t cardType = SD.cardType();
@@ -45,6 +46,7 @@ bool SD_Init(void)
   else
   {
     Serial.println("UNKNOWN");
+    sd_ready = false;
   }
 
   uint64_t cardSize = SD.cardSize() / (1024 * 1024);
@@ -61,22 +63,22 @@ bool SD_Init(void)
   //deleteFile(SD, "/foo.txt");
   //renameFile(SD, "/hello.txt", "/foo.txt");
   //readFile(SD, "/log.json");
-  //testFileIO(SD, "/log.json");
+  testFileIO(SD, "/log.json");
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
-  
+
   return sd_ready;
 }
 
 
- // ------------------------------------------------------------------------------------------------ getJsonFromSD
+// ------------------------------------------------------------------------------------------------ getJsonFromSD
 JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path, bool forceCleanONJsonError)
 {
   // open the file for reading:
   //file = LittleFS.open(filename, "r");
   /*file = SPIFFS.open(path);
-  if (file)
-  {
+    if (file)
+    {
     //Serial.println("Opening File");
 
     size_t size = file.size();
@@ -107,7 +109,7 @@ JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path,
     Serial.println("{\"json_loaded\": true}");
 
     return doc->as<JsonObject>();
-  } else {
+    } else {
     // if the file didn't open, print an error:
     //Serial.print(F("Error opening (or file not exists) "));
     //Serial.println(filename);
@@ -115,7 +117,7 @@ JsonObject getJSonFromSD( StaticJsonDocument<FILE_SIZE> *doc, const char * path,
     //Serial.println(F("Empty json created"));
     Serial.println("{\"empty_json\": true}");
     return doc->to<JsonObject>();
-  }*/
+    }*/
 
 }
 
@@ -244,7 +246,7 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2)
 
 
 // ---------------------------------------------------------deleteFile
-void deleteFile(fs::FS &fs, const char * path) 
+void deleteFile(fs::FS &fs, const char * path)
 {
   Serial.printf("Deleting file: %s\n", path);
   if (fs.remove(path)) {
@@ -256,20 +258,27 @@ void deleteFile(fs::FS &fs, const char * path)
 
 
 // ---------------------------------------------------------testFileIO
-void testFileIO(fs::FS &fs, const char * path)
+bool testFileIO(fs::FS &fs, const char * path)
 {
+  Serial.print("Testing: ");
+  Serial.println(path);
+  
   File file = fs.open(path);
   static uint8_t buf[512];
   size_t len = 0;
   uint32_t start = millis();
   uint32_t end = start;
-  if (file) {
+
+  if (file)
+  {
     len = file.size();
     size_t flen = len;
     start = millis();
-    while (len) {
+    while (len)
+    {
       size_t toRead = len;
-      if (toRead > 512) {
+      if (toRead > 512)
+      {
         toRead = 512;
       }
       file.read(buf, toRead);
@@ -278,23 +287,28 @@ void testFileIO(fs::FS &fs, const char * path)
     end = millis() - start;
     Serial.printf("%u bytes read for %u ms\n", flen, end);
     file.close();
-  } else {
+    return true;
+  }
+  else
+  {
+    file.close();
     Serial.println("Failed to open file for reading");
+    return false;
   }
 
 
-  file = fs.open(path, FILE_WRITE);
-  if (!file) {
+  /*file = fs.open(path, FILE_WRITE);
+    if (!file) {
     Serial.println("Failed to open file for writing");
     return;
-  }
+    }
 
-  size_t i;
-  start = millis();
-  for (i = 0; i < 2048; i++) {
+    size_t i;
+    start = millis();
+    for (i = 0; i < 2048; i++) {
     file.write(buf, 512);
-  }
-  end = millis() - start;
-  Serial.printf("%u bytes written for %u ms\n", 2048 * 512, end);
-  file.close();
+    }
+    end = millis() - start;
+    Serial.printf("%u bytes written for %u ms\n", 2048 * 512, end);
+    file.close();*/
 }

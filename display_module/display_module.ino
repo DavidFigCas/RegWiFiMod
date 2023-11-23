@@ -48,6 +48,8 @@ int16_t y_pes = 212;  //(display.height() - tbh) / 2;
 
 uint16_t w; // Un poco de margen
 uint16_t h;
+uint16_t w2; // Un poco de margen
+uint16_t h2;
 
 const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 
@@ -365,7 +367,7 @@ void setup1()
 {
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
-  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  display.epd2.selectSPI(SPI, SPISettings(16000000, MSBFIRST, SPI_MODE0));
   gpio_set_function(P_MISO, GPIO_FUNC_SPI);
   gpio_set_function(P_SCK, GPIO_FUNC_SPI);
   gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
@@ -404,15 +406,16 @@ void loop1()
       //{
       Serial.println("Display Main Screen");
       //display.init(0);
+      
       display.setFullWindow();
-      //display.firstPage();
+      display.firstPage();
       //do
-      {
+      //{
         display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-      }
+      //}
       //while (display.nextPage());
 
-      //print_icons();
+      print_icons();
 
 
       //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
@@ -593,10 +596,10 @@ void loop1()
 
         String pesosStr = String(print_pesos);  // Convierte el número a String
         display.getTextBounds(pesosStr, 0, 0, &tbx, &tby, &tbw, &tbh);
-        w = tbw + 10; // Un poco de margen
-        h = tbh + 10;
+        w2 = tbw + 10; // Un poco de margen
+        h2 = tbh + 10;
 
-        display.setPartialWindow(x_pes, y_pes, w, h);
+        display.setPartialWindow(x_pes, y_pes, w2, h2);
         display.firstPage();
         do {
           display.setCursor(x_pes - tbx, y_pes - tby); // Ajustar la posición del cursor
