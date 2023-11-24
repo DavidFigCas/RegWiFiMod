@@ -12,69 +12,92 @@ void dirTest(fs::FS &fs, const char * dirname)
 // --------------------------------------------------------- SD_Init
 bool SD_Init(void)
 {
-
-
   //SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
   //if (!SD.begin(SD_CS))
+
+  //if (!sd_ready)
+  uint64_t cardSize;
+  uint8_t cardType;
   sd_ready = SD.begin();
+
+
   if (!sd_ready)
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
+    return sd_ready;
   }
   else
   {
-    uint32_t cardSize = SD.cardSize() / (1024 * 1024);
+    cardSize = SD.cardSize() / (1024 * 1024);
     String str = "> SDCard Size: " + String(cardSize) + "MB";
     Serial.println(str);
+
+
+    cardType = SD.cardType();
+
+    if (cardType == CARD_NONE)
+    {
+      Serial.println("No SD card attached");
+      sd_ready = false;
+    }
+
+    Serial.print("SD Card Type: ");
+    if (cardType == CARD_MMC)
+    {
+      Serial.println("MMC");
+    }
+    else if (cardType == CARD_SD)
+    {
+      Serial.println("SDSC");
+    }
+    else if (cardType == CARD_SDHC)
+    {
+      Serial.println("SDHC");
+    }
+    else
+    {
+      Serial.println("UNKNOWN");
+      sd_ready = false;
+      //ESP.restart();
+    }
+
+    if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))
+    {
+      Serial.println("SD Error, reboot");
+      ESP.restart();
+    }
+
+
+    dirTest(SD, "/gps");
+    dirTest(SD, "/servicios");
+    dirTest(SD, "/logs");
+    dirTest(SD, "/reportes");
+
+
+    /*obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
+    serializeJsonPretty(obj_log, Serial);
+    Serial.println();
+
+
+    read_clock();
+    
+    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+    if (!SD.exists(gps_name_file))
+    {
+      Serial.print("File not found, create: ");
+      Serial.println(gps_name_file);
+      //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+    }*/
+
+
+    listDir(SD, "/", 2);
+    Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+    Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+
+    status_doc["sd"] = bool(sd_ready);
+    return sd_ready;
   }
 
-  uint8_t cardType = SD.cardType();
-
-  if (cardType == CARD_NONE)
-  {
-    Serial.println("No SD card attached");
-    sd_ready = false;
-  }
-
-  Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC)
-  {
-    Serial.println("MMC");
-  }
-  else if (cardType == CARD_SD)
-  {
-    Serial.println("SDSC");
-  }
-  else if (cardType == CARD_SDHC)
-  {
-    Serial.println("SDHC");
-  }
-  else
-  {
-    Serial.println("UNKNOWN");
-    sd_ready = false;
-  }
-
-  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
-
-  //listDir(SD, "/", 0);
-  //createDir(SD, "/mydir");
-  //listDir(SD, "/", 0);
-  //removeDir(SD, "/mydir");
-  listDir(SD, "/", 2);
-  //writeFile(SD, "/log.json", "Hello ");
-  //appendFile(SD, "/log.json", "World!\n");
-  //readFile(SD, "/hello.txt");
-  //deleteFile(SD, "/foo.txt");
-  //renameFile(SD, "/hello.txt", "/foo.txt");
-  //readFile(SD, "/log.json");
-  testFileIO(SD, "/log.json");
-  Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
-
-  status_doc["sd"] = bool(sd_ready);
-  return sd_ready;
 }
 
 
@@ -191,6 +214,8 @@ void readFile(fs::FS &fs, const char * path)
   File file = fs.open(path);
   if (!file) {
     Serial.println("Failed to open file for reading");
+    sd_ready = false;
+    file.close();
     return;
   }
 
@@ -208,15 +233,28 @@ void writeFile(fs::FS &fs, const char * path, const char * message)
   Serial.printf("Writing file: %s\n", path);
 
   File file = fs.open(path, FILE_WRITE);
-  if (!file) {
+
+  if (!file)
+  {
     Serial.println("Failed to open file for writing");
+    file.close();
+    sd_ready = false;
+    //SD_Init();
     return;
   }
-  if (file.print(message)) {
-    Serial.println("File written");
-  } else {
-    Serial.println("Write failed");
+  else
+  {
+    if (file.print(message))
+    {
+      Serial.println("File written");
+    }
+    else
+    {
+      Serial.println("Write failed");
+      sd_ready = false;
+    }
   }
+
   file.close();
 }
 
@@ -229,6 +267,9 @@ void appendFile(fs::FS &fs, const char * path, const char * message)
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
     Serial.println("Failed to open file for appending");
+    //sd_ready = false;
+    file.close();
+    // Probar iniciar la SD aqui
     return;
   }
   if (file.print(message)) {

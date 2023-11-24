@@ -55,10 +55,12 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
-// ---------------------------------------- intervalos para gps
+// ----------------------------------------GPS intervalos para gps
 unsigned long previousMillisGPS = 0;  // Variable para almacenar la última vez que se ejecutó el evento
 const long intervalGPS = 60000;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
-unsigned long currentMillisGPS; 
+unsigned long currentMillisGPS;
+String gps_name_file;
+String gps_str;
 
 uint32_t start_process_time;
 float litros;
@@ -250,20 +252,21 @@ void search_nclient(uint32_t aux_client)
 void system_init()
 {
 
-  //delay(100);
+  delay(100);
   Serial.begin(115200);
   //delay(5000);
   I2C_Init();
+
+  SD_Init();
+
+  
   Serial.println("i2c_Init");
+  status_doc["ver"] = VERSION;
   oled_display_init();
   oled_display_text(VERSION);    // Draw 'stylized' characters
-  SD_Init();
 
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
-
-  status_doc["ver"] = VERSION;
-
   if (spiffs_init())
   {
     Cfg_get(/*NULL*/);  // Load File from spiffs
@@ -276,10 +279,8 @@ void system_init()
     init_clock();        // I2C for clock
   }
 
-
-
+  
   gps_init();
-
   init_glcd();
 
   // WatchDog Timer
@@ -394,20 +395,8 @@ void reset_config()
 /*static*/ void Cfg_get(/*struct jsonrpc_request * r*/)
 //  {"method":"Config.Get"}
 {
-  // open file to load config
-
+  // ----------------------------------------------------- open file to load config
   obj = getJSonFromFile(SPIFFS, &doc, fileconfig);
-  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist);
-  obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
-
-
-  if (obj_list.isNull())
-  {
-    Serial.println("Rehaciendo null");
-    obj_list = doc_list.to<JsonArray>();
-  }
-
-
   if (obj.size() == 0)
   {
     Serial.println("{\"config_file\":\"empty\"}");
@@ -415,15 +404,24 @@ void reset_config()
     Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
   }
 
+  // ------------------------------------------------------------ Load list of clients
+  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist); // Cambiar ubicación a SD
+  if (obj_list.isNull())
+  {
+    Serial.println("Rehaciendo null");
+    obj_list = doc_list.to<JsonArray>();
+  }
+
+
+  
+
   //if (obj["test"].as<bool>() == true)
   {
     // Comment for production
     serializeJson(obj, Serial);
     Serial.println();
-    serializeJsonPretty(obj_list, Serial);
-    Serial.println();
 
-    serializeJsonPretty(obj_log, Serial);
+    serializeJsonPretty(obj_list, Serial);
     Serial.println();
 
     //Serial.println("SPIFFS");

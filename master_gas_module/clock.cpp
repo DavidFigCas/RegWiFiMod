@@ -32,7 +32,7 @@ void init_clock()
   //  Wire1.setSDA(2);
   //Wire1.setSCL(3);
   //Wire.begin();
-  //delay(100);
+  delay(100);
   if (!rtc.begin(&Wire))
   {
     Serial.println("{\"rtc_init\":false}");

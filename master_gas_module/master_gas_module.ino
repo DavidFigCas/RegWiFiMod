@@ -15,7 +15,7 @@ void setup()
   buttonState = LOW;
   lastButtonState = HIGH;
 
-  oled_display_number(0);    // Draw 'stylized' characters
+
 
   // Reset Display state
   doc_aux["STATE"] = 0;
@@ -26,7 +26,7 @@ void setup()
   Wire.endTransmission();
   delay(TIME_SPACE);
 
-
+  oled_display_number(0);    // Draw 'stylized' characters
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
@@ -386,6 +386,69 @@ void loop()
     }
 
   }
+
+  // Guarda cada minuto la posicion
+  // ----------------------------------------------- 1 minute refresh
+  //if (millis() - previousMillisGPS >= intervalGPS)
+  /*if (millis() - previousMillisGPS >= 2000)
+  {
+    // Guarda la última vez que actualizaste el evento
+    previousMillisGPS = millis();
+
+    StaticJsonDocument<100> gps_doc;
+    read_clock();
+    gps_doc["time"] = now.unixtime();
+    gps_doc["lat"] = status_doc["lat"];
+    gps_doc["lon"] = status_doc["lon"];
+
+    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+
+    serializeJson(gps_doc, gps_str);
+    gps_str += '\n'; // O puedes usar gps_str.concat('\n');
+
+    // ------------------------------------------- log de GPS existe?
+    //if (testFileIO(SD, gps_name_file.c_str()) == true)
+    if (SD.exists(gps_name_file))
+    {
+      appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+    }
+    else
+
+    {
+      //writeFile(SD, gps_name_file.c_str(), gps_str.c_str());
+      // File nod found
+      Serial.println("File not found");
+      //SD_Init();
+
+     // gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      if (!SD.exists(gps_name_file))
+      {
+        Serial.print("File not found, create?: ");
+        Serial.println(gps_name_file);
+        //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+        // File nod found
+        //
+        //SD_Init();
+        //}
+      }
+    }
+
+    /*obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
+    serializeJsonPretty(obj_log, Serial);
+    Serial.println();
+
+
+    read_clock();
+    
+    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+    if (!SD.exists(gps_name_file))
+    {
+      Serial.print("File not found, create: ");
+      Serial.println(gps_name_file);
+      //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+    }
+
+  }*/
 
 
   // ----------------------------------------- save new List

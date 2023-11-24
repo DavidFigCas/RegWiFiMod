@@ -33,20 +33,14 @@ File file;
 // ------------------------------------------------------------------------------------- spiffs_init
 bool spiffs_init()
 {
-  /*if (!LittleFS.begin()) {
-    Serial.println("{\"spiffs\":false}");
-    return false;
-    } else {
-    Serial.println("{\"spiffs\":true}");
-    Cfg_get();  // Load File from spiffs
-    return true;
-    }*/
-
   // SPIFFS Init
-  if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(true)) 
+  {
     Serial.println("{\"spiffs\":false}");
     return false;
-  } else {
+  } 
+  else 
+  {
     Serial.println("{\"spiffs\":true}");
     return true;
   }

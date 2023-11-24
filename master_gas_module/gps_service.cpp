@@ -97,40 +97,7 @@ void gps_update()
   status_doc["lat"] = obj["lat"];
   status_doc["lon"] = obj["lon"];
 
-
-  // Guarda cada minuto la posicion
-  // ----------------------------------------------- 1 minute refresh
-  if (millis() - previousMillisGPS >= intervalGPS)
-  {
-    // Guarda la última vez que actualizaste el evento
-    previousMillisGPS = millis();
-
-    dirTest(SD, "/gps");
-
-    String gps_str;
-    StaticJsonDocument<100> gps_doc;
-    read_clock();
-    gps_doc["time"] = now.unixtime();
-    gps_doc["lat"] = status_doc["lat"];
-    gps_doc["lon"] = status_doc["lon"]; 
-
-    String gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-
-    serializeJson(gps_doc, gps_str);
-    gps_str += '\n'; // O puedes usar gps_str.concat('\n');
-
-    // ------------------------------------------- log de GPS existe?
-    if (testFileIO(SD, gps_name_file.c_str()) == true)
-    {
-      appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
-    }
-    else
-    {
-      writeFile(SD, gps_name_file.c_str(), gps_str.c_str());
-
-    }
-
-  }
+  
 }
 
 // This custom version of delay() ensures that the gps object
