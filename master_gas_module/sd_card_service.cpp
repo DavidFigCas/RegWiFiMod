@@ -4,7 +4,10 @@
 // --------------------------------------------------------- dir_exist
 void dirTest(fs::FS &fs, const char * dirname)
 {
-  if (!fs.exists(dirname)) {
+  if (!fs.exists(dirname)) 
+  {
+    Serial.print("Create Dir: ");
+    Serial.println(dirname);
     fs.mkdir(dirname);
   }
 }
@@ -61,11 +64,11 @@ bool SD_Init(void)
       //ESP.restart();
     }
 
-    if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))
-    {
-      Serial.println("SD Error, reboot");
-      ESP.restart();
-    }
+    // if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))
+    //{
+    //Serial.println("SD Error, reboot");
+    //ESP.restart();
+    //}
 
 
     dirTest(SD, "/gps");
@@ -75,19 +78,19 @@ bool SD_Init(void)
 
 
     /*obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
-    serializeJsonPretty(obj_log, Serial);
-    Serial.println();
+      serializeJsonPretty(obj_log, Serial);
+      Serial.println();
 
 
-    read_clock();
-    
-    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-    if (!SD.exists(gps_name_file))
-    {
+      read_clock();
+
+      gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      if (!SD.exists(gps_name_file))
+      {
       Serial.print("File not found, create: ");
       Serial.println(gps_name_file);
       //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
-    }*/
+      }*/
 
 
     listDir(SD, "/", 2);
