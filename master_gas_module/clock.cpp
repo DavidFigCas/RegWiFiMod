@@ -213,7 +213,7 @@ void read_clock()
       }
 
       //dias = int(round(round(now.unixtime() - last_ac.unixtime()) / 86400L));
-      dias = (now.unixtime() - last_ac.unixtime()) / 86400;
+      //dias = (now.unixtime() - last_ac.unixtime()) / 86400;
       mes = now.month();
       anio = now.year();
       dia_hoy = now.day();

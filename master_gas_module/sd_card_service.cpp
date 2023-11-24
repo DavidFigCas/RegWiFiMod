@@ -1,5 +1,14 @@
 #include "sd_card_service.h"
 
+
+// --------------------------------------------------------- dir_exist
+void dirTest(fs::FS &fs, const char * dirname) 
+{
+    if (!fs.exists(dirname)) {
+        fs.mkdir(dirname);
+    }
+}
+
 // --------------------------------------------------------- SD_Init
 bool SD_Init(void)
 {
@@ -262,7 +271,7 @@ bool testFileIO(fs::FS &fs, const char * path)
 {
   Serial.print("Testing: ");
   Serial.println(path);
-  
+
   File file = fs.open(path);
   static uint8_t buf[512];
   size_t len = 0;
@@ -272,22 +281,32 @@ bool testFileIO(fs::FS &fs, const char * path)
   if (file)
   {
     len = file.size();
-    size_t flen = len;
-    start = millis();
-    while (len)
+    if (len <= 0)
     {
-      size_t toRead = len;
-      if (toRead > 512)
-      {
-        toRead = 512;
-      }
-      file.read(buf, toRead);
-      len -= toRead;
+      file.close();
+      Serial.println("Failed, size error");
+      return false;
     }
-    end = millis() - start;
-    Serial.printf("%u bytes read for %u ms\n", flen, end);
-    file.close();
-    return true;
+    else
+    {
+      size_t flen = len;
+      start = millis();
+      while (len)
+      {
+        size_t toRead = len;
+        if (toRead > 512)
+        {
+          toRead = 512;
+        }
+        file.read(buf, toRead);
+        len -= toRead;
+      }
+      end = millis() - start;
+      Serial.printf("%u bytes read for %u ms\n", flen, end);
+      file.close();
+      return true;
+    }
+
   }
   else
   {
