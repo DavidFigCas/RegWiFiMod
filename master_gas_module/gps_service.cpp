@@ -109,10 +109,10 @@ void gps_update()
 
     String gps_str;
     StaticJsonDocument<100> gps_doc;
-    gps_doc["lon"] = status_doc["lon"];
-    gps_doc["lat"] = status_doc["lat"];
     read_clock();
     gps_doc["time"] = now.unixtime();
+    gps_doc["lat"] = status_doc["lat"];
+    gps_doc["lon"] = status_doc["lon"]; 
 
     String gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
 

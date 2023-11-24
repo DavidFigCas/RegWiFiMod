@@ -2,11 +2,11 @@
 
 
 // --------------------------------------------------------- dir_exist
-void dirTest(fs::FS &fs, const char * dirname) 
+void dirTest(fs::FS &fs, const char * dirname)
 {
-    if (!fs.exists(dirname)) {
-        fs.mkdir(dirname);
-    }
+  if (!fs.exists(dirname)) {
+    fs.mkdir(dirname);
+  }
 }
 
 // --------------------------------------------------------- SD_Init
@@ -20,14 +20,12 @@ bool SD_Init(void)
   if (!sd_ready)
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
-    //sd_ready = false;
   }
   else
   {
     uint32_t cardSize = SD.cardSize() / (1024 * 1024);
     String str = "> SDCard Size: " + String(cardSize) + "MB";
     Serial.println(str);
-    //sd_ready = true;
   }
 
   uint8_t cardType = SD.cardType();
@@ -36,7 +34,6 @@ bool SD_Init(void)
   {
     Serial.println("No SD card attached");
     sd_ready = false;
-    //return;
   }
 
   Serial.print("SD Card Type: ");
@@ -76,6 +73,7 @@ bool SD_Init(void)
   Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
   Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 
+  status_doc["sd"] = bool(sd_ready);
   return sd_ready;
 }
 
