@@ -14,8 +14,8 @@ std::vector<WiFiManagerParameter*> customParams;
 bool wifiAP(bool force)
 {
   bool ap_ready = false;
-  String ap_ssid = obj["ap"].as<String>();
-  String ap_pass = obj["ap_pass"].as<String>();
+  const char * ap_ssid = obj["ap"].as<const char *>();
+  const char * ap_pass = obj["ap_pass"].as<const char *>();
 
   for (JsonPair kv : doc.as<JsonObject>()) 
   {
@@ -37,7 +37,7 @@ bool wifiAP(bool force)
 
     if (force == true)
     {
-      wifiManager.startConfigPortal(ap_ssid.c_str(), ap_pass.c_str());
+      wifiManager.startConfigPortal(ap_ssid, ap_pass);
       Serial.print("{\"Server_force\":");
       Serial.print("true");
       Serial.println("}");
@@ -45,7 +45,7 @@ bool wifiAP(bool force)
     }
     else
     {
-      ap_ready = wifiManager.autoConnect(ap_ssid.c_str(), ap_pass.c_str());
+      ap_ready = wifiManager.autoConnect(ap_ssid, ap_pass);
       Serial.print("{\"Server_force\":");
       Serial.print("false");
       Serial.println("}");
@@ -88,10 +88,10 @@ void wifi_init()
     //const char* auxssid = obj["ssid"].as<String>().c_str();
     //const char* auxpass = obj["pass"].as<String>().c_str();
 
-    String auxssid = obj["ssid"].as<String>();
-    String auxpass = obj["pass"].as<String>();
+    const char * auxssid = obj["ssid"].as<const char *>();
+    const char * auxpass = obj["pass"].as<const char *>();
 
-    WiFi.begin(auxssid.c_str(), auxpass.c_str());
+    WiFi.begin(auxssid, auxpass);
 
     Serial.print("{\"wifi\":{\"ssid\":\"");
     Serial.print(auxssid);

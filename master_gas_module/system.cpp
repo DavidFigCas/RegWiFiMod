@@ -117,15 +117,15 @@ void saveNewlog()
   status_doc["last_service"] = newLogEntry;
 
   //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
-  if (saveJSonArrayToAFile(SD, &obj_log, filelog))
-  {
-    Serial.println("{\"log_update_SD\":true}");
-  }
-  else
-  {
-    Serial.println("{\"log_update_SD\":false}");
-    sd_ready = false;
-  }
+  //if (saveJSonArrayToAFile(SD, &obj_log, filelog))
+  //{
+  //Serial.println("{\"log_update_SD\":true}");
+  //}
+  //else
+  //{
+  //Serial.println("{\"log_update_SD\":false}");
+  //sd_ready = false;
+  //}
 
 
 
@@ -254,19 +254,20 @@ void system_init()
 
   delay(100);
   Serial.begin(115200);
+  Serial.println("Main Logic");
+  Serial.print("Version:"); Serial.println(VERSION);
   //delay(5000);
-  I2C_Init();
 
+  delay(100);
   SD_Init();
+  delay(100);
 
-  
-  Serial.println("i2c_Init");
+
   status_doc["ver"] = VERSION;
   oled_display_init();
   oled_display_text(VERSION);    // Draw 'stylized' characters
 
-  Serial.println("Main Logic");
-  Serial.print("Version:"); Serial.println(VERSION);
+
   if (spiffs_init())
   {
     Cfg_get(/*NULL*/);  // Load File from spiffs
@@ -279,7 +280,8 @@ void system_init()
     init_clock();        // I2C for clock
   }
 
-  
+  I2C_Init();
+  Serial.println("i2c_Init");
   gps_init();
   init_glcd();
 
@@ -413,7 +415,7 @@ void reset_config()
   }
 
 
-  
+
 
   //if (obj["test"].as<bool>() == true)
   {

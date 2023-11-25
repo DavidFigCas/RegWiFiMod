@@ -108,12 +108,14 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
   printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r");
 
   // Imprimir número de unidad y folio
-  String id_str = obj["id"].as<String>();
+  //String id_str = obj["id"].as<String>();
+  const char * id_str = obj["id"].as<const char *>();
   Serial.print("ID: ");
   Serial.println(id_str);
 
   printString("EQUIPO: ");
-  printString(id_str.c_str());
+  //printString(id_str.c_str());
+  printString(id_str);
 
 
 

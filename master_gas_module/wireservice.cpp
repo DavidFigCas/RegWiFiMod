@@ -5,8 +5,8 @@ void I2C_Init()
   //Wire.setSDA(SDA_MAIN);
   //Wire.setSCL(SCL_MAIN);
   Wire.begin();
-  delay(5000);
-  Serial.println("Main Logic START");
+  //delay(5000);
+  //Serial.println("Main Logic START");
 }
 
 
