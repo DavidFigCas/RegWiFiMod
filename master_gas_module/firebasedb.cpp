@@ -268,9 +268,29 @@ void connectFirebase()
   esp_task_wdt_reset();
   if (!Firebase.ready()) // Add more filters
   {
+
+
+    // Timeout, prevent to program halt
+    config.timeout.wifiReconnect = 5 * 1000; // 10 Seconds to 2 min (10 * 1000)
+    config.timeout.socketConnection = 30 * 1000; // 1 sec to 1 min (30 * 1000)
+    config.timeout.sslHandshake = 2 * 60 * 1000; // 1 sec to 2 min (2 * 60 * 1000)
+    config.timeout.rtdbKeepAlive = 20 * 1000;    // 20 sec to 2 min (45 * 1000)
+    config.timeout.rtdbStreamReconnect = 1 * 1000;  //1 sec to 1 min (1 * 1000)
+    config.timeout.rtdbStreamError = 3 * 1000;    // 3 sec to 30 sec (3 * 1000)
+    config.timeout.serverResponse = 1 * 1000;    //Server response read timeout in ms 1 sec - 1 min ( 10 * 1000).
     /* Assign the api key (required) */
     // s_aux = obj["key"].as<String>();
     //len = s_aux.length();
+    //--------------- LOAD REGISTERS
+    //String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
+    //size_t length = email.length();
+
+    /* if (length <= sizeof(name_data)) {
+       strncpy((char*)name_data, email.c_str(), sizeof(name_data));
+       name_data[sizeof(name_data) - 1] = '\0'; // Asegura que la cadena esté terminada correctamente
+      } else {
+       Serial.println("La longitud del correo electrónico es demasiado larga para name_data");
+      }*/
 
     //blk = false;
     Serial.println("{\"firebase_init\":true}");
@@ -290,28 +310,17 @@ void connectFirebase()
     Firebase.reconnectWiFi(true);
 
     unsigned long startTime = millis();
-      esp_task_wdt_reset();
+    esp_task_wdt_reset();
     while (!Firebase.ready())
-    //if (!Firebase.ready())
+      //if (!Firebase.ready())
     {
       if (millis() - startTime > mainTime)
       {
-      Serial.println("Failed to connect to Firebase within timeout period");
-      break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
+        Serial.println("Failed to connect to Firebase within timeout period");
+        break; // Salir del bucle si no se puede conectar a Firebase después de TIMEOUT_DURATION milisegundos
       }
       delay(100); // Esperar un poco antes de comprobar de nuevo, para no bloquear completamente el bucle
     }
-
-
-
-    // Timeout, prevent to program halt
-    config.timeout.wifiReconnect = 5 * 1000; // 10 Seconds to 2 min (10 * 1000)
-    config.timeout.socketConnection = 30 * 1000; // 1 sec to 1 min (30 * 1000)
-    config.timeout.sslHandshake = 2 * 60 * 1000; // 1 sec to 2 min (2 * 60 * 1000)
-    config.timeout.rtdbKeepAlive = 20 * 1000;    // 20 sec to 2 min (45 * 1000)
-    config.timeout.rtdbStreamReconnect = 1 * 1000;  //1 sec to 1 min (1 * 1000)
-    config.timeout.rtdbStreamError = 3 * 1000;    // 3 sec to 30 sec (3 * 1000)
-    config.timeout.serverResponse = 1 * 1000;    //Server response read timeout in ms 1 sec - 1 min ( 10 * 1000).
 
   }
 

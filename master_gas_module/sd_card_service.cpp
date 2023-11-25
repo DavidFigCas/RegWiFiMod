@@ -4,11 +4,18 @@
 // --------------------------------------------------------- dir_exist
 void dirTest(fs::FS &fs, const char * dirname)
 {
-  if (!fs.exists(dirname)) 
+  if (!fs.exists(dirname))
   {
-    Serial.print("Create Dir: ");
-    Serial.println(dirname);
-    fs.mkdir(dirname);
+    if (fs.mkdir(dirname))
+    {
+      Serial.print("Create Dir: ");
+      Serial.println(dirname);
+    }
+    else
+    {
+      Serial.print("EROOR Dir: ");
+      Serial.println(dirname);
+    }
   }
 }
 
@@ -27,6 +34,17 @@ bool SD_Init(void)
   if (!sd_ready)
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
+    //Serial.println("{\"retry_sd\":true}");
+    if (obj["sd_try"].isNull())
+      obj["sd_try"] = 0;
+
+    //obj["sd_try"] = (obj["sd_try"].as< unsigned int>()) + 1;
+    //saveConfigData();
+    //if ((obj["sd_try"].as< unsigned int>()  < 3) || (obj["sd_try"].as< unsigned int>()  > 10))
+    {
+      //Serial.println("reboot");
+      //ESP.restart();
+    }
     return sd_ready;
   }
   else
@@ -61,7 +79,7 @@ bool SD_Init(void)
     {
       Serial.println("UNKNOWN");
       sd_ready = false;
-      //ESP.restart();
+      ESP.restart();
     }
 
     // if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))
@@ -75,6 +93,16 @@ bool SD_Init(void)
     dirTest(SD, "/servicios");
     dirTest(SD, "/logs");
     dirTest(SD, "/reportes");
+
+    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+
+    if (!SD.exists(gps_name_file))
+    {
+      Serial.print("File not found, create?: ");
+      Serial.println(gps_name_file);
+      writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+    }
+
 
 
     /*obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);
@@ -98,6 +126,8 @@ bool SD_Init(void)
     Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 
     status_doc["sd"] = bool(sd_ready);
+    obj["sd_try"] = 0;
+    saveConfig = true;
     return sd_ready;
   }
 
@@ -276,7 +306,8 @@ void appendFile(fs::FS &fs, const char * path, const char * message)
     return;
   }
   if (file.print(message)) {
-    Serial.println("Message appended");
+    Serial.print("Append File size: ");
+    Serial.println(file.size());
   } else {
     Serial.println("Append failed");
   }

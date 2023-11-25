@@ -353,10 +353,11 @@ void loop()
         else
 
         {
-          Serial.print("File not found, create?: ");
-          Serial.println(gps_name_file);
+          //Serial.print("File not found, create?: ");
+          //Serial.println(gps_name_file);
           //listDir(SD, "/", 2);
           //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+          sd_ready = false;
         }
 
       }
@@ -501,7 +502,8 @@ void loop()
 
   // leer boton para imprimir reporte diario
   // Si el botón cambia de no presionado a presionado
-  if (lastButtonState == HIGH && buttonState == LOW) {
+  if (lastButtonState == HIGH && buttonState == LOW) 
+  {
     Serial.println("PUSH");
     buttonPressTime = millis();
     wifiAP(true);
@@ -539,14 +541,6 @@ void loop()
   }
 
   lastButtonState = buttonState;
-
-  //if (digitalRead(BT_REPORT) == LOW)
-  //{
-  //Serial.println("PUSH");
-
-  //print_log = true;
-  //}
-
 
   esp_task_wdt_reset();
 }

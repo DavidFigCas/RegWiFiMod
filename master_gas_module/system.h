@@ -126,6 +126,9 @@ extern unsigned long previousMillisGPS;  // Variable para almacenar la última v
 extern const long intervalGPS;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
 extern unsigned long currentMillisGPS; 
 
+// ------------------------------------- wifi flag
+extern bool server_running;
+
 extern String gps_name_file;
 extern String gps_str;
 

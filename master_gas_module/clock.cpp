@@ -117,6 +117,10 @@ void update_clock()
     if (rtcUpdated == false)
     {
       // New connection to NTP server
+      // ---------------------------- Time NTP
+      WiFiUDP ntpUDP;
+      NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
+
       if (ntpConnected == false)
       {
         //Serial.println("{\"ntp\":\"connecting...\"}");
@@ -161,7 +165,7 @@ void update_clock()
         now = rtc.now();
         status_doc["time"] = now.unixtime();
         doc["time"] = now.unixtime();
-        
+
         Serial.print("{\"time_rtc\":\"");
         Serial.print(now.year(), DEC);
         Serial.print('/');

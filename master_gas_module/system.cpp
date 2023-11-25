@@ -62,6 +62,9 @@ unsigned long currentMillisGPS;
 String gps_name_file;
 String gps_str;
 
+// ------------------------------------- wifi flag
+bool server_running = false;
+
 uint32_t start_process_time;
 float litros;
 uint32_t target_litros;
@@ -258,9 +261,10 @@ void system_init()
   Serial.print("Version:"); Serial.println(VERSION);
   //delay(5000);
 
+
   delay(100);
-  SD_Init();
-  delay(100);
+  I2C_Init();
+  Serial.println("i2c_Init");
 
 
   status_doc["ver"] = VERSION;
@@ -268,20 +272,22 @@ void system_init()
   oled_display_text(VERSION);    // Draw 'stylized' characters
 
 
+
   if (spiffs_init())
   {
     Cfg_get(/*NULL*/);  // Load File from spiffs
     loadConfig();       // Load and update behaivor of system
-    mqtt_init();
     wifi_init();
-    mqtt_check();
+    mqtt_init();
+    //mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
 
-  I2C_Init();
-  Serial.println("i2c_Init");
+  delay(100);
+  SD_Init();
+
   gps_init();
   init_glcd();
 
@@ -446,6 +452,7 @@ void loadConfig()
   Serial.println("{\"loadConfig\":true}");
 
 
+  updated = obj["updated"].as<bool>();
 
   if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
   {
@@ -455,20 +462,6 @@ void loadConfig()
     Serial.println("{\"reboot\":true}");
     ESP.restart();
   }
-
-  //--------------- LOAD REGISTERS
-  String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
-  updated = obj["updated"].as<bool>();
-
-  size_t length = email.length();
-
-  /* if (length <= sizeof(name_data)) {
-     strncpy((char*)name_data, email.c_str(), sizeof(name_data));
-     name_data[sizeof(name_data) - 1] = '\0'; // Asegura que la cadena esté terminada correctamente
-    } else {
-     Serial.println("La longitud del correo electrónico es demasiado larga para name_data");
-    }*/
-
 
   // ------------- ID
   String s_aux = obj["id"].as<String>();
@@ -487,19 +480,6 @@ void loadConfig()
 
     Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
   }
-
-
-
-  //----------------- RTC
-  // if (obj["enable_rtc"].as<bool>())
-  // {
-  //   rtcUpdated = false;
-  //   ntpConnected = false;
-  //   init_clock();
-  //}
-
-
-
 
 
   // -------------------------------- mainTime
@@ -530,7 +510,6 @@ void loadConfig()
   //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
   pulsos_litro =  obj["pulsos_litro"];
   status_doc["pulsos_litro"] = pulsos_litro;
-
 
 
   Serial.println("{\"config\":true}");
