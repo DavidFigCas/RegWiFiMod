@@ -41,7 +41,7 @@ void mqtt_init()
     Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     Mclient.setCallback(callback);
-
+    Mclient.setKeepAlive(30); 
   }
 
 

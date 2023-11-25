@@ -311,18 +311,17 @@ void loop()
   }
 
 
-  // ---------------------------------------------------------------- MAIN TIME 
+  // ---------------------------------------------------------------- MAIN TIME
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
-    
+
     read_clock();
     gps_update();
-    
+
     //check SD
-    if (!sd_ready)
-      SD_Init();
-    else
+
+    if (sd_ready)
     {
       // Guarda cada minuto la posicion
       // ----------------------------------------------- 1 minute refresh
@@ -333,7 +332,7 @@ void loop()
         previousMillisGPS = millis();
 
         StaticJsonDocument<100> gps_doc;
-        read_clock();
+        //read_clock();
         gps_doc["time"] = now.unixtime();
         gps_doc["lat"] = status_doc["lat"];
         gps_doc["lon"] = status_doc["lon"];
@@ -351,12 +350,8 @@ void loop()
           appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
         }
         else
-
         {
-          //Serial.print("File not found, create?: ");
-          //Serial.println(gps_name_file);
-          //listDir(SD, "/", 2);
-          //writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
+          Serial.println("File not found, init SD");
           sd_ready = false;
         }
 
@@ -372,6 +367,11 @@ void loop()
     {
 
       // ----------------------------------------- check internet
+
+      if (!sd_ready)
+        SD_Init();
+
+
       if (wifi_check())
       {
         update_clock();
@@ -502,7 +502,7 @@ void loop()
 
   // leer boton para imprimir reporte diario
   // Si el botón cambia de no presionado a presionado
-  if (lastButtonState == HIGH && buttonState == LOW) 
+  if (lastButtonState == HIGH && buttonState == LOW)
   {
     Serial.println("PUSH");
     buttonPressTime = millis();

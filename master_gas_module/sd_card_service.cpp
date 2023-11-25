@@ -22,13 +22,16 @@ void dirTest(fs::FS &fs, const char * dirname)
 // --------------------------------------------------------- SD_Init
 bool SD_Init(void)
 {
-  //SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-  //if (!SD.begin(SD_CS))
+  
 
   //if (!sd_ready)
   uint64_t cardSize;
   uint8_t cardType;
-  sd_ready = SD.begin();
+  //sd_ready = SD.begin();
+
+  SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
+  //if (!SD.begin(SD_CS))
+  sd_ready = SD.begin(SD_CS);
 
 
   if (!sd_ready)
@@ -79,7 +82,7 @@ bool SD_Init(void)
     {
       Serial.println("UNKNOWN");
       sd_ready = false;
-      ESP.restart();
+      //ESP.restart();
     }
 
     // if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))
@@ -298,19 +301,57 @@ void appendFile(fs::FS &fs, const char * path, const char * message)
   Serial.printf("Appending to file: %s\n", path);
 
   File file = fs.open(path, FILE_APPEND);
-  if (!file) {
-    Serial.println("Failed to open file for appending");
-    //sd_ready = false;
+  if (!file)
+  {
+    Serial.println("Failed to open file, not exist");
     file.close();
+    
+    Serial.println("Retry");
+    delay(50);
+    file = fs.open(path, FILE_APPEND);
+    if (file.print(message))
+    {
+      Serial.print("Append File size: ");
+      Serial.println(file.size());
+      sd_ready = true;
+    }
+    else
+    {
+      Serial.println("Append failed again");
+      sd_ready = false;
+    }
+
     // Probar iniciar la SD aqui
-    return;
+    //return;
   }
-  if (file.print(message)) {
-    Serial.print("Append File size: ");
-    Serial.println(file.size());
-  } else {
-    Serial.println("Append failed");
+  else
+  {
+    if (file.print(message))
+    {
+      Serial.print("Append File size: ");
+      Serial.println(file.size());
+      sd_ready = true;
+    }
+    else
+    {
+      Serial.println("Append failed, retry");
+      delay(50);
+      file = fs.open(path, FILE_APPEND);
+      if (file.print(message))
+      {
+        Serial.print("Append File size: ");
+        Serial.println(file.size());
+        sd_ready = true;
+      }
+      else
+      {
+        Serial.println("Append failed again");
+        sd_ready = false;
+      }
+
+    }
   }
+
   file.close();
 }
 
