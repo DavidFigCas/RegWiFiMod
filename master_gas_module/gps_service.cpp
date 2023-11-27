@@ -5,7 +5,10 @@ TinyGPSPlus gps;
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  uint8_t rxPin = 34;
+  uint8_t txPin = 33;
+  Serial2.begin(115200, SERIAL_8N1, rxPin, txPin);
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
 }
 
@@ -97,7 +100,7 @@ void gps_update()
   status_doc["lat"] = obj["lat"];
   status_doc["lon"] = obj["lon"];
 
-  
+
 }
 
 // This custom version of delay() ensures that the gps object
