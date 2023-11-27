@@ -2,6 +2,50 @@
 
 TinyGPSPlus gps;
 
+
+// ------------------------------------------------------ save gps_log
+void save_gps_log()
+{
+  //check SD
+
+  if (sd_ready)
+  {
+    // Guarda cada minuto la posicion
+    // ----------------------------------------------- 1 minute refresh
+    //if (millis() - previousMillisGPS >= intervalGPS)
+    //if (millis() - previousMillisGPS >= 5000)
+    {
+      // Guarda la última vez que actualizaste el evento
+      previousMillisGPS = millis();
+
+      StaticJsonDocument<100> gps_doc;
+      //read_clock();
+      gps_doc["time"] = now.unixtime();
+      gps_doc["lat"] = status_doc["lat"];
+      gps_doc["lon"] = status_doc["lon"];
+
+      gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      delay(50);
+      serializeJson(gps_doc, gps_str);
+      //delay(50);
+      gps_str += '\n'; // O puedes usar gps_str.concat('\n');
+
+      // ------------------------------------------- log de GPS existe?
+      //if (testFileIO(SD, gps_name_file.c_str()) == true)
+      if (SD.exists(gps_name_file))
+      {
+        appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+      }
+      else
+      {
+        Serial.println("File not found, init SD");
+        sd_ready = false;
+      }
+
+    }
+  }
+}
+
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
