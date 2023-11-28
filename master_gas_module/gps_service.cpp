@@ -18,28 +18,37 @@ void save_gps_log()
       // Guarda la última vez que actualizaste el evento
       previousMillisGPS = millis();
 
-      StaticJsonDocument<100> gps_doc;
+      //StaticJsonDocument<100> gps_doc;
       //read_clock();
-      gps_doc["time"] = now.unixtime();
-      gps_doc["lat"] = status_doc["lat"];
-      gps_doc["lon"] = status_doc["lon"];
+      //gps_doc["time"] = now.unixtime();
+      //gps_doc["lat"] = status_doc["lat"];
+      //gps_doc["lon"] = status_doc["lon"];
 
-      gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-      delay(50);
-      serializeJson(gps_doc, gps_str);
+      //gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
+      gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
+
+      String csvLine = String((int)status_doc["time"]+ "," + String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6) );
       //delay(50);
-      gps_str += '\n'; // O puedes usar gps_str.concat('\n');
+      //serializeJson(gps_doc, gps_str);
+      //delay(50);
+      csvLine += '\n'; // O puedes usar gps_str.concat('\n');
 
       // ------------------------------------------- log de GPS existe?
-      //if (testFileIO(SD, gps_name_file.c_str()) == true)
       if (SD.exists(gps_name_file))
       {
-        appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+        //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+        appendFile(SD, gps_name_file.c_str(), csvLine.c_str());
       }
       else
       {
-        Serial.println("File not found, init SD");
-        sd_ready = false;
+        //Serial.println("File not found, init SD");
+        //sd_ready = false;
+        //if (!SD.exists(gps_name_file))
+        //{
+        Serial.print("File not found, create?: ");
+        Serial.println(gps_name_file);
+        writeFile(SD, gps_name_file.c_str(), csvLine.c_str());
+        //}
       }
 
     }

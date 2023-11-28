@@ -97,15 +97,6 @@ bool SD_Init(void)
     dirTest(SD, "/logs");
     dirTest(SD, "/reportes");
 
-    gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-
-    if (!SD.exists(gps_name_file))
-    {
-      Serial.print("File not found, create?: ");
-      Serial.println(gps_name_file);
-      writeFile(SD, gps_name_file.c_str(), gps_name_file.c_str());
-    }
-
 
 
     /*obj_log = getJSonArrayFromFile(SD, &doc_log, filelog);

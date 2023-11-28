@@ -12,7 +12,7 @@ StaticJsonDocument<LIST_SIZE> doc_list;
 JsonArray obj_log;
 StaticJsonDocument<LOG_SIZE> doc_log;
 
-JsonObject newLogEntry;
+//JsonObject newLogEntry;
 
 StaticJsonDocument<200> doc_aux;
 StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
@@ -22,7 +22,8 @@ StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para
 const char* fileconfig = "/config.json";
 const char *filedefault = "/default.json";
 const char *filelist = "/list.json";
-const char *filelog = "/log.json";
+//const char *filelog = "/log.json";
+String filelog;
 volatile bool saveConfig = false;
 
 File file;

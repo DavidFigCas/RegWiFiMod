@@ -102,22 +102,51 @@ void saveNewlog()
   Serial.println(litros);
   Serial.print("Folio: ");
   Serial.println(folio);
-  newLogEntry = obj_log.createNestedObject();
+  //newLogEntry = obj_log.createNestedObject();
   //newLogEntry["timestamp"] = DateTimeToString(now);
-  newLogEntry["folio"] = folio;
-  newLogEntry["start_timestamp"] = start_process_time;
-  newLogEntry["end_timestamp"] = now.unixtime();
-  newLogEntry["state"] = STATE;
-  newLogEntry["litros"] = litros_check;
-  newLogEntry["precio"] = precio_check;
-  newLogEntry["cliente"] = obj_in["cliente"].as<unsigned int>();
-  if (!obj["gps"]["lat"].isNull())
-  {
-    newLogEntry["lat"] = obj["gps"]["lat"];
-    newLogEntry["lon"] = obj["gps"]["lon"];
-  }
 
-  status_doc["last_service"] = newLogEntry;
+  status_doc["last_service"]["folio"] = folio;
+  status_doc["last_service"]["start_timestamp"] = start_process_time;
+  status_doc["last_service"]["end_timestamp"] = now.unixtime();
+  status_doc["last_service"]["state"] = STATE;
+  status_doc["last_service"]["litros"] = litros_check;
+  status_doc["last_service"]["precio"] = precio_check;
+  status_doc["last_service"]["cliente"] = obj_in["cliente"].as<unsigned int>();
+
+  //if (!obj["gps"]["lat"].isNull())
+  //{
+  status_doc["last_service"]["lat"] = obj["lat"];
+  status_doc["last_service"]["lon"] = obj["lon"];
+  //}
+
+  //status_doc["last_service"] = newLogEntry;
+
+  filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  String log_str; //= String((double)status_doc["lon"], 6) + "," + String((double)status_doc["lat"], 6) + "," + String((int)status_doc["time"]);
+  //delay(50);
+  serializeJson(status_doc["last_service"], log_str);
+  //delay(50);
+  log_str += '\n'; // O puedes usar gps_str.concat('\n');
+
+  // ------------------------------------------- log de GPS existe?
+  //if (testFileIO(SD, gps_name_file.c_str()) == true)
+  if (SD.exists(filelog))
+  {
+    //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+    appendFile(SD, filelog.c_str(), log_str.c_str());
+  }
+  else
+  {
+    //Serial.println("File not found, init SD");
+    //sd_ready = false;
+    //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+    //if (!SD.exists(filelog))
+    //{
+    Serial.print("File not found, create?: ");
+    Serial.println(filelog);
+    writeFile(SD, filelog.c_str(), log_str.c_str());
+    //}
+  }
 
   //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
   //if (saveJSonArrayToAFile(SD, &obj_log, filelog))
@@ -134,8 +163,8 @@ void saveNewlog()
 
   //if (obj["test"].as<bool>())
   {
-    serializeJsonPretty(obj_log, Serial);
-    Serial.println();
+    //serializeJsonPretty(newLogEntry, Serial);
+    Serial.println(log_str);
   }
 
   folio++;
