@@ -170,6 +170,7 @@ void system_init();
 void search_nclient(uint32_t aux_client);
 void register_client();
 void saveNewlog();
+void read_logs();
 
 
 #endif

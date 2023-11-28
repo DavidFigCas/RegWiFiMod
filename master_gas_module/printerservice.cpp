@@ -1,44 +1,6 @@
 #include "printerservice.h"
 
-void printing_logs()
-{
-  Serial.println("Print ALL LOGS");
-  serializeJson(obj_log, Serial);
 
-  uint32_t litros_acumulado = 0;
-  uint32_t servicios = 0;
-  uint32_t total_ventas = 0;
-
-  // Iterar sobre cada objeto en el JsonArray
-  for (JsonObject jsonObject : obj_log)
-  {
-
-    // Extraer los valores del objeto JSON
-    uint32_t folio = jsonObject["folio"];
-    uint32_t timestamp = jsonObject["timestamp"];
-    uint32_t state = jsonObject["state"];
-    uint32_t litros = jsonObject["litros"].as<uint32_t>();
-    uint32_t precio = jsonObject["precio"].as<uint32_t>();
-    uint32_t cliente = jsonObject["cliente"];
-    float uprice = (float)precio / litros; // Asumiendo que uprice es el precio por litro
-
-    // Convertir el timestamp a fecha y hora usando RTClib
-    //DateTime dt(timestamp);
-    //int dia_hoy = dt.day();
-    //int mes = dt.month();
-    //int anio = dt.year();
-    //int hora = dt.hour();
-    //int minuto = dt.minute();
-
-    servicios++;
-    litros_acumulado = litros_acumulado + litros;
-    total_ventas = total_ventas + precio;
-
-    // Llamar a la función printCheck con los valores extraídos
-  }
-
-  printReport(servicios, litros_acumulado, total_ventas);
-}
 
 // --------------------------------------------------------------------------- printRepot
 // printCheck worked. A ticket was printed

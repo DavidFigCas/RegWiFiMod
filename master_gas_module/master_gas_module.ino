@@ -306,7 +306,7 @@ void loop()
   // ------------------------------------------- Print LOG
   if (print_log == true)
   {
-    printing_logs();
+    read_logs();
     print_log = false;
   }
 

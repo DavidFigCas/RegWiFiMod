@@ -94,6 +94,52 @@ volatile bool readyToPrint = false;
 
 volatile uint32_t pesos;
 
+
+// -------------------------------------------------------------- read_logs
+void read_logs() 
+{
+  Serial.println("READ ALL LOGS");
+
+  filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  File file = SD.open(filelog.c_str(), FILE_READ);
+  if (!file) 
+  {
+    Serial.print("Error al abrir el archivo: ");
+    Serial.println(filelog);
+    return;
+  }
+
+  uint32_t litros_acumulado = 0;
+  uint32_t servicios = 0;
+  uint32_t total_ventas = 0;
+
+  while (file.available()) 
+  {
+    String line = file.readStringUntil('\n');
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, line);
+
+    if (error) 
+    {
+      Serial.print("Error al parsear JSON: ");
+      Serial.println(error.c_str());
+      continue;
+    }
+
+    // Extraer los valores del objeto JSON
+    uint32_t litros = doc["litros"];
+    uint32_t precio = doc["precio"];
+
+    servicios++;
+    litros_acumulado += litros;
+    total_ventas += precio;
+  }
+
+  file.close();
+
+  printReport(servicios, litros_acumulado, total_ventas);
+}
+
 // -------------------------------------------------------------- save_newlog
 void saveNewlog()
 {

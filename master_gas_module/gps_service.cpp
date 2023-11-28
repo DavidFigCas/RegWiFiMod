@@ -27,10 +27,9 @@ void save_gps_log()
       //gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
       gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
 
-      String csvLine = String((int)status_doc["time"]+ "," + String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6) );
-      //delay(50);
-      //serializeJson(gps_doc, gps_str);
-      //delay(50);
+      //String csvLine = String((int)status_doc["time"] + "," + String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6) );
+      String csvLine = String(anio) + "-" + String(mes) + "-" + String(dia_hoy) + " " + String(hora) + ":" + String(minuto) + ":" + String(segundo) + ",";
+      csvLine += String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6);
       csvLine += '\n'; // O puedes usar gps_str.concat('\n');
 
       // ------------------------------------------- log de GPS existe?

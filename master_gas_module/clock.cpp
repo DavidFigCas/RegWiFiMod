@@ -12,6 +12,7 @@ int anio;
 int hora;
 int minuto;
 int dia_hoy;
+int segundo;
 
 const char* ntpServer = "pool.ntp.org";
 //long  gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
@@ -223,6 +224,7 @@ void read_clock()
       dia_hoy = now.day();
       hora = now.hour();
       minuto = now.minute();
+      segundo = now.second();
 
       Serial.print("{\"time\":\"");
       Serial.print(now.year(), DEC);
@@ -250,7 +252,7 @@ void read_clock()
       lcd.print(":");
       lcd.print(minuto);
       lcd.print(":");
-      lcd.print(now.second());
+      lcd.print(segundo);
 
     }
   }
