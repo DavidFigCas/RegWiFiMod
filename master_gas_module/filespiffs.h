@@ -25,8 +25,9 @@ extern StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espac
 extern const char *fileconfig;
 extern const char *filedefault;
 extern const char *filelist;
-//extern const char *filelog;
 extern String filelog;
+extern String consult_filelog;
+extern String file_to_send;
 extern volatile bool saveConfig;
 
 extern File file;

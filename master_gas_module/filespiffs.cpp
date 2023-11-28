@@ -22,8 +22,9 @@ StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para
 const char* fileconfig = "/config.json";
 const char *filedefault = "/default.json";
 const char *filelist = "/list.json";
-//const char *filelog = "/log.json";
 String filelog;
+String consult_filelog;
+String file_to_send;
 volatile bool saveConfig = false;
 
 File file;

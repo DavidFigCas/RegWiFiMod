@@ -96,16 +96,16 @@ volatile uint32_t pesos;
 
 
 // -------------------------------------------------------------- read_logs
-void read_logs() 
+void read_logs(String consult) 
 {
   Serial.println("READ ALL LOGS");
 
-  filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-  File file = SD.open(filelog.c_str(), FILE_READ);
+  //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  File file = SD.open(consult.c_str(), FILE_READ);
   if (!file) 
   {
     Serial.print("Error al abrir el archivo: ");
-    Serial.println(filelog);
+    Serial.println(consult);
     return;
   }
 
@@ -168,6 +168,7 @@ void saveNewlog()
   //status_doc["last_service"] = newLogEntry;
 
   filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  consult_filelog = filelog;
   String log_str; //= String((double)status_doc["lon"], 6) + "," + String((double)status_doc["lat"], 6) + "," + String((int)status_doc["time"]);
   //delay(50);
   serializeJson(status_doc["last_service"], log_str);

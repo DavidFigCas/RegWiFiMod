@@ -306,7 +306,7 @@ void loop()
   // ------------------------------------------- Print LOG
   if (print_log == true)
   {
-    read_logs();
+    read_logs(consult_filelog);
     print_log = false;
   }
 
@@ -342,22 +342,7 @@ void loop()
           // ------------------------------------------- Send Log
           if (send_log == true)
           {
-            Serial.println("{\"mqtt_log\":\"sending\"}");
-
-            //saveNewlog();
-
-            strcpy(buffer_union_publish, obj["id"].as<const char*>());
-            strcat(buffer_union_publish, publish_topic);
-            strcat(buffer_union_publish, log_topic);
-
-            JsonArray logObject = obj_log;
-            size_t serializedLength = measureJson(logObject) + 1;
-            char tempBuffer[serializedLength];
-            serializeJson(logObject, tempBuffer, serializedLength);
-            strcpy(buffer_msg, tempBuffer);
-
-            Mclient.publish(buffer_union_publish, buffer_msg);
-            send_log = false;
+            mqtt_send_file(file_to_send);
           }
 
           // ------------------------------------------- Send STATUS
