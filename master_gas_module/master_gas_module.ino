@@ -1,6 +1,12 @@
 #include "system.h"
 
 
+SemaphoreHandle_t mutex;
+int globalVariable = 0;
+
+void Task1(void *parameter);
+void Task2(void *parameter);
+
 
 
 
@@ -28,12 +34,21 @@ void setup()
 
   oled_display_number(0);    // Draw 'stylized' characters
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+
+   // Crear un mutex
+  mutex = xSemaphoreCreateMutex();
+
+  // Crear tareas
+  xTaskCreate(Task1, "Task 1", 1000, NULL, 1, NULL);
+  xTaskCreate(Task2, "Task 2", 1000, NULL, 1, NULL);
+
 }
 
 
 // ------------------------------------------------------ loop
 void loop()
 {
+  
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
   // ----------------------------------------------- leer
@@ -490,4 +505,30 @@ void loop()
   lastButtonState = buttonState;
 
   esp_task_wdt_reset();
+  
+}
+
+// ------------------------------------------------------ TASKS
+void Task1(void *parameter) {
+  while (true) {
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+      globalVariable++;
+      Serial.print("Task 1 incrementó la variable a: ");
+      Serial.println(globalVariable);
+      xSemaphoreGive(mutex);
+    }
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+
+void Task2(void *parameter) {
+  while (true) {
+    if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+      globalVariable--;
+      Serial.print("Task 2 decrementó la variable a: ");
+      Serial.println(globalVariable);
+      xSemaphoreGive(mutex);
+    }
+    vTaskDelay(pdMS_TO_TICKS(2000));
+  }
 }
