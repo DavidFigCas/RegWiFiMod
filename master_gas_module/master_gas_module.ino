@@ -52,21 +52,10 @@ void loop()
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
 
-
   // ----------------------------------------------- leer
 
   // --------------------- leer display
-  // Read from the slave and print out
-  Wire.requestFrom(DISPLAY_ADD, 199);
-  memset(buff, 0, sizeof(buff));
-  i = 0;
-  while (Wire.available())
-  {
-    buff[i] = Wire.read();
-    //Serial  .print((char)buff[i]);
-    i++;
-  }
-  //Serial.println();
+
 
   jsonStr =  buff;
   //Serial.println(jsonStr);
@@ -120,24 +109,27 @@ void loop()
 
   delay(TIME_SPACE);
 
+
   // ----------------------------------------------- procesar
-  //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
-  // Encoder value is ready and not null
-  if (!doc_encoder["current"].isNull())
-  {
+
+  /*
+    //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
+    // Encoder value is ready and not null
+    if (!doc_encoder["current"].isNull())
+    {
     litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
     precio = litros * uprice;
-  }
+    }
 
-  display_reset = false;
-
-
+    display_reset = false;
 
 
 
-  // ------------------------------------- encoder Read and stop
-  //if (!doc_encoder["STATE"].isNull())
-  {
+
+
+    // ------------------------------------- encoder Read and stop
+    //if (!doc_encoder["STATE"].isNull())
+    {
     if (doc_encoder["STATE"] == 1)
     {
       if (!startFlowing)
@@ -195,12 +187,12 @@ void loop()
     //{
 
     //}
-  }
+    }
 
 
-  // --------------------------------- proces stop, display liters and wait for icon
-  if (startCounting)
-  {
+    // --------------------------------- proces stop, display liters and wait for icon
+    if (startCounting)
+    {
     // Ya se ha detectado antes, verificar el intervalo
     tiempoActual = millis();
     if (tiempoActual - tiempoAnterior >= intervalo)
@@ -214,13 +206,13 @@ void loop()
       startCounting = false;
       readyToPrint = true;
     }
-  }
+    }
 
 
-  // ------------------------------------- printer ready to print
-  // Debe depender del encoder
-  if (readyToPrint == true)
-  {
+    // ------------------------------------- printer ready to print
+    // Debe depender del encoder
+    if (readyToPrint == true)
+    {
     if (startTimeToPrint == 0)
     { // Si es la primera vez que entras al estado
       startTimeToPrint = millis();
@@ -240,17 +232,17 @@ void loop()
       oled_display_number(0);
       lcd.noBacklight();
     }
-  }
+    }
 
 
-  // ----------------------------------------------- enviar
+    // ----------------------------------------------- enviar
 
 
-  // ---------------------- display doc
-  doc_aux.clear();
+    // ---------------------- display doc
+    doc_aux.clear();
 
-  if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
-  {
+    if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
+    {
     doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
     doc_aux["wifi"] = true;
     doc_aux["gps"] = false;
@@ -259,49 +251,49 @@ void loop()
     doc_aux["paper"] = true;
     STATE_DISPLAY = 1;
 
-  }
-  else
-  {
+    }
+    else
+    {
     doc_aux["flow"] = doc_encoder["flow"].as<bool>();
     doc_aux["litros"] = litros;
     doc_aux["litros_check"] = litros_check;
     doc_aux["precio"] = precio;
     doc_aux["precio_check"] = precio_check;
     doc_aux["uprice"] = uprice;
-  }
+    }
 
-  doc_aux["STATE"] = STATE_DISPLAY;
-  doc_aux["time"] = now.unixtime();
-  serializeJson(doc_aux, b);
+    doc_aux["STATE"] = STATE_DISPLAY;
+    doc_aux["time"] = now.unixtime();
+    serializeJson(doc_aux, b);
 
-  //Serial.print("Master to display: ");
-  //serializeJson(doc, Serial);
-  //Serial.println();
+    //Serial.print("Master to display: ");
+    //serializeJson(doc, Serial);
+    //Serial.println();
 
 
-  Wire.beginTransmission(DISPLAY_ADD);
-  Wire.write((const uint8_t*)b, (strlen(b)));
-  Wire.endTransmission();
-  delay(TIME_SPACE);
+    Wire.beginTransmission(DISPLAY_ADD);
+    Wire.write((const uint8_t*)b, (strlen(b)));
+    Wire.endTransmission();
+    delay(TIME_SPACE);
 
-  // ---------------------- encoder doc
-  doc_aux.clear();
-  doc_aux["reset"] = encoder_reset;
-  doc_aux["litros"] = litros;
-  serializeJson(doc_aux, b);
-  //Serial.print("Master to encoder: ");
-  //serializeJson(doc, Serial);
-  //Serial.println();
+    // ---------------------- encoder doc
+    doc_aux.clear();
+    doc_aux["reset"] = encoder_reset;
+    doc_aux["litros"] = litros;
+    serializeJson(doc_aux, b);
+    //Serial.print("Master to encoder: ");
+    //serializeJson(doc, Serial);
+    //Serial.println();
 
-  Wire.beginTransmission(ENCODE_ADD);
-  Wire.write((const uint8_t*)b, (strlen(b)));
-  Wire.endTransmission();
+    Wire.beginTransmission(ENCODE_ADD);
+    Wire.write((const uint8_t*)b, (strlen(b)));
+    Wire.endTransmission();
 
-  delay(TIME_SPACE);
+    delay(TIME_SPACE);
 
-  // ------------------------------------------- Clear Log
-  if (clear_log == true)
-  {
+    // ------------------------------------------- Clear Log
+    if (clear_log == true)
+    {
     //obj_log.clear();
     //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
     // if (saveJSonArrayToAFile(SD, &obj_log, filelog.c_str()))
@@ -317,20 +309,20 @@ void loop()
 
     //}
     clear_log = false;
-  }
+    }
 
 
-  // ------------------------------------------- Print LOG
-  if (print_log == true)
-  {
+    // ------------------------------------------- Print LOG
+    if (print_log == true)
+    {
     read_logs(consult_filelog);
     print_log = false;
-  }
+    }
 
 
-  // ---------------------------------------------------------------- MAIN TIME
-  if (millis() - mainRefresh > mainTime)
-  {
+    // ---------------------------------------------------------------- MAIN TIME
+    if (millis() - mainRefresh > mainTime)
+    {
     mainRefresh = millis();
 
     read_clock();
@@ -394,27 +386,27 @@ void loop()
 
     }
 
-  }
+    }
 
 
 
 
-  // ----------------------------------------- save new List
-  if (flag_new_list == true)
-  {
+    // ----------------------------------------- save new List
+    if (flag_new_list == true)
+    {
     flag_new_list = false;
 
     Serial.print("Saving List on Loop: ");
     //serializeJson(doc_list,Serial);
     //Serial.println();
     //saveListData();
-  }
+    }
 
 
 
-  // ----------------------------------------- save new data
-  if (saveConfig == true)  // Data change
-  {
+    // ----------------------------------------- save new data
+    if (saveConfig == true)  // Data change
+    {
     saveConfig = false;
 
     //Serial.println("{\"upload_config_from_loop\":true}");
@@ -461,21 +453,21 @@ void loop()
     //
     //}
 
-  }
+    }
 
 
-  // leer boton para imprimir reporte diario
-  // Si el botón cambia de no presionado a presionado
-  if (lastButtonState == HIGH && buttonState == LOW)
-  {
+    // leer boton para imprimir reporte diario
+    // Si el botón cambia de no presionado a presionado
+    if (lastButtonState == HIGH && buttonState == LOW)
+    {
     Serial.println("PUSH");
     buttonPressTime = millis();
     wifiAP(true);
-  }
+    }
 
-  // Si el botón cambia de presionado a no presionado
-  if (lastButtonState == LOW && buttonState == HIGH)
-  {
+    // Si el botón cambia de presionado a no presionado
+    if (lastButtonState == LOW && buttonState == HIGH)
+    {
     if (millis() - buttonPressTime < longPressDuration)
     {
       Serial.println("Short press detected!");
@@ -502,11 +494,13 @@ void loop()
     }
 
 
-  }
+    }
 
-  lastButtonState = buttonState;
+    lastButtonState = buttonState;
+  */
 
   esp_task_wdt_reset();
+
 
 }
 
@@ -517,9 +511,22 @@ void ReadSensors(void *parameter)
   {
     if (xSemaphoreTake(mutex, portMAX_DELAY))
     {
-      globalVariable++;
-      Serial.print("Task 1 incrementó la variable a: ");
-      Serial.println(globalVariable);
+
+      //Serial.print("main_status: ");
+      //serializeJson(status_doc, Serial);
+      //Serial.println();
+
+      // Read from the slave and print out
+      Wire.requestFrom(DISPLAY_ADD, 199);
+      memset(buff, 0, sizeof(buff));
+      i = 0;
+      while (Wire.available())
+      {
+        buff[i] = Wire.read();
+        Serial  .print((char)buff[i]);
+        i++;
+      }
+      Serial.println();
 
       xSemaphoreGive(mutex);
     }
@@ -531,13 +538,13 @@ void WifiService(void *parameter)
 {
   while (true)
   {
-    if (xSemaphoreTake(mutex, portMAX_DELAY))
-    {
-      globalVariable--;
-      Serial.print("Task 2 decrementó la variable a: ");
-      Serial.println(globalVariable);
-      xSemaphoreGive(mutex);
-    }
+    //if (xSemaphoreTake(mutex, portMAX_DELAY))
+    //{
+    //globalVariable--;
+    Serial.println("Task 2 decrementó la variable a: ");
+    //Serial.println(globalVariable);
+    //xSemaphoreGive(mutex);
+    //}
     vTaskDelay(pdMS_TO_TICKS(2000));
   }
 }
