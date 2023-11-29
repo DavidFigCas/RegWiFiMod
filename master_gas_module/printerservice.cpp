@@ -6,16 +6,26 @@
 // printCheck worked. A ticket was printed
 // the function i2c_write_blocking is for RP2040 (RPi Pico)
 //Numero       letra          dia          mes       año       hora       minuto
-void printReport (uint32_t num, uint32_t ltr, uint32_t total)
+void printReport (uint32_t num, uint32_t ltr, uint32_t total, uint32_t reporte)
 {
 
+  // Numero de reporte
+  //reporte = obj["reporte"].as<uint32_t>();
+  //status_doc["reporte"] = reporte;
+  Serial.print("Reporte: ");
+  Serial.println(reporte);
+
+  Serial.print("REPORTE: ");
+  Serial.println(ltr);
   Serial.print("LITROS: ");
   Serial.println(ltr);
   Serial.print("SERVICIOS: ");
   Serial.println(num);
 
   setPrintMode(0); // Configurar modo de impresión
-  printString("        REPORTE \n\r");
+  printString("        REPORTE #:");
+  printNumber(reporte);
+  printString("\n\r");
   printString("VERSION: ");
   printString(VERSION);
   printString("\n\r");
@@ -50,6 +60,11 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total)
   //printDateTime(dia_hoy, mes, anio, hora, minuto);
   endPrint();
   //printString("\n\r");
+
+  reporte++;
+  obj["reporte"] = reporte;
+  status_doc["reporte"] = reporte;
+  saveConfig = true;
 
 
 }

@@ -135,6 +135,7 @@ extern String gps_str;
 
 extern uint32_t start_process_time;
 extern float litros;
+extern uint32_t acumulado_litros;
 extern float pulsos_litro;
 extern float precio;
 extern float uprice; //price of 1 litre

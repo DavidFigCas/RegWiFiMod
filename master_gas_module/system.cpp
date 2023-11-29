@@ -67,6 +67,7 @@ bool server_running = false;
 
 uint32_t start_process_time;
 float litros;
+uint32_t acumulado_litros;
 uint32_t target_litros;
 float pulsos_litro = 1;
 float precio;
@@ -76,6 +77,7 @@ uint32_t litros_check;
 uint32_t precio_check;
 
 uint32_t folio;
+uint32_t reporte;
 char b[200];
 char buff[200];
 int i;
@@ -137,7 +139,7 @@ void read_logs(String consult)
 
   file.close();
 
-  printReport(servicios, litros_acumulado, total_ventas);
+  printReport(servicios, litros_acumulado, total_ventas, reporte);
 }
 
 // -------------------------------------------------------------- save_newlog
@@ -216,7 +218,8 @@ void saveNewlog()
 
   folio++;
   obj["folio"] = folio;
-}
+  status_doc["folio"] = folio; 
+} 
 
 // ------------------------------------------------------------ register_client
 void register_client()
@@ -581,7 +584,18 @@ void loadConfig()
   status_doc["folio"] = folio;
   Serial.print("Folio: ");
   Serial.println(folio);
-  //}
+
+
+  // Numero de reporte
+  reporte = obj["reporte"].as<uint32_t>();
+  status_doc["reporte"] = reporte;
+  Serial.print("Reporte: ");
+  Serial.println(reporte);
+
+
+  // Litros totales
+  acumulado_litros =  obj["acumulado_litros"].as<uint32_t>();
+  status_doc["acumulado_litros"] = acumulado_litros;
 
   //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
   pulsos_litro =  obj["pulsos_litro"];
