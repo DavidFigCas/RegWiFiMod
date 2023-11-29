@@ -106,6 +106,7 @@ void mqtt_send_file(String file_to_send)
       // Publicar la línea
       Mclient.publish(buffer_union_publish, line.c_str(), line.length());
       delay(100); // Pequeña pausa para evitar saturar el cliente MQTT
+      esp_task_wdt_reset();
     }
   }
 
