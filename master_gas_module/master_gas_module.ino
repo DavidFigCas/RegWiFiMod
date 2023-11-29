@@ -14,9 +14,7 @@ void WifiService(void *parameter);
 void setup()
 {
   system_init();
-  search_nclient(0);
-  //saveNewlog();
-  //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //search_nclient(0);
 
   buttonState = LOW;
   lastButtonState = HIGH;
@@ -24,7 +22,7 @@ void setup()
 
 
   // Reset Display state
-  doc_aux["STATE"] = 0;
+  /*doc_aux["STATE"] = 0;
   doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
   Wire.beginTransmission(DISPLAY_ADD);
@@ -34,7 +32,7 @@ void setup()
 
   oled_display_number(0);    // Draw 'stylized' characters
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
-
+*/
   // Crear un mutex
   mutex = xSemaphoreCreateMutex();
 
@@ -57,7 +55,7 @@ void loop()
   // --------------------- leer display
 
 
-  jsonStr =  buff;
+  /*jsonStr =  buff;
   //Serial.println(jsonStr);
   deserializeJson(doc_display, jsonStr);
   if (doc_display.isNull())
@@ -89,7 +87,7 @@ void loop()
   if (doc_encoder.isNull())
     status_doc["encoder"] = false;
   else
-    status_doc["encoder"] = true;
+    status_doc["encoder"] = true;*/
 
 
 

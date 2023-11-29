@@ -343,7 +343,7 @@ void system_init()
   Serial.println("i2c_Init");
 
 
-  status_doc["ver"] = VERSION;
+  /*status_doc["ver"] = VERSION;
   oled_display_init();
   oled_display_text(VERSION);    // Draw 'stylized' characters
 
@@ -351,7 +351,7 @@ void system_init()
 
   if (spiffs_init())
   {
-    Cfg_get(/*NULL*/);  // Load File from spiffs
+    Cfg_get();  // Load File from spiffs
     loadConfig();       // Load and update behaivor of system
     wifi_init();
     mqtt_init();
@@ -370,7 +370,7 @@ void system_init()
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
-  pinMode(BT_REPORT, INPUT_PULLUP);
+  pinMode(BT_REPORT, INPUT_PULLUP);*/
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
