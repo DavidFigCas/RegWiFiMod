@@ -5,108 +5,158 @@ int wifi_trys;
 boolean isSaved = false;
 bool ALLOWONDEMAND   = true; // enable on demand
 bool WMISBLOCKING    = true;
-//WiFiManager wifiManager;
-//WiFiManager_RP2040W wifiManager;
-//std::vector<WiFiManagerParameter*> customParams;
+WiFiManager wifiManager;
+std::vector<WiFiManagerParameter*> customParams;
 
 
+
+// ------------------------------------------------ wifiAP
+bool wifiAP(bool force)
+{
+
+  server_running = false;
+  const char * ap_ssid = obj["ap"].as<const char *>();
+  const char * ap_pass = obj["ap_pass"].as<const char *>();
+
+  Serial.print("{\"AP\": \"");
+  Serial.print(ap_ssid);
+  Serial.println("\"}");
+
+  //WiFiManager
+  wifiManager.setConfigPortalBlocking(false);
+  // captive portal redirection
+  //wifiManager.setCaptivePortalEnable(false);
+  wifiManager.setTimeout(120);
+
+  //set config save notify callback
+  wifiManager.setSaveParamsCallback(saveConfigCallback);
+  wifiManager.setSaveConfigCallback(saveWifiCallback);
+  wifiManager.setWebServerCallback(bindServerCallback);
+  wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
+  wifiManager.setConfigPortalTimeout(140);
+  //wifiManager.setParamsPage(true); // move params to seperate page, not wifi, do not combine with setmenu!
+
+  //set static ip
+  //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
+
+  //reset settings - for testing
+  //wifiManager.resetSettings();
+
+  //set minimu quality of signal so it ignores AP's under that quality
+  //defaults to 8%
+  //wifiManager.setMinimumSignalQuality();
+
+  //sets timeout until configuration portal gets turned off
+  //useful to make it all retry or go to sleep
+  //in seconds
+
+
+  //fetches ssid and pass and tries to connect
+  //if it does not connect it starts an access point with the specified name
+  //here  "AutoConnectAP"
+  //and goes into a blocking loop awaiting configuration
+
+  for (JsonPair kv : doc.as<JsonObject>())
+  {
+    String keyString = kv.key().c_str();
+    char* key = new char[keyString.length() + 1];
+    strcpy(key, keyString.c_str());
+
+    String value = kv.value().as<String>();
+    char* valueCStr = new char[value.length() + 1];
+    strcpy(valueCStr, value.c_str());
+
+    WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 10);
+    customParams.push_back(p);
+    wifiManager.addParameter(p);
+  }
+
+  if (!obj["ap"].isNull())
+  {
+
+    if (force == true)
+    {
+      wifiManager.startConfigPortal(ap_ssid, ap_pass);
+      Serial.print("{\"Server_force\":");
+      Serial.print("true");
+      Serial.println("}");
+      server_running = true;
+    }
+    else
+    {
+
+      if (wifiManager.autoConnect(ap_ssid, ap_pass))
+        server_running = false;
+      else
+        server_running = true;
+
+      Serial.print("{\"Server_force\":");
+      Serial.print("false");
+      Serial.println("}");
+    }
+
+  }
+  else
+  {
+    if (force == true)
+    {
+      wifiManager.startConfigPortal("GasSolutions", "12345678");
+      Serial.print("{\"Server_force_wdefault\":");
+      Serial.print("true");
+      Serial.println("}");
+      server_running = true;
+    }
+    else
+    {
+      if ( wifiManager.autoConnect("GasSolutions", "12345678"))
+        server_running = false;
+      else
+        server_running = true;
+
+
+      Serial.print("{\"Server_force_wdefault\":");
+      Serial.print("false");
+      Serial.println("}");
+    }
+
+  }
+  Serial.print("{\"server_running\":");
+  Serial.print(bool(server_running));
+  Serial.println("}");
+  return server_running;
+}
+
+
+// --------------------------------------------------- wifiINIT
 void wifi_init()
 {
 
-  //if (obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED))
+  if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
   {
     WiFi.mode(WIFI_STA);
-    //const char* auxssid = obj["ssid"].as<String>().c_str();
-    //const char* auxpass = obj["pass"].as<String>().c_str();
 
-    String auxssid = obj["ssid"].as<String>();
-    String auxpass = obj["pass"].as<String>();
+    const char * auxssid = obj["ssid"].as<const char *>();
+    const char * auxpass = obj["pass"].as<const char *>();
 
-    WiFi.begin(auxssid.c_str(), auxpass.c_str());
+    // Star WiFi connection
+    WiFi.begin(auxssid, auxpass);
 
     Serial.print("{\"wifi\":{\"ssid\":\"");
     Serial.print(auxssid);
     Serial.println("\"}}");
-
-
-    // ---------------------------- Time NTP
-    WiFiUDP ntpUDP;
-    NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
-
-
     Serial.println("{\"wifi\":\"init\"}");
 
-    // ---- load parameter for config portal
-
-    /*for (JsonPair kv : doc.as<JsonObject>()) {
-      String keyString = kv.key().c_str();
-      char* key = new char[keyString.length() + 1];
-      strcpy(key, keyString.c_str());
-
-      String value = kv.value().as<String>();
-      char* valueCStr = new char[value.length() + 1];
-      strcpy(valueCStr, value.c_str());
-
-      WiFiManagerParameter* p = new WiFiManagerParameter(key, key, valueCStr, value.length() + 1);
-      customParams.push_back(p);
-      wifiManager.addParameter(p);
-      }*/
-
-    //WiFiManager
-    //if (!WMISBLOCKING) {
-    //  wifiManager.setConfigPortalBlocking(false);
-    //}
-
-    //set config save notify callback
-    //    wifiManager.setSaveParamsCallback(saveConfigCallback);
-    //wifiManager.setSaveConfigCallback(saveWifiCallback);
-    //wifiManager.setWebServerCallback(bindServerCallback);
-    //wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
-
-    //set static ip
-    //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
-
-    //reset settings - for testing
-    //wifiManager.resetSettings();
-
-    //set minimu quality of signal so it ignores AP's under that quality
-    //defaults to 8%
-    //wifiManager.setMinimumSignalQuality();
-
-    //sets timeout until configuration portal gets turned off
-    //useful to make it all retry or go to sleep
-    //in seconds
-    //wifiManager.setTimeout(120);
-
-    //fetches ssid and pass and tries to connect
-    //if it does not connect it starts an access point with the specified name
-    //here  "AutoConnectAP"
-    //and goes into a blocking loop awaiting configuration
-    //if (!wifiManager.autoConnect("AutoConnectAP", "password")) {
-    //Serial.println("failed to connect previous network and hit timeout");
-    //delay(3000);
-    //reset and try again, or maybe put it to deep sleep
-    //ESP.restart();
-    //delay(5000);
-    //}
-    //else
-    {
-      //if you get here you have connected to the WiFi
-      Serial.println("{\"wifi\":\"first connection\"}");
-
-      Serial.print("{\"ip\":\"");
-      Serial.print(WiFi.localIP());
-      Serial.println("\"}");
-    }
+    // Check wifi connection or make AP
+    wifiAP(false);
 
   }
-  //else if (obj["enable_wifi"].as<bool>() == false)
-  //{
-  //
-  //WiFi.disconnect(true);
-  //WiFi.mode(WIFI_OFF);
-  //Serial.println("{\"wifi\":{\"enable\":false}}");
-  //}
+  else if (obj["enable_wifi"].as<bool>() == false)
+  {
+    //
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+    Serial.println("{\"wifi\":{\"enable\":false}}");
+  }
 
 
 }
@@ -115,108 +165,67 @@ void wifi_init()
 
 
 
-// ------------------------------------------------------------------------------------------------------- checkServer
+// ------------------------------------------------------------------------------------------------------- checkServers
 bool wifi_check()
 {
   bool flag;
-  // put your main code here, to run repeatedly:
-  //if (!WMISBLOCKING) {
-  //  Serial.println("{\"wifi\":\"manager process\"}");
-  //wifiManager.process();
-  //}
 
-  // is configuration portal requested?
-  //if (ALLOWONDEMAND && digitalRead(ONDDEMANDPIN) == LOW )
+  // -------------------------------------------- server is running
+  if (server_running)
   {
-    //delay(100);
-    //if ( digitalRead(ONDDEMANDPIN) == LOW )
-    {
-      // Serial.println("BUTTON PRESSED");
-
-      // button reset/reboot
-      // wm.resetSettings();
-      // wm.reboot();
-      // delay(200);
-      // return;
-
-
-      //wifiManager.setSaveParamsCallback(saveConfigCallback);
-      //wifiManager.setSaveConfigCallback(saveWifiCallback);
-      //wifiManager.setWebServerCallback(bindServerCallback);
-      //wifiManager.setConfigPortalTimeout(140);
-      //wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
-      //wifiManager.setParamsPage(true); // move params to seperate page, not wifi, do not combine with setmenu!
-
-      // disable captive portal redirection
-      // wm.setCaptivePortalEnable(false);
-
-      //if (!wifiManager.startConfigPortal("OnDemandAP", "12345678"))
-      {
-        //Serial.println("failed to connect on demand and hit timeout");
-        //delay(3000);
-      }
-    }
-    //else
-    {
-      //if you get here you have connected to the WiFi
-      //Serial.println("{\"new_wifi\":\"connected\"}");
-      //getTime();
-    }
+    Serial.println("{\"wifi\":\"manager process\"}");
+    wifiManager.process();
   }
 
-
-  if (obj["enable_wifi"].as<bool>())
+  //if (obj["enable_wifi"].as<bool>())
   {
 
     //if ((millis() - s_timestamp) >= connectTimeoutMs) // check to an interval of time
-    //if (millis() - mainRefresh > mainTime)
-    //mainRefresh = millis();
+    //{
+    //s_timestamp = millis();
 
-
-
-
-
-    if ((millis() - s_timestamp) >= connectTimeoutMs) // check to an interval of time
+    // ------------------ Wifi Connected
+    if (WiFi.status() == WL_CONNECTED)
     {
-      s_timestamp = millis();
-      //String auxssid = obj["ssid"].as<String>();
+      Serial.print("{\"wifi_connected\": ");
+      serializeJson(obj["ssid"],Serial);
+      Serial.println("}");
+      Serial.print("{\"ip\":\"");
+      Serial.print(WiFi.localIP());
+      Serial.println("\"}");
+      status_doc["ssid"] = obj["ssid"];
+      status_doc["ip"] = WiFi.localIP();
 
+      flag = true;
+      //STATE = 1;
+      STATE |= (1 << 6);
 
-      // ------------------ Wifi Connected
-      if (WiFi.status() == WL_CONNECTED)
+      // ------------------------ firebase connection
+      if (updated == false)
       {
-        Serial.println("{\"check_wifi\":\"connected\"}");
-        Serial.print("{\"ip\":\"");
-        Serial.print(WiFi.localIP());
-        Serial.println("\"}");
-
-
-        //if (obj["enable_rtc"].as<bool>())
-        //  update_clock();
-
-        flag = true;
-        //STATE = 1;
-        STATE |= (1 << 6);
-
-        // ------------------------ actualemnte falla firebase
-        //if (updated == false)
-          connectFirebase();
-
-
-      }
-
-      else //wifi not connected
-      {
-        Serial.println("{\"wifi\":\"disconnected\"}");
-        flag = false;
-        //STATE = 0;
-        STATE &= ~(1 << 6);
+        oled_display_text("VERSION \n NUEVA");
+        connectFirebase();
       }
 
 
     }
 
+    else //wifi not connected
+    {
+      Serial.println("{\"wifi\":\"disconnected\"}");
+      flag = false;
+      //STATE = 0;
+      STATE &= ~(1 << 6);
+      if (server_running == false)
+        wifiAP(true);         // run force server
+      else
+        Serial.println("{\"server\":\"running\"}");
+    }
+
+
   }
+
+  //}
   //else
 
   return flag;
@@ -227,6 +236,15 @@ bool wifi_check()
 // ------------------------- callback notifying us of the need to save config
 void saveConfigCallback () {
   Serial.println("Should save config");
+
+  for (WiFiManagerParameter* p : customParams) {
+    // Suponiendo que cada p->getID() es único y coincide con las claves en 'doc'
+    const char* paramId = p->getID();
+    const char* paramValue = p->getValue();
+
+    // Actualizar o añadir el valor en el documento JSON
+    doc[paramId] = paramValue;
+  }
   saveConfig = true;
   //return;
 }
@@ -243,4 +261,5 @@ void handleRoute() {
 
 void saveWifiCallback() {
   Serial.println("[CALLBACK] saveCallback fired");
+  saveConfig = true;
 }

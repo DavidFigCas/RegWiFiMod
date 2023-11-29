@@ -17,6 +17,7 @@ extern int anio;
 extern int dia_hoy;
 extern int hora;
 extern int minuto;
+extern int segundo;
 
 extern const char* ntpServer;
 extern long  gmtOffset_sec;

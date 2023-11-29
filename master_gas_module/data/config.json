@@ -3,11 +3,13 @@
   "mqtt_server": "inventoteca.com",
   "mqtt_port": 1883,
   "test": true,
-  "id": "18",
+  "id": "0",
   "enable_wifi": true,
   "ssid": "Inventoteca_2G",
   "pass": "science_7425",
   "email": "info@inventoteca.com",
+  "ap": "GasSolutions",
+  "ap_pass": "12345678",
   "firepass": "Homerosim",
   "key": "AIzaSyAOfGOjdpVQZtnhwTjmNRy8mApY993zHfc",
   "storage_id": "smart-industry-panels.appspot.com",
@@ -17,7 +19,8 @@
   "dayOff" : 0,
   "capacity": 10000,
   "percentage": 70.5,
-  "uprice": 9.7,
-  "pulsos_litro": 10,
-  "folio": 2
+  "pulsos_litro": 1,
+  "folio": 0,
+  "lat": 19.03793, 
+  "lon": -98.20346
 }

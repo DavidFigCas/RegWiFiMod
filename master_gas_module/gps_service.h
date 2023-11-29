@@ -4,6 +4,8 @@
 #include "system.h"
 extern TinyGPSPlus gps;
 
+
+void save_gps_log();
 void gps_init();
 void gps_update();
 static void printInt(unsigned long val, bool valid, int len);

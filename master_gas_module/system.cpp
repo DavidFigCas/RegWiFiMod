@@ -3,6 +3,9 @@
 
 //pinMode(ONDDEMANDPIN, INPUT_PULLUP);
 
+// sd card
+bool sd_ready = false;
+
 
 bool buttonState = LOW;
 bool lastButtonState = LOW;
@@ -19,22 +22,27 @@ volatile bool found_client = false;
 unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
 unsigned long mainTime = 1000;
 
+// firebase
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
 unsigned long startTime = 0;
 
+// printer
+uint32_t startTimeToPrint;
 
+// --------------------------------- printer
 const char  end1 = '\r';
 const char  end2 = '\n';
 uint8_t tempVar = 0;
 char tempChar;
 uint8_t resultadoBytes[200];
+uint32_t pendingPrint = 0;
 
-char resultado[200];
+char resultado[300];
 
-const char* unidades[] = {"", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"};
-const char* decenas[] = {"", "diez", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"};
-const char* especiales[] = {"diez", "once", "doce", "trece", "catorce", "quince"};
+const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
+const char* decenas[] = {"", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
+const char* especiales[] = {"DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"};
 //uint32_t unitprice;
 
 
@@ -47,30 +55,171 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 volatile bool startCounting2 = false;
 
+// ----------------------------------------GPS intervalos para gps
+unsigned long previousMillisGPS = 0;  // Variable para almacenar la última vez que se ejecutó el evento
+const long intervalGPS = 60000;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
+unsigned long currentMillisGPS;
+String gps_name_file;
+String gps_str;
 
-uint32_t litros;
+// ------------------------------------- wifi flag
+bool server_running = false;
+
+uint32_t start_process_time;
+float litros;
+uint32_t acumulado_litros;
 uint32_t target_litros;
-unsigned int pulsos_litro = 10;
-uint32_t precio;
+float pulsos_litro = 1;
+float precio;
 float uprice = 9.8; //price of 1 litre
 float factor;
 uint32_t litros_check;
 uint32_t precio_check;
 
-int folio;
+uint32_t folio;
+uint32_t reporte;
 char b[200];
 char buff[200];
 int i;
 String jsonStr;
 unsigned int STATE_DISPLAY = 1;
 
+
 volatile bool display_reset = false;
+volatile bool encoder_reset = false;
 volatile bool start_print = false;
 volatile bool startCounting = false;
+volatile bool startFlowing = false;
+volatile bool stopFlowing = false;
+volatile bool readyToPrint = false;
 
 
 volatile uint32_t pesos;
 
+
+// -------------------------------------------------------------- read_logs
+void read_logs(String consult) 
+{
+  Serial.println("READ ALL LOGS");
+
+  //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  File file = SD.open(consult.c_str(), FILE_READ);
+  if (!file) 
+  {
+    Serial.print("Error al abrir el archivo: ");
+    Serial.println(consult);
+    return;
+  }
+
+  uint32_t litros_acumulado = 0;
+  uint32_t servicios = 0;
+  uint32_t total_ventas = 0;
+
+  while (file.available()) 
+  {
+    String line = file.readStringUntil('\n');
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, line);
+
+    if (error) 
+    {
+      Serial.print("Error al parsear JSON: ");
+      Serial.println(error.c_str());
+      continue;
+    }
+
+    // Extraer los valores del objeto JSON
+    uint32_t litros = doc["litros"];
+    uint32_t precio = doc["precio"];
+
+    servicios++;
+    litros_acumulado += litros;
+    total_ventas += precio;
+  }
+
+  file.close();
+
+  printReport(servicios, litros_acumulado, total_ventas, reporte);
+}
+
+// -------------------------------------------------------------- save_newlog
+void saveNewlog()
+{
+  Serial.println("Make new LOG");
+  Serial.print("Litros: ");
+  Serial.println(litros);
+  Serial.print("Folio: ");
+  Serial.println(folio);
+  //newLogEntry = obj_log.createNestedObject();
+  //newLogEntry["timestamp"] = DateTimeToString(now);
+
+  status_doc["last_service"]["folio"] = folio;
+  status_doc["last_service"]["start_timestamp"] = start_process_time;
+  status_doc["last_service"]["end_timestamp"] = now.unixtime();
+  status_doc["last_service"]["state"] = STATE;
+  status_doc["last_service"]["litros"] = litros_check;
+  status_doc["last_service"]["precio"] = precio_check;
+  status_doc["last_service"]["cliente"] = obj_in["cliente"].as<unsigned int>();
+
+  //if (!obj["gps"]["lat"].isNull())
+  //{
+  status_doc["last_service"]["lat"] = obj["lat"];
+  status_doc["last_service"]["lon"] = obj["lon"];
+  //}
+
+  //status_doc["last_service"] = newLogEntry;
+
+  filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+  consult_filelog = filelog;
+  String log_str; //= String((double)status_doc["lon"], 6) + "," + String((double)status_doc["lat"], 6) + "," + String((int)status_doc["time"]);
+  //delay(50);
+  serializeJson(status_doc["last_service"], log_str);
+  //delay(50);
+  log_str += '\n'; // O puedes usar gps_str.concat('\n');
+
+  // ------------------------------------------- log de GPS existe?
+  //if (testFileIO(SD, gps_name_file.c_str()) == true)
+  if (SD.exists(filelog))
+  {
+    //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+    appendFile(SD, filelog.c_str(), log_str.c_str());
+  }
+  else
+  {
+    //Serial.println("File not found, init SD");
+    //sd_ready = false;
+    //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+    //if (!SD.exists(filelog))
+    //{
+    Serial.print("File not found, create?: ");
+    Serial.println(filelog);
+    writeFile(SD, filelog.c_str(), log_str.c_str());
+    //}
+  }
+
+  //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
+  //if (saveJSonArrayToAFile(SD, &obj_log, filelog))
+  //{
+  //Serial.println("{\"log_update_SD\":true}");
+  //}
+  //else
+  //{
+  //Serial.println("{\"log_update_SD\":false}");
+  //sd_ready = false;
+  //}
+
+
+
+  //if (obj["test"].as<bool>())
+  {
+    //serializeJsonPretty(newLogEntry, Serial);
+    Serial.println(log_str);
+  }
+
+  folio++;
+  obj["folio"] = folio;
+  status_doc["folio"] = folio; 
+} 
 
 // ------------------------------------------------------------ register_client
 void register_client()
@@ -85,6 +234,12 @@ void register_client()
   factor = (obj_in["factor"].as<float>());
   const char* client_name = obj_in["nombre"].as<const char*>();
   int len = strlen(client_name);
+
+  status_doc["client"]["litros"] = target_litros;
+  status_doc["client"]["precio"] = uprice;
+  status_doc["client"]["factor"] = factor;
+  status_doc["client"]["nombre"] = client_name;
+  status_doc["client"]["id"] = obj_in["cliente"];
 
   Serial.println();
   Serial.print("NAME: ");
@@ -178,29 +333,47 @@ void search_nclient(uint32_t aux_client)
 // ----------------------------------------------------------- init
 void system_init()
 {
+
   delay(100);
   Serial.begin(115200);
-  delay(5000);
-  I2C_Init(); Serial.println("i2c_Init");// Slave mode
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
+  //delay(5000);
+
+
+  delay(100);
+  I2C_Init();
+  Serial.println("i2c_Init");
+
+
+  status_doc["ver"] = VERSION;
+  oled_display_init();
+  oled_display_text(VERSION);    // Draw 'stylized' characters
+
+
 
   if (spiffs_init())
   {
+    Cfg_get(/*NULL*/);  // Load File from spiffs
     loadConfig();       // Load and update behaivor of system
-    mqtt_init();
     wifi_init();
-    mqtt_check();
+    mqtt_init();
+    //mqtt_check();
     rtcUpdated = false;
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
+
+  delay(100);
+  SD_Init();
+
   gps_init();
+  init_glcd();
 
   // WatchDog Timer
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
-  pinMode(BT_REPORT,INPUT);
+  pinMode(BT_REPORT, INPUT_PULLUP);
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
@@ -282,8 +455,8 @@ void reset_config()
   //obj["enable_wifi"] = true;
   //obj["count_wifi"] = 0;
   //obj["registered_wifi"] = false;
-  obj = getJSonFromFile(&doc, filedefault);
-  Serial.println(saveJSonToAFile(&obj, filename) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
+  obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+  Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"factory_reset\":true}" : "{\"factory_reset\":false}");
   delay(2000);
   //ESP.restart();
   // rp2040.reboot();
@@ -304,6 +477,52 @@ void reset_config()
   }
   }*/
 
+
+// --------------------------------------------------------------------------------------------------- Cfg_get
+/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/)
+//  {"method":"Config.Get"}
+{
+  // ----------------------------------------------------- open file to load config
+  obj = getJSonFromFile(SPIFFS, &doc, fileconfig);
+  if (obj.size() == 0)
+  {
+    Serial.println("{\"config_file\":\"empty\"}");
+    obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+    Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
+  }
+
+  // ------------------------------------------------------------ Load list of clients
+  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist); // Cambiar ubicación a SD
+  if (obj_list.isNull())
+  {
+    Serial.println("Rehaciendo null");
+    obj_list = doc_list.to<JsonArray>();
+  }
+
+
+
+
+  //if (obj["test"].as<bool>() == true)
+  {
+    // Comment for production
+    serializeJson(obj, Serial);
+    Serial.println();
+
+    serializeJsonPretty(obj_list, Serial);
+    Serial.println();
+
+    //Serial.println("SPIFFS");
+
+    //obj_log = getJSonArrayFromFile(SPIFFS, &doc_log, filelog);
+    //serializeJsonPretty(obj_log, Serial);
+  }
+
+
+
+}
+
+
+
 // ---------------------------------------------------------------------------------------------------- loadConfig
 // Update a new config in the file an change behivor
 void loadConfig()
@@ -312,23 +531,20 @@ void loadConfig()
   Serial.println("{\"loadConfig\":true}");
 
 
-
-  //--------------- LOAD REGISTERS
-  String email = obj["email"].as<String>(); // Suponiendo que obj es un objeto JSON válido
   updated = obj["updated"].as<bool>();
-  
-  size_t length = email.length();
 
-  /* if (length <= sizeof(name_data)) {
-     strncpy((char*)name_data, email.c_str(), sizeof(name_data));
-     name_data[sizeof(name_data) - 1] = '\0'; // Asegura que la cadena esté terminada correctamente
-    } else {
-     Serial.println("La longitud del correo electrónico es demasiado larga para name_data");
-    }*/
-
+  if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
+  {
+    obj["reboot"] = false;
+    Serial.println("{\"reboot_upload\":true}");
+    saveConfigData();
+    Serial.println("{\"reboot\":true}");
+    ESP.restart();
+  }
 
   // ------------- ID
   String s_aux = obj["id"].as<String>();
+  status_doc["id"] = obj["id"];
   int len = s_aux.length();
   // check for id or mac is the config.json file
   if ((len == 0))
@@ -341,21 +557,8 @@ void loadConfig()
 
     //obj["id"].set( WiFi.macAddress());
 
-    Serial.println(saveJSonToAFile(&obj, filename) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
+    Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"id_file_saved\":true}" : "{\"id_file_saved\":false}" );
   }
-
-
-
-  //----------------- RTC
-  // if (obj["enable_rtc"].as<bool>())
-  // {
-  //   rtcUpdated = false;
-  //   ntpConnected = false;
-  //   init_clock();
-  //}
-
-
-
 
 
   // -------------------------------- mainTime
@@ -375,18 +578,28 @@ void loadConfig()
   }
   mainRefresh = mainTime + 1;
 
-  //uprice = obj["uprice"];
-  //pulsos_litro = obj["pulsos_litro"];
-  
-  //if (!obj["folio"].isNull())
-  //  folio = obj["folio"];
-  //else
-  //{
-    folio = obj["folio"];
-    Serial.print("Folio: ");
-    Serial.println(folio);
-  //}
 
+  //El folio lo puede sacar del ultimo servicio
+  folio = obj["folio"];
+  status_doc["folio"] = folio;
+  Serial.print("Folio: ");
+  Serial.println(folio);
+
+
+  // Numero de reporte
+  reporte = obj["reporte"].as<uint32_t>();
+  status_doc["reporte"] = reporte;
+  Serial.print("Reporte: ");
+  Serial.println(reporte);
+
+
+  // Litros totales
+  acumulado_litros =  obj["acumulado_litros"].as<uint32_t>();
+  status_doc["acumulado_litros"] = acumulado_litros;
+
+  //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
+  pulsos_litro =  obj["pulsos_litro"];
+  status_doc["pulsos_litro"] = pulsos_litro;
 
 
   Serial.println("{\"config\":true}");

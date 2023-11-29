@@ -2,10 +2,65 @@
 
 TinyGPSPlus gps;
 
+
+// ------------------------------------------------------ save gps_log
+void save_gps_log()
+{
+  //check SD
+
+  if (sd_ready)
+  {
+    // Guarda cada minuto la posicion
+    // ----------------------------------------------- 1 minute refresh
+    //if (millis() - previousMillisGPS >= intervalGPS)
+    //if (millis() - previousMillisGPS >= 5000)
+    {
+      // Guarda la última vez que actualizaste el evento
+      previousMillisGPS = millis();
+
+      //StaticJsonDocument<100> gps_doc;
+      //read_clock();
+      //gps_doc["time"] = now.unixtime();
+      //gps_doc["lat"] = status_doc["lat"];
+      //gps_doc["lon"] = status_doc["lon"];
+
+      //gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
+      gps_name_file = "/gps/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".csv";
+
+      //String csvLine = String((int)status_doc["time"] + "," + String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6) );
+      String csvLine = String(anio) + "-" + String(mes) + "-" + String(dia_hoy) + " " + String(hora) + ":" + String(minuto) + ":" + String(segundo) + ",";
+      csvLine += String((double)status_doc["lat"], 6) + "," + String((double)status_doc["lon"], 6);
+      csvLine += '\n'; // O puedes usar gps_str.concat('\n');
+
+      // ------------------------------------------- log de GPS existe?
+      if (SD.exists(gps_name_file))
+      {
+        //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+        appendFile(SD, gps_name_file.c_str(), csvLine.c_str());
+      }
+      else
+      {
+        //Serial.println("File not found, init SD");
+        //sd_ready = false;
+        //if (!SD.exists(gps_name_file))
+        //{
+        Serial.print("File not found, create?: ");
+        Serial.println(gps_name_file);
+        writeFile(SD, gps_name_file.c_str(), csvLine.c_str());
+        //}
+      }
+
+    }
+  }
+}
+
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  //Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
+  uint8_t rxPin = 34;
+  uint8_t txPin = 33;
+  Serial2.begin(115200, SERIAL_8N1, rxPin, txPin);
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
 }
 
@@ -18,16 +73,25 @@ void gps_update()
   strcat(buffer_union_publish, publish_topic);
   strcat(buffer_union_publish, gps_topic);
 
-  JsonObject gpsObject = obj["gps"].as<JsonObject>();
+  // -------------------------get GPS until a time
+  smartDelay(1000);
 
-  smartDelay(mainTime);
+  /*printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
+    printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
+    printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
+    printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
+    printInt(gps.location.age(), gps.location.isValid(), 5);
+    printDateTime(gps.date, gps.time);
+    printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+    printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
+    Serial.println();*/
 
   if ((millis() > 1000 && gps.charsProcessed() < 10))
   {
     STATE &= ~(1 << 5);                 // GPS error
     STATE &= ~(1 << 1);                 // GPS error
     Serial.println(F("{\"gps_status\": \"error_last_seen\"}"));
-    obj["gps"]["status"] = "error_last_seen";
+    obj["gps_status"] = "error_last_seen";
 
   }
   else if ((gps.hdop.isValid()) && (gps.location.isValid()))
@@ -40,6 +104,7 @@ void gps_update()
     //printDateTime(gps.date, gps.time);
     //printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
     //printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
+    //Serial.println();
 
     int hdopValue = int(gps.hdop.hdop());
     if (hdopValue >= 10)
@@ -47,7 +112,7 @@ void gps_update()
       // Send Previous GPS
       STATE |= (1 << 5);                  // GPS connected
       STATE &= ~(1 << 1);                 // GPS not ready
-      obj["gps"]["status"] = "heating up";
+      obj["gps_status"] = "heating up";
       Serial.println(F("{\"gps_status\": \"heating up\"}"));
 
     }
@@ -56,38 +121,38 @@ void gps_update()
       STATE |= (1 << 5);                  // GPS connected
       STATE |= (1 << 1);                  // GPS state OK
 
-      obj["gps"]["status"] = "ready";
-      obj["gps"]["lat"] = gps.location.lat();
-      obj["gps"]["lon"] = gps.location.lng();
+      obj["gps_status"] = "ready";
+      obj["lat"] = gps.location.lat();
+      obj["lon"] = gps.location.lng();
 
-      saveConfig = true;
-      Serial.println();
     }
   }
   else
   {
     // Send Previous GPS
-    obj["gps"]["status"] = "calculating";
+    obj["gps_status"] = "calculating";
     Serial.println(F("{\"gps_status\": \"calculating\"}"));
+
+
+
     STATE |= (1 << 5);                  // GPS connected
     STATE &= ~(1 << 1);                 // GPS not ready
   }
 
-  serializeJson(obj["gps"], Serial);
-  Serial.println();
+  Serial.print("{\"lat\":");
+  serializeJson(obj["lat"], Serial);
+  Serial.print(",\"lon\":");
+  serializeJson(obj["lon"], Serial);
+  Serial.println("}");
 
-  gpsObject = obj["gps"].as<JsonObject>();
-  gpsObject["state"] = STATE;
-  gpsObject["percentage"] = obj["percentage"];
-  gpsObject["capacity"] = obj["capacity"];
-  //gpsObject["time"] = now;
 
-  size_t serializedLength = measureJson(gpsObject) + 1;
-  char tempBuffer[serializedLength];
-  serializeJson(gpsObject, tempBuffer, serializedLength);
-  strcpy(buffer_msg, tempBuffer);
+  //status_doc["gps"].clear();
+  //status_doc["gps"] = obj["gps"];
+  status_doc["gps_status"] = obj["gps_status"];
+  status_doc["lat"] = obj["lat"];
+  status_doc["lon"] = obj["lon"];
 
-  Mclient.publish(buffer_union_publish, buffer_msg);
+
 }
 
 // This custom version of delay() ensures that the gps object
@@ -96,11 +161,15 @@ void gps_update()
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
+  //Serial.println("Get GPS");
   //do
   //{
-    //while (Serial1.available())
-      //gps.encode(Serial1.read());
+  while ((Serial2.available() && (millis() - start < ms)))
+  {
+    gps.encode(Serial2.read());
+  }
   //} while (millis() - start < ms);
+  //Serial.println("new GPS data");
 }
 
 // ----------------------------------------------------- printFloat

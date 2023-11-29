@@ -12,6 +12,7 @@ int anio;
 int hora;
 int minuto;
 int dia_hoy;
+int segundo;
 
 const char* ntpServer = "pool.ntp.org";
 //long  gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
@@ -32,7 +33,7 @@ void init_clock()
   //  Wire1.setSDA(2);
   //Wire1.setSCL(3);
   //Wire.begin();
-  //delay(100);
+  delay(100);
   if (!rtc.begin(&Wire))
   {
     Serial.println("{\"rtc_init\":false}");
@@ -67,6 +68,8 @@ void init_clock()
 
 
     now = rtc.now();
+    status_doc["time"] = now.unixtime();
+    doc["time"] = now.unixtime();
 
     // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
     const uint32_t unixTime2050 = 2524608000;
@@ -115,6 +118,10 @@ void update_clock()
     if (rtcUpdated == false)
     {
       // New connection to NTP server
+      // ---------------------------- Time NTP
+      WiFiUDP ntpUDP;
+      NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
+
       if (ntpConnected == false)
       {
         //Serial.println("{\"ntp\":\"connecting...\"}");
@@ -157,6 +164,9 @@ void update_clock()
       //if (rtc.isrunning())
       {
         now = rtc.now();
+        status_doc["time"] = now.unixtime();
+        doc["time"] = now.unixtime();
+
         Serial.print("{\"time_rtc\":\"");
         Serial.print(now.year(), DEC);
         Serial.print('/');
@@ -195,6 +205,8 @@ void read_clock()
     //if (rtc.isrunning())
     {
       now = rtc.now();
+      status_doc["time"] = now.unixtime();
+      doc["time"] = now.unixtime();
 
       // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
       const uint32_t unixTime2050 = 2524608000;
@@ -206,12 +218,13 @@ void read_clock()
       }
 
       //dias = int(round(round(now.unixtime() - last_ac.unixtime()) / 86400L));
-      dias = (now.unixtime() - last_ac.unixtime()) / 86400;
+      //dias = (now.unixtime() - last_ac.unixtime()) / 86400;
       mes = now.month();
       anio = now.year();
       dia_hoy = now.day();
       hora = now.hour();
       minuto = now.minute();
+      segundo = now.second();
 
       Serial.print("{\"time\":\"");
       Serial.print(now.year(), DEC);
@@ -226,6 +239,20 @@ void read_clock()
       Serial.print(':');
       Serial.print(now.second(), DEC);
       Serial.println("\"}");
+
+
+      lcd.setCursor(0, 2); //
+      lcd.print(dia_hoy);
+      lcd.print("/");
+      lcd.print(mes);
+      lcd.print("/");
+      lcd.print(anio);
+      lcd.print("  ");
+      lcd.print(hora);
+      lcd.print(":");
+      lcd.print(minuto);
+      lcd.print(":");
+      lcd.print(segundo);
 
     }
   }
