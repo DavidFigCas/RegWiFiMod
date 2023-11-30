@@ -1,26 +1,45 @@
 #include "printerservice.h"
 
+// --------------------------------------------------------------------------- printRepot emty
+void printReport(void)
+{
+  Serial.print("NO HAY REPORTES: ");
 
+
+  setPrintMode(0); // Configurar modo de impresión
+  printString("   NO HAY REPORTES");
+  printString("\n\r");
+  //printDateTime(dia_hoy, mes, anio, hora, minuto);
+  endPrint();
+
+  //reporte++;
+  //obj["reporte"] = reporte;
+  //status_doc["reporte"] = reporte;
+  //saveConfig = true;
+
+}
 
 // --------------------------------------------------------------------------- printRepot
 // printCheck worked. A ticket was printed
 // the function i2c_write_blocking is for RP2040 (RPi Pico)
 //Numero       letra          dia          mes       año       hora       minuto
-void printReport (uint32_t num, uint32_t ltr, uint32_t total, uint32_t reporte)
+void printReport (uint32_t servicios, uint32_t ltr, uint32_t total, uint32_t reporte, uint32_t acumulado_litros, uint32_t folio_ini, uint32_t folio_fin, uint32_t litros_ini, uint32_t litros_fin)
 {
 
   // Numero de reporte
   //reporte = obj["reporte"].as<uint32_t>();
   //status_doc["reporte"] = reporte;
-  Serial.print("Reporte: ");
-  Serial.println(reporte);
+  //Serial.print("Reporte: ");
+  //Serial.println(reporte);
 
   Serial.print("REPORTE: ");
   Serial.println(ltr);
   Serial.print("LITROS: ");
   Serial.println(ltr);
   Serial.print("SERVICIOS: ");
-  Serial.println(num);
+  Serial.println(servicios);
+  Serial.print("LITROS GLOBALES: ");
+  Serial.println(acumulado_litros);
 
   setPrintMode(0); // Configurar modo de impresión
   printString("        REPORTE #:");
@@ -38,13 +57,40 @@ void printReport (uint32_t num, uint32_t ltr, uint32_t total, uint32_t reporte)
   printString("LITROS: ");
   printNumber(ltr);
   printString("\n\r");
+
+  printString("GLOBAL: ");
+  printNumber(acumulado_litros);
+  printString("\n\r");
+
   printString("SERVICIOS: ");
-  printNumber(num);
+  printNumber(servicios);
   printString("\n\r");
   printString("VENTA: ");
   printNumber(total);
   printString("\n\r");
   setPrintMode(0); // Configurar modo de impresión
+
+  printString("LITROS INICIAL: ");
+  printNumber(litros_ini);
+  printString("\n\r");
+
+  printString("LITROS FINAL: ");
+  printNumber(litros_fin);
+  printString("\n\r");
+
+  printString("FOLIO INICIAL: ");
+  printNumber(folio_ini);
+  printString("\n\r");
+
+  printString("FOLIO FINAL: ");
+  printNumber(folio_fin);
+  printString("\n\r");
+
+  printString("PROXIMO SERVICIO: ");
+  printNumber(folio_fin + 1);
+  printString("\n\r");
+
+
   printString("\n\r");
   // Imprimir fecha y hora
   printString("FECHA:");
@@ -157,7 +203,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
   setPrintMode(0);
   printString("GRACIAS POR SU PREFERENCIA");
   endPrint();
-  
+
   return;
 }
 

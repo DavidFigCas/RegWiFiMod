@@ -82,7 +82,7 @@ bool SD_Init(void)
     {
       Serial.println("UNKNOWN");
       sd_ready = false;
-      //ESP.restart();
+      ESP.restart();
     }
 
     // if ((SD.cardSize() != 0) && ((SD.totalBytes() == 0) || (SD.usedBytes() == 0)))

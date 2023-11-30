@@ -159,7 +159,6 @@ void loop()
         //encoder_reset = true;
         read_clock();
         saveNewlog();
-        saveConfig = true;
 
       }
       oled_display_number(litros_check);
@@ -453,7 +452,7 @@ void loop()
   {
     Serial.println("PUSH");
     buttonPressTime = millis();
-    wifiAP(true);
+
   }
 
   // Si el botón cambia de presionado a no presionado
@@ -462,26 +461,38 @@ void loop()
     if (millis() - buttonPressTime < longPressDuration)
     {
       Serial.println("Short press detected!");
+      read_clock();
+      consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
       print_log = true;
     }
-    else if (millis() - buttonPressTime >= (2 * longPressDuration)) // Reinicio de fabrica
+    else if (millis() - buttonPressTime >= (4 * longPressDuration)) // Reinicio de fabrica
     {
       Serial.println("Super Long press detected!");
+
       obj.clear();
       obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+
+
+      //print_log = false;
+      //clear_log = true;
+      //folio = 1;
+      //obj["folio"] = folio;
+
+      consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      deleteFile(SD,consult_filelog.c_str());
+
+      
+      saveConfig = true;
       Serial.println("{\"default_config\":true}");
       saveConfigData();
       ESP.restart();
+
     }
     else if (millis() - buttonPressTime >= longPressDuration) // Reinicia el log
     {
+
       Serial.println("Long press detected!");
-      print_log = false;
-      clear_log = true;
-      folio = 0;
-      obj["folio"] = folio;
-      saveConfig = true;
-      //saveNewlog();
+      wifiAP(true);
     }
 
 

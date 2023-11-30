@@ -108,12 +108,20 @@ void read_logs(String consult)
   {
     Serial.print("Error al abrir el archivo: ");
     Serial.println(consult);
+
+    printReport();
+    
     return;
   }
 
-  uint32_t litros_acumulado = 0;
+  uint32_t litros_suma = 0;
   uint32_t servicios = 0;
   uint32_t total_ventas = 0;
+  uint32_t folio_ini;
+  uint32_t folio_fin;
+  uint32_t litros_ini;
+  uint32_t litros_fin;
+  
 
   while (file.available()) 
   {
@@ -132,14 +140,25 @@ void read_logs(String consult)
     uint32_t litros = doc["litros"];
     uint32_t precio = doc["precio"];
 
+    if(servicios == 0)
+    {
+      folio_ini = doc["folio"];
+    }
+
+    folio_fin = doc["folio"];
+
     servicios++;
-    litros_acumulado += litros;
+    litros_suma += litros;
     total_ventas += precio;
   }
 
   file.close();
+  //printReport (servicios,  ltr,  total, reporte, acumulado_litros, folio_ini, folio_fin, litros_ini, litros_fin)
 
-  printReport(servicios, litros_acumulado, total_ventas, reporte);
+  litros_ini = acumulado_litros - litros_suma;
+  litros_fin = acumulado_litros;
+
+  printReport(servicios, litros_suma, total_ventas, reporte, acumulado_litros, folio_ini, folio_fin, litros_ini, litros_fin);
 }
 
 // -------------------------------------------------------------- save_newlog
@@ -216,9 +235,15 @@ void saveNewlog()
     Serial.println(log_str);
   }
 
+  // Litros totales
+  acumulado_litros =  obj["acumulado_litros"].as<uint32_t>() + litros_check;
+  obj["acumulado_litros"] = acumulado_litros;
+  status_doc["acumulado_litros"] = acumulado_litros;
+
   folio++;
   obj["folio"] = folio;
   status_doc["folio"] = folio; 
+  saveConfig = true;
 } 
 
 // ------------------------------------------------------------ register_client

@@ -19,8 +19,10 @@
   "dayOff" : 0,
   "capacity": 10000,
   "percentage": 70.5,
-  "pulsos_litro": 1,
+  "pulsos_litro": 179,
   "folio": 0,
   "lat": 19.03793, 
-  "lon": -98.20346
+  "lon": -98.20346,
+  "reporte": 1,
+  "acumulado_litros": 0
 }
