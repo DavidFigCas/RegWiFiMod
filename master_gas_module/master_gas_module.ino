@@ -212,7 +212,7 @@ void loop()
       //if (millis() - startTimeToPrint >= 1000)
       //{ // Han pasado 10 segundos
       //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
-      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio - 1, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
       //saveConfig = true;

@@ -74,7 +74,7 @@ void gps_update()
   strcat(buffer_union_publish, gps_topic);
 
   // -------------------------get GPS until a time
-  smartDelay(1000);
+  smartDelay(2000);
 
   /*printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
     printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);

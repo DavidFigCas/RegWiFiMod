@@ -41,8 +41,9 @@ uint32_t pendingPrint = 0;
 char resultado[300];
 
 const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
-const char* decenas[] = {"", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
+const char* decenas[] = {"", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
 const char* especiales[] = {"DIEZ", "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"};
+
 //uint32_t unitprice;
 
 

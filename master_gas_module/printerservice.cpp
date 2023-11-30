@@ -145,7 +145,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
 
 
   printString("\n\r");
-  printString("NO. DE SERVICO: ");
+  printString("NO. DE SERVICIO: ");
   printNumber(f);
   printString("\n\r");
   // Imprimir fecha y hora
@@ -236,96 +236,63 @@ void printNumber(uint32_t num) {
 
 
 // --------------------------------------------------------------------------convertNumberToWords
-void convertNumberToWords(uint32_t num, char* resultado) {
-  // Lógica para convertir números a palabras...
-  // Utilizar sprintf o strcat según sea necesario
-  //////////////////// convert numbers to words: ////////////////////////////////////
+void convertNumberToWords(uint32_t num, char* resultado) 
+{
   if (num == 0) {
     strcpy(resultado, "CERO");
-    //resultado = "cero";
+    return;
+  } else {
+    strcpy(resultado, "");
   }
-  else strcpy(resultado, " ");
+
   if (num >= 1000) {
     int miles = num / 1000;
     strcat(resultado, unidades[miles]);
     strcat(resultado, " MIL ");
-    //resultado += unidades[miles];
-    //resultado += " mil ";
     num %= 1000;
   }
-  // Обработка сотен
+
   if (num >= 200) {
     int centenas = num / 100;
     strcat(resultado, unidades[centenas]);
     strcat(resultado, " CIENTOS ");
-    //resultado += unidades[centenas];
-    //  resultado += " cientos ";
     num %= 100;
-  }
-  else if (num > 100) {
+  } else if (num > 100) {
     strcat(resultado, "CIENTO ");
-    //resultado += "ciento ";
     num %= 100;
-  }
-  else if (num == 100) {
+  } else if (num == 100) {
     strcat(resultado, "CIEN");
-    //resultado += "cien";
     num %= 100;
   }
 
-  // Обработка десятков
   if (num > 29) {
     int decena = num / 10;
     strcat(resultado, decenas[decena]);
-    strcat(resultado, " ");
-    //resultado += decenas[decena];
-    //resultado += " ";
-    num %= 10;
-    if (num > 0) {
-      strcat(resultado, "Y ");
-      //resultado += "y ";
+    if (num % 10 > 0) {
+      strcat(resultado, " Y ");
     }
-  }
-  else if (num > 20) {
+    num %= 10;
+  } else if (num > 20) {
     strcat(resultado, "VEINTI");
-    //resultado += "veinti";
     num %= 10;
-  }
-  else if (num == 20) {
+  } else if (num == 20) {
     strcat(resultado, "VEINTE");
-    //resultado += "veinte";
-    num %= 10;
-  }
-  else if (num > 15) {
+    num = 0;
+  } else if (num > 15) {
     strcat(resultado, "DIECI");
-    strcat(resultado, unidades[num - 10]);
-    //resultado += "dieci";
-    //resultado +=  unidades[num - 10];
     num %= 10;
-  }
-  else if (num >= 11) {
+  } else if (num >= 11) {
     strcat(resultado, especiales[num - 10]);
-    //strcat(resultado, " ");
-    //resultado += especiales[num - 10];
-    num %= 10;
-  }
-  else if (num == 10) {
+    num = 0;
+  } else if (num == 10) {
     strcat(resultado, "DIEZ");
-    //resultado += "diez";
-    num %= 10;
+    num = 0;
   }
-  Serial.println (num);
-  // Обработка единиц
+
   if (num > 0) {
     strcat(resultado, unidades[num]);
-    //resultado += unidades[num];
   }
-  Serial.println(resultado);
-  uint32_t size = strlen(resultado);
-  strncpy((char*)resultadoBytes, resultado, size);
-
 }
-
 
 //-------------------------------------------- print price
 void printPrice(uint32_t price) {
@@ -338,7 +305,13 @@ void printPrice(uint32_t price) {
 // -------------------------------------------- printDateTime
 void printDateTime(uint8_t d, uint8_t m, uint8_t y, uint8_t h, uint8_t mn) {
   char buffer[30];
-  sprintf(buffer, "%u/%u/%u %u:%u", d, m, y, h, mn);
+
+  if (mn >= 10)
+    sprintf(buffer, "%u/%u/%u %u:%u", d, m, y, h, mn);
+  else
+    sprintf(buffer, "%u/%u/%u %u:0%u", d, m, y, h, mn);
+
+
   printString(buffer);
 }
 
