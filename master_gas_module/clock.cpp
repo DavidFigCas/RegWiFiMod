@@ -17,8 +17,8 @@ int segundo;
 const char* ntpServer = "pool.ntp.org";
 //long  gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
 //int   daylightOffset_sec = obj["dayOff"].as<int>();               // Horario de verano, disabled
-long  gmtOffset_sec;
-int   daylightOffset_sec;
+int32_t  gmtOffset_sec;
+int32_t   daylightOffset_sec;
 bool ntpConnected = false;
 bool rtcUpdated = false;
 bool rtc_ready = false;
@@ -44,8 +44,8 @@ void init_clock()
   {
     Serial.println("{\"rtc_init\":true}");
     delay(10);
-    gmtOffset_sec = obj["gmtOff"].as<long>();
-    daylightOffset_sec = obj["dayOff"].as<int>();
+    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
+    daylightOffset_sec = obj["dayOff"].as<int32_t>();
     rtc_ready = true;
 
     // For New devices
@@ -94,8 +94,8 @@ void init_clock()
     Serial.print(now.second(), DEC);
     Serial.println("\"}");
 
-    gmtOffset_sec = obj["gmtOff"].as<long>();
-    daylightOffset_sec = obj["dayOff"].as<int>();
+    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
+    daylightOffset_sec = obj["dayOff"].as<int32_t>();
 
     Serial.print("{\"gmtOff\":");
     Serial.print(gmtOffset_sec);
@@ -127,8 +127,8 @@ void update_clock()
         //Serial.println("{\"ntp\":\"connecting...\"}");
         //timeClient.begin();
         timeClient.end();
-        gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
-        daylightOffset_sec = obj["dayOff"].as<int>();               // Horario de verano, disabled
+        gmtOffset_sec = obj["gmtOff"].as<int32_t>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
+        daylightOffset_sec = obj["dayOff"].as<int32_t>();               // Horario de verano, disabled
         timeClient = NTPClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
         timeClient.begin();
         Serial.println("{\"ntp\":\"connected\"}");

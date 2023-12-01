@@ -38,7 +38,7 @@ char tempChar;
 uint8_t resultadoBytes[200];
 uint32_t pendingPrint = 0;
 
-char resultado[300];
+char resultado[400];
 
 const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
 const char* decenas[] = {"", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};

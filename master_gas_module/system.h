@@ -111,7 +111,7 @@ extern char tempChar;
 extern uint8_t resultadoBytes[200];
 extern uint32_t pendingPrint;
 
-extern char resultado[300];
+extern char resultado[400];
 
 extern const char* unidades[];
 extern const char* decenas[];
