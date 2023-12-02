@@ -31,10 +31,11 @@
 #define TX_PIN   PIN_PA5
 
 int contador;
-long p;
+long p, bat;
 long angulo;
 long promedio_angulo;
 long promedio_angulo_anterior;
+uint8_t txData[4];
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 AS5600 encoder;
@@ -69,53 +70,40 @@ void setup() {
 
   mySerial.print("AT:");
   Serial1.print("AT\r");
+  delay(10);
   while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
     char data = Serial1.read(); // Leer un byte desde Serial1
     mySerial.write(data); // Enviar ese byte a mySerial
   }
   mySerial.println();
-  delay(500);
+
 
   mySerial.print("ID:");
   Serial1.print("AT$I=10\r");
+  delay(10);
   while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
     char data = Serial1.read(); // Leer un byte desde Serial1
     mySerial.write(data); // Enviar ese byte a mySerial
   }
   mySerial.println();
-  delay(1000);
+
 
   mySerial.print("PAC:");
   Serial1.print("AT$I=11\r");
+  delay(10);
   while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
     char data = Serial1.read(); // Leer un byte desde Serial1
     mySerial.write(data); // Enviar ese byte a mySerial
   }
   mySerial.println();
-  //delay(1000);
-  //delay(5000);
 
 
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  //
-  //mySerial.print("Power: ");
-  //mySerial.println(encoder.getPowerMode());
-  //delay(1000);
 
-  //mySerial.print("Filter: ");
-  //mySerial.println(encoder.getSlowFilter());
-  //delay(1000);
-
-
-
-
-
-
-  //encoder.setPowerMode(2);
-
+  bat = analogRead(PIN_PA4);
   if (encoder.magnetTooWeak()) //encoder.detectMagnet()
   {
 
@@ -141,11 +129,17 @@ void loop() {
 
   if (p > 200)
   {
-    //mySerial.print("Sensor OK");
+    mySerial.print("Sensor OK");
+    digitalWrite(PIN_PA3, HIGH);    // turn the LED off by making the voltage LOW
+    delay(100);
+    digitalWrite(PIN_PA3, LOW);   // turn the LED on (HIGH is the voltage level)
+    delay(100);
+    SendHEXdata();
+
   }
   else
   {
-    //mySerial.print("Sensor no colocado");
+    mySerial.print("Sensor no colocado");
   }
 
   p = 0;
@@ -186,4 +180,42 @@ void loop() {
     if (nDevices == 0){
      mySerial.println("No I2C devices found");
     }*/
+}
+
+void SendHEXdata() {
+
+  txData[0] = (p >> 8) & 0xFF;
+  txData[1] = p & 0xFF;
+  txData[2] = (bat >> 8) & 0xFF;
+  txData[3] = bat  & 0xFF;
+
+
+  Serial1.print ("AT$SF=");
+  if (txData[0] < 0x10) Serial1.print("0");
+  Serial1.print(txData[0], HEX);
+  if (txData[1] < 0x10) Serial1.print("0");
+  Serial1.print(txData[1], HEX);
+  if (txData[2] < 0x10) Serial1.print("0");
+  Serial1.print(txData[2], HEX);
+  if (txData[3] < 0x10) Serial1.print("0");
+  Serial1.print(txData[3], HEX);
+  Serial1.print("\r");
+
+  //delay(120000);
+  mySerial.print("Esperando");
+  for (int i = 0; i < 150 ; i++)
+  {
+    mySerial.println(i);
+    delay(6000);
+
+    // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
+    if (i % 10 == 0) {
+      // Parpadeo del LED
+      digitalWrite(PIN_PA3, HIGH); 
+      delay(100); // LED encendido durante 500 ms
+      digitalWrite(PIN_PA3, LOW); 
+      //delay(100); // LED apagado durante 500 ms
+    }
+  }
+  mySerial.println();
 }
