@@ -24,14 +24,17 @@
 
 #include <SoftwareSerial.h>
 #include "Wire.h"
+#include <AS5600.h>
 
 #define RX_PIN   PIN_PB4
 #define TX_PIN   PIN_PA5
 //#define TX_PIN   PIN_PA0
 
 int contador;
+uint16_t p;
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
+AS5600 encoder; 
 
 
 // the setup function runs once when you press reset or power the board
@@ -51,15 +54,16 @@ void loop() {
   delay(100);                       // wait for a second
   digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
   delay(100);    
-  mySerial.print("Contador: "); // Enviar el carácter 'A'// wait for a second  
-  mySerial.println(contador++); // Enviar el carácter 'A'// wait for a second
+  mySerial.print("Sensor: "); // Enviar el carácter 'A'// wait for a second  
+  p = encoder.getAngle();
+  mySerial.println(p); // Enviar el carácter 'A'// wait for a second
 
-  byte error, address;
-  int nDevices = 0;
+  //byte error, address;
+  //int nDevices = 0;
 
-  //delay(5000);
+  delay(500);
 
-  mySerial.println("Scanning for I2C devices ...");
+ /* mySerial.println("Scanning for I2C devices ...");
   for(address = 0x01; address < 0x7f; address++){
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
@@ -72,5 +76,5 @@ void loop() {
   }
   if (nDevices == 0){
     mySerial.println("No I2C devices found");
-  }
+  }*/
 }
