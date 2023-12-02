@@ -25,6 +25,8 @@
 #include <SoftwareSerial.h>
 #include "Wire.h"
 #include <AS5600.h>
+#include <avr/sleep.h>
+#include <avr/interrupt.h>
 
 #define RX_PIN   PIN_PB4
 //#define TX_PIN   PIN_PA3
@@ -41,8 +43,9 @@ SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los nÃ
 AS5600 encoder;
 
 
-// the setup function runs once when you press reset or power the board
-void setup() {
+// --------------------------------------------------------------------- setup
+void setup()
+{
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(PIN_PA3, OUTPUT);
@@ -65,8 +68,9 @@ void setup() {
   digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
   delay(100);
 
-  encoder.setPowerMode(2);
-  encoder.setSlowFilter(2);
+  encoder.setPowerMode(3);
+  encoder.setFastFilter(0);
+  encoder.setSlowFilter(3);
 
   mySerial.print("AT:");
   Serial1.print("AT\r");
@@ -97,11 +101,22 @@ void setup() {
   }
   mySerial.println();
 
-
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
 }
 
-// the loop function runs over and over again forever
-void loop() {
+// --------------------------------------------------------------------- loop
+void loop()
+{
+
+  mySerial.print("AT:");
+  Serial1.print("AT\r");
+  delay(10);
+  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+  }
+  mySerial.println();
 
   bat = analogRead(PIN_PA4);
   if (encoder.magnetTooWeak()) //encoder.detectMagnet()
@@ -112,7 +127,7 @@ void loop() {
       angulo = encoder.readAngle();
       p = p + angulo;
       mySerial.println(angulo); // Enviar el carÃ¡cter 'A'// wait for a second
-      delay(10);
+      delay(210);
     }
     p = p / 10;
 
@@ -129,7 +144,7 @@ void loop() {
 
   if (p > 200)
   {
-    mySerial.print("Sensor OK");
+    mySerial.println("Sensor OK");
     digitalWrite(PIN_PA3, HIGH);    // turn the LED off by making the voltage LOW
     delay(100);
     digitalWrite(PIN_PA3, LOW);   // turn the LED on (HIGH is the voltage level)
@@ -202,20 +217,36 @@ void SendHEXdata() {
   Serial1.print("\r");
 
   //delay(120000);
-  mySerial.print("Esperando");
+  mySerial.println("Radio Deep Sleep");
+
+  // Radio a bajo consumo
+  //Serial1.print ("AT$P=2");
+  //Serial1.print("\r");
+  //delay(10);
+  //while(!Serial1.available())
+  //while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //}
+
   for (int i = 0; i < 15 ; i++)
   {
+    //Serial1.print ("AT$P=2");
+    //Serial1.print("\r");
+
     mySerial.println(i);
     delay(6000);
 
     // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
     if (i % 10 == 0) {
       // Parpadeo del LED
-      digitalWrite(PIN_PA3, HIGH); 
+      digitalWrite(PIN_PA3, HIGH);
       delay(100); // LED encendido durante 500 ms
-      digitalWrite(PIN_PA3, LOW); 
+      digitalWrite(PIN_PA3, LOW);
       //delay(100); // LED apagado durante 500 ms
     }
   }
+
   mySerial.println();
+  sleep_enable();
 }
