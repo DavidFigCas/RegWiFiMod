@@ -203,7 +203,7 @@ void SendHEXdata() {
 
   //delay(120000);
   mySerial.print("Esperando");
-  for (int i = 0; i < 150 ; i++)
+  for (int i = 0; i < 15 ; i++)
   {
     mySerial.println(i);
     delay(6000);
