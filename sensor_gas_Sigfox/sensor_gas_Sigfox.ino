@@ -103,6 +103,7 @@ void setup()
   }
   mySerial.println();
 
+  analogReference(INTERNAL2V048);
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
@@ -145,7 +146,7 @@ void loop()
     resetRadio();
     SendHEXdata();
     sleepRadio();
-    espera_larga(15); // 15 = 1.5 min, 150 = 15min
+    espera_larga(150); // 15 = 1.5 min, 150 = 15min
   }
   else
   {
