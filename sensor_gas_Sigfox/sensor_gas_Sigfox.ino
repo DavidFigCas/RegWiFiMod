@@ -28,9 +28,13 @@
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 
-#define RX_PIN   PIN_PB4
-//#define TX_PIN   PIN_PA3
-#define TX_PIN   PIN_PA5
+#define RX_PIN        -1
+//#define RX_PIN        PIN_PB4
+//#define TX_PIN      PIN_PA0
+#define TX_PIN        PIN_PA4
+#define LED_1         PIN_PA3
+#define RESET_RADIO   PIN_PB4
+#define BAT_PIN       -1
 
 int contador;
 long p, bat;
@@ -48,38 +52,36 @@ void setup()
 {
 
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(PIN_PA3, OUTPUT);
-  //pinMode(PIN_PA7, OUTPUT);
-  //digitalWrite(PIN_PA7, LOW);
+  //pinMode(TX_PIN, OUTPUT);
+  //pinMode(BAT_PIN, INPUT);
 
   mySerial.begin(9600);
   Serial1.begin(9600); // START UART
 
   Wire.begin();
-  mySerial.println("Encoder Init"); // Enviar el carácter 'A'
-  digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
-  digitalWrite(PIN_PA3, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);
-  digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
-  digitalWrite(PIN_PA3, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);
-  digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
+  mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
+
+
 
   encoder.setPowerMode(3);
   encoder.setFastFilter(0);
   encoder.setSlowFilter(3);
 
-  mySerial.print("AT:");
-  Serial1.print("AT\r");
-  delay(10);
-  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    mySerial.write(data); // Enviar ese byte a mySerial
-  }
-  mySerial.println();
+  parpadeo(3, 100);
+
+  //if (resetRadio())
+  //{
+    //mySerial.println("Radio connected");
+    //parpadeo(3, 100);
+  //}
+
+  //else
+  //{
+    //mySerial.print("Radio not detected");
+    //parpadeo(5, 500);
+  //}
+  resetRadio();
+
 
 
   mySerial.print("ID:");
@@ -101,6 +103,7 @@ void setup()
   }
   mySerial.println();
 
+
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
 }
@@ -109,16 +112,9 @@ void setup()
 void loop()
 {
 
-  mySerial.print("AT:");
-  Serial1.print("AT\r");
-  delay(10);
-  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    mySerial.write(data); // Enviar ese byte a mySerial
-  }
-  mySerial.println();
 
-  bat = analogRead(PIN_PA4);
+  //bat = analogRead(BAT_PIN);
+  p = 0;
   if (encoder.magnetTooWeak()) //encoder.detectMagnet()
   {
 
@@ -145,59 +141,26 @@ void loop()
   if (p > 200)
   {
     mySerial.println("Sensor OK");
-    digitalWrite(PIN_PA3, HIGH);    // turn the LED off by making the voltage LOW
-    delay(100);
-    digitalWrite(PIN_PA3, LOW);   // turn the LED on (HIGH is the voltage level)
-    delay(100);
+    parpadeo(2, 50);
+    resetRadio();
     SendHEXdata();
-
+    sleepRadio();
+    espera_larga(15); // 15 = 1.5 min, 150 = 15min
   }
   else
   {
     mySerial.print("Sensor no colocado");
+    espera_larga(15); // 15 = 1.5 min, 150 = 15min
+    //espera_larga();
   }
 
-  p = 0;
-  delay(500);
-
-  /*else
-    {
-    if (encoder.magnetTooWeak())
-    {
-      digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
-
-    }
-    else
-      mySerial.println("Sensor min"); // Enviar el carácter 'A'// wait for a second
-    delay(100);
-    }*/
-
-
-
-
-
-  //byte error, address;
-  //int nDevices = 0;
-
-  //delay(500);
-
-  /* mySerial.println("Scanning for I2C devices ...");
-    for(address = 0x01; address < 0x7f; address++){
-     Wire.beginTransmission(address);
-     error = Wire.endTransmission();
-     if (error == 0){
-       mySerial.printf("I2C device found at address 0x%02X\n", address);
-       nDevices++;
-     } else if(error != 2){
-       mySerial.printf("Error %d at address 0x%02X\n", error, address);
-     }
-    }
-    if (nDevices == 0){
-     mySerial.println("No I2C devices found");
-    }*/
+  
 }
 
+
+// ----------------------------------------------------------- sendHexData
 void SendHEXdata() {
+
 
   txData[0] = (p >> 8) & 0xFF;
   txData[1] = p & 0xFF;
@@ -216,12 +179,74 @@ void SendHEXdata() {
   Serial1.print(txData[3], HEX);
   Serial1.print("\r");
 
+
+}
+
+
+//---------------------------------------------- espera_larga
+void espera_larga(uint32_t espera)
+{
+  for (uint32_t i = 0; i < espera; i++)
+  {
+
+    mySerial.println(i);
+    delay(6000);
+
+    // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
+    if (i % 10 == 0)
+    {
+      parpadeo(1, 100);
+    }
+  }
+
+  mySerial.println();
+}
+
+
+// ----------------------------------------------- resetRadio
+void resetRadio()
+{
+  mySerial.println("Reseting Radio");
+  bool response = false;
+  pinMode(RESET_RADIO, OUTPUT);
+
+  digitalWrite(RESET_RADIO, HIGH);    // Reset Radio;
+  delay(30);
+  digitalWrite(RESET_RADIO, LOW);    // Radio OK;
+  pinMode(RESET_RADIO, INPUT);
+  delay(30);
+
+  mySerial.print("AT:");
+  Serial1.print("AT\r");
+  delay(100);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+    response = true;
+  }
+  mySerial.println();
+
+  if(response == true)
+  {
+    mySerial.println("Radio Ready");
+  }
+
+  //return response;
+}
+
+
+//-------------------------------------- sleepRadio
+void sleepRadio()
+{
   //delay(120000);
   mySerial.println("Radio Deep Sleep");
 
   // Radio a bajo consumo
-  //Serial1.print ("AT$P=2");
-  //Serial1.print("\r");
+  Serial1.print ("AT$P=2");
+  Serial1.print("\r");
+
   //delay(10);
   //while(!Serial1.available())
   //while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
@@ -229,24 +254,22 @@ void SendHEXdata() {
   //mySerial.write(data); // Enviar ese byte a mySerial
   //}
 
-  for (int i = 0; i < 15 ; i++)
+  //espera_larga();
+  //sleep_enable();
+}
+
+
+//------------------------------------------ parpadeo()
+void parpadeo(uint16_t cantidad, uint32_t ms)
+{
+  // Parpadeo del LED
+  pinMode(LED_1, OUTPUT);
+  for (uint16_t i = 0; i <= cantidad; i++)
   {
-    //Serial1.print ("AT$P=2");
-    //Serial1.print("\r");
-
-    mySerial.println(i);
-    delay(6000);
-
-    // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
-    if (i % 10 == 0) {
-      // Parpadeo del LED
-      digitalWrite(PIN_PA3, HIGH);
-      delay(100); // LED encendido durante 500 ms
-      digitalWrite(PIN_PA3, LOW);
-      //delay(100); // LED apagado durante 500 ms
-    }
+    digitalWrite(LED_1, HIGH);
+    delay(ms); // LED encendido durante 500 ms
+    digitalWrite(LED_1, LOW);
+    delay(ms); // LED apagado durante 500 ms
   }
 
-  mySerial.println();
-  sleep_enable();
 }
