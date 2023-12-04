@@ -65,7 +65,7 @@ void setup()
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
-
+  // Sensor en bajo consumo
   encoder.setPowerMode(3);
   encoder.setFastFilter(0);
   encoder.setSlowFilter(3);
@@ -146,14 +146,17 @@ void loop()
 
 
 
-  mySerial.print("Sensor: "); // Enviar el carácter 'A'// wait for a second
-  mySerial.println(p);
+  mySerial.print("Sensor: "); 
+  mySerial.print(p);
+  mySerial.print("\t\t");
+  mySerial.print("Battery: "); 
+  mySerial.println(bat);
 
   if (p > 200)
   {
+    resetRadio();
     mySerial.println("Sensor OK");
     parpadeo(2, 50);
-    resetRadio();
     SendHEXdata();
     sleepRadio();
     espera_larga(150); // 15 = 1.5 min, 150 = 15min
@@ -161,7 +164,10 @@ void loop()
   else
   {
     mySerial.print("Sensor no colocado");
-    espera_larga(15); // 15 = 1.5 min, 150 = 15min
+    resetRadio();
+    SendHEXdata();
+    sleepRadio();
+    espera_larga(150); // 15 = 1.5 min, 150 = 15min
     //espera_larga();
   }
 
@@ -172,6 +178,7 @@ void loop()
 // ----------------------------------------------------------- sendHexData
 void SendHEXdata() {
 
+  mySerial.println("SendHEX");
 
   txData[0] = (p >> 8) & 0xFF;
   txData[1] = p & 0xFF;
@@ -190,6 +197,15 @@ void SendHEXdata() {
   Serial1.print(txData[3], HEX);
   Serial1.print("\r");
 
+  delay(10);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+    //response = true;
+  }
+  mySerial.println();
 
 }
 
@@ -225,11 +241,11 @@ void resetRadio()
   delay(30);
   digitalWrite(RESET_RADIO, LOW);    // Radio OK;
   pinMode(RESET_RADIO, INPUT);
-  delay(30);
+  delay(50);
 
   mySerial.print("AT:");
   Serial1.print("AT\r");
-  delay(100);
+  delay(10);
   //while (!Serial1.available());
   while (Serial1.available())
   { // Verificar si hay datos disponibles en Serial1
@@ -275,12 +291,12 @@ void parpadeo(uint16_t cantidad, uint32_t ms)
 {
   // Parpadeo del LED
   pinMode(LED_1, OUTPUT);
-  for (uint16_t i = 0; i <= cantidad; i++)
+  for (uint16_t i = 0; i < cantidad; i++)
   {
     digitalWrite(LED_1, HIGH);
     delay(ms); // LED encendido durante 500 ms
     digitalWrite(LED_1, LOW);
     delay(ms); // LED apagado durante 500 ms
   }
-
+  //pinMode(LED_1, INPUT);
 }
