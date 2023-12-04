@@ -27,6 +27,8 @@
 #include <AS5600.h>
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+// Librería megaTinyCore para leer Vdd fácilmente (ver ejemplo "readTempVcc")
+#include <megaTinyCore.h>
 
 #define RX_PIN        -1
 //#define RX_PIN        PIN_PB4
@@ -37,7 +39,8 @@
 #define BAT_PIN       -1
 
 int contador;
-long p, bat;
+long p; //promedio?
+uint16_t bat; //voltaje de la batería (Vdd)
 long angulo;
 long promedio_angulo;
 long promedio_angulo_anterior;
@@ -55,8 +58,8 @@ void setup()
   //pinMode(TX_PIN, OUTPUT);
   //pinMode(BAT_PIN, INPUT);
 
-  mySerial.begin(9600);
-  Serial1.begin(9600); // START UART
+  mySerial.begin(9600); // para depurar
+  Serial1.begin(9600); // START UART para el módulo Sigfox
 
   Wire.begin();
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
@@ -71,14 +74,14 @@ void setup()
 
   //if (resetRadio())
   //{
-    //mySerial.println("Radio connected");
-    //parpadeo(3, 100);
+  //mySerial.println("Radio connected");
+  //parpadeo(3, 100);
   //}
 
   //else
   //{
-    //mySerial.print("Radio not detected");
-    //parpadeo(5, 500);
+  //mySerial.print("Radio not detected");
+  //parpadeo(5, 500);
   //}
   resetRadio();
 
@@ -103,7 +106,14 @@ void setup()
   }
   mySerial.println();
 
-  analogReference(INTERNAL2V048);
+  // config ADC para leer voltaje interno
+  analogReference(INTERNAL1V024); //INTERNAL2V048
+  // se iba a implementar escribiendo directamente en los registros,
+  // afortunadamente ya existe una librería para eso
+  //VREF.CTRLA = 1;//VREF_ADC0REFSEL_1V1_gc;
+  //ADC0.MUXPOS = 1;//ADC_MUXPOS_INTREF_gc;
+  // descartar primera lectura para mejor medición
+  readSupplyVoltage();
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
@@ -112,9 +122,9 @@ void setup()
 // --------------------------------------------------------------------- loop
 void loop()
 {
-
-
   //bat = analogRead(BAT_PIN);
+  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+
   p = 0;
   if (encoder.magnetTooWeak()) //encoder.detectMagnet()
   {
@@ -155,7 +165,7 @@ void loop()
     //espera_larga();
   }
 
-  
+
 }
 
 
@@ -190,7 +200,7 @@ void espera_larga(uint32_t espera)
   for (uint32_t i = 0; i < espera; i++)
   {
 
-    mySerial.println(i);
+    mySerial.println(espera - i);
     delay(6000);
 
     // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
@@ -229,7 +239,7 @@ void resetRadio()
   }
   mySerial.println();
 
-  if(response == true)
+  if (response == true)
   {
     mySerial.println("Radio Ready");
   }
