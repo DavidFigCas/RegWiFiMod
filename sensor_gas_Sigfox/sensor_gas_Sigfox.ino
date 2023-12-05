@@ -22,6 +22,7 @@
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink
 */
 
+
 #include <SoftwareSerial.h>
 #include "Wire.h"
 #include <AS5600.h>
@@ -42,6 +43,7 @@
 #define INICIO    0
 #define PROCESO   1
 #define ESPERA    2
+#define F_CPU 32768UL // Define la frecuencia del reloj como 32.768 kHz
 
 int contador;
 long p; //promedio?
@@ -59,27 +61,27 @@ AS5600 encoder;
 // --------------------------------------------------------------------- setup
 void setup()
 {
-  
-  CCP = 0xD8;
-  CLKCTRL.MCLKCTRLA = 1;
-  CLKCTRL.OSC32KCTRLA = 1;
+  //F_CPU;
+  //CCP = 0xD8;
+  //CLKCTRL.MCLKCTRLA = 1;
+  //CLKCTRL.OSC32KCTRLA = 1;
   
 
- //mySerial.begin(9600); // para depurar
- // Serial1.begin(9600); // START UART para el módulo Sigfox
+ mySerial.begin(9600); // para depurar
+  Serial1.begin(9600); // START UART para el módulo Sigfox
 
-  //Wire.begin();
-  //mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
+  Wire.begin();
+  mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
   // Sensor en bajo consumo
-  //encoder.setPowerMode(3);
-  //encoder.setFastFilter(0);
-  //encoder.setSlowFilter(3);
+  encoder.setPowerMode(3);
+  encoder.setFastFilter(0);
+  encoder.setSlowFilter(3);
 
-  parpadeo(3, 1);
+  parpadeo(3, 10);
 
-  /*resetRadio();
+  resetRadio();
 
 
 
@@ -110,7 +112,7 @@ void setup()
   //ADC0.MUXPOS = 1;//ADC_MUXPOS_INTREF_gc;
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
-*/
+
 
 
   //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -121,11 +123,7 @@ void setup()
 // --------------------------------------------------------------------- loop
 void loop()
 {
- 
- delay(10000);
- parpadeo(3, 10);
- //sleep_mode(); 
-/*
+
 
   switch (STATE)
   {
@@ -190,7 +188,7 @@ void loop()
       espera_larga(150); // 15 = 1.5 min, 150 = 15mi
       STATE = INICIO;
       break;
-  }*/
+  }
 }
 
 
