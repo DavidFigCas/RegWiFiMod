@@ -59,13 +59,17 @@ AS5600 encoder;
 // --------------------------------------------------------------------- setup
 void setup()
 {
-  //CLKCTRL.MCLKCTRLA = 1;
+  
+  CCP = 0xD8;
+  CLKCTRL.MCLKCTRLA = 1;
+  CLKCTRL.OSC32KCTRLA = 1;
+  
 
- mySerial.begin(9600); // para depurar
+ //mySerial.begin(9600); // para depurar
  // Serial1.begin(9600); // START UART para el módulo Sigfox
 
   //Wire.begin();
-  mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
+  //mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
   // Sensor en bajo consumo
@@ -73,7 +77,7 @@ void setup()
   //encoder.setFastFilter(0);
   //encoder.setSlowFilter(3);
 
-  parpadeo(3, 100);
+  parpadeo(3, 1);
 
   /*resetRadio();
 
@@ -119,7 +123,7 @@ void loop()
 {
  
  delay(10000);
- parpadeo(3, 100);
+ parpadeo(3, 10);
  //sleep_mode(); 
 /*
 
