@@ -35,8 +35,13 @@
 //#define TX_PIN      PIN_PA0
 #define TX_PIN        PIN_PA4
 #define LED_1         PIN_PA3
+//#define LED_1         PIN_PC3
 #define RESET_RADIO   PIN_PB4
 #define BAT_PIN       -1
+
+#define INICIO    0
+#define PROCESO   1
+#define ESPERA    2
 
 int contador;
 long p; //promedio?
@@ -45,6 +50,7 @@ long angulo;
 long promedio_angulo;
 long promedio_angulo_anterior;
 uint8_t txData[4];
+unsigned int STATE = 0;
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 AS5600 encoder;
@@ -53,37 +59,23 @@ AS5600 encoder;
 // --------------------------------------------------------------------- setup
 void setup()
 {
+  //CLKCTRL.MCLKCTRLA = 1;
 
-  // initialize digital pin LED_BUILTIN as an output.
-  //pinMode(TX_PIN, OUTPUT);
-  //pinMode(BAT_PIN, INPUT);
+ mySerial.begin(9600); // para depurar
+ // Serial1.begin(9600); // START UART para el módulo Sigfox
 
-  mySerial.begin(9600); // para depurar
-  Serial1.begin(9600); // START UART para el módulo Sigfox
-
-  Wire.begin();
+  //Wire.begin();
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
   // Sensor en bajo consumo
-  encoder.setPowerMode(3);
-  encoder.setFastFilter(0);
-  encoder.setSlowFilter(3);
+  //encoder.setPowerMode(3);
+  //encoder.setFastFilter(0);
+  //encoder.setSlowFilter(3);
 
   parpadeo(3, 100);
 
-  //if (resetRadio())
-  //{
-  //mySerial.println("Radio connected");
-  //parpadeo(3, 100);
-  //}
-
-  //else
-  //{
-  //mySerial.print("Radio not detected");
-  //parpadeo(5, 500);
-  //}
-  resetRadio();
+  /*resetRadio();
 
 
 
@@ -114,64 +106,87 @@ void setup()
   //ADC0.MUXPOS = 1;//ADC_MUXPOS_INTREF_gc;
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
+*/
 
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
+
+  //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  //sleep_enable();
+  //sleep_mode(); 
 }
 
 // --------------------------------------------------------------------- loop
 void loop()
 {
-  //bat = analogRead(BAT_PIN);
-  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+ 
+ delay(10000);
+ parpadeo(3, 100);
+ //sleep_mode(); 
+/*
 
-  p = 0;
-  if (encoder.magnetTooWeak()) //encoder.detectMagnet()
+  switch (STATE)
   {
+    //----------------------------------------------------------- Leer sensores
+    case INICIO:
+      //bat = analogRead(BAT_PIN);
+      bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 
-    for (int i = 0; i < 10; i++)
-    {
-      angulo = encoder.readAngle();
-      p = p + angulo;
-      mySerial.println(angulo); // Enviar el carácter 'A'// wait for a second
-      delay(210);
-    }
-    p = p / 10;
+      p = 0;
+      if (encoder.magnetTooWeak()) //encoder.detectMagnet()
+      {
 
-  }
-  else if (encoder.detectMagnet())
-  {
-    p = encoder.readAngle();
-  }
+        for (int i = 0; i < 10; i++)
+        {
+          angulo = encoder.readAngle();
+          p = p + angulo;
+          mySerial.println(angulo); // Enviar el carácter 'A'// wait for a second
+          delay(210);
+        }
+        p = p / 10;
 
-
-
-  mySerial.print("Sensor: "); 
-  mySerial.print(p);
-  mySerial.print("\t\t");
-  mySerial.print("Battery: "); 
-  mySerial.println(bat);
-
-  if (p > 200)
-  {
-    resetRadio();
-    mySerial.println("Sensor OK");
-    parpadeo(2, 50);
-    SendHEXdata();
-    sleepRadio();
-    espera_larga(150); // 15 = 1.5 min, 150 = 15min
-  }
-  else
-  {
-    mySerial.print("Sensor no colocado");
-    resetRadio();
-    SendHEXdata();
-    sleepRadio();
-    espera_larga(150); // 15 = 1.5 min, 150 = 15min
-    //espera_larga();
-  }
+      }
+      else if (encoder.detectMagnet())
+      {
+        p = encoder.readAngle();
+      }
 
 
+
+      mySerial.print("Sensor: ");
+      mySerial.print(p);
+      mySerial.print("\t\t");
+      mySerial.print("Battery: ");
+      mySerial.println(bat);
+      STATE = PROCESO;
+      break;
+
+
+    //----------------------------------------------------------- Procesa y envia los datos
+    case PROCESO:
+      if ((p > 200) && (p < 3830))
+      {
+        resetRadio();
+        mySerial.println("Sensor OK");
+        parpadeo(2, 50);
+        SendHEXdata();
+        sleepRadio();
+      }
+      else
+      {
+        resetRadio();
+        p = 0;
+        mySerial.print("Sensor no colocado");
+        SendHEXdata();
+        sleepRadio();
+
+      }
+      STATE = ESPERA;
+      break;
+
+    case ESPERA:
+      espera_larga(150); // 15 = 1.5 min, 150 = 15mi
+      STATE = INICIO;
+      break;
+  }*/
 }
 
 
@@ -197,7 +212,7 @@ void SendHEXdata() {
   Serial1.print(txData[3], HEX);
   Serial1.print("\r");
 
-  delay(10);
+  delay(20);
   //while (!Serial1.available());
   while (Serial1.available())
   { // Verificar si hay datos disponibles en Serial1
