@@ -44,6 +44,7 @@ void mqtt_init();
 bool mqtt_check();
 void mqtt_send();
 void mqtt_send_list();
+void mqtt_send_file(String file_to_send);
 
 
 

@@ -22,24 +22,25 @@ extern StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio p
 extern StaticJsonDocument<200> doc_display;  // Crea un documento JSON con espacio para 200
 extern StaticJsonDocument<200> doc_encoder;  // Crea un documento JSON con espacio para 200
 
-extern const char *filename;
+extern const char *fileconfig;
 extern const char *filedefault;
 extern const char *filelist;
-extern const char *filelog;
+extern String filelog;
+extern String consult_filelog;
+extern String file_to_send;
 extern volatile bool saveConfig;
 
 extern File file;
 
-JsonObject getJSonFromFile(/*DynamicJsonDocument *doc*/ StaticJsonDocument<FILE_SIZE> *doc, String filename,bool forceCleanONJsonError = true);
-/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/);
-bool saveJSonToAFile(JsonObject * doc, String filename);
+JsonObject getJSonFromFile(fs::FS &fs,StaticJsonDocument<FILE_SIZE> *doc, const char * path,bool forceCleanONJsonError = true);
+bool saveJSonToAFile(fs::FS &fs,JsonObject * doc, const char * path);
 void saveConfigData();
 void saveListData();
 bool spiffs_init();
-bool saveJSonArrayToAFile(JsonArray * doc_list, String filename);
+bool saveJSonArrayToAFile(fs::FS &fs, JsonArray * doc_list, const char * path);
 //JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename,bool forceCleanONJsonError = true);
-JsonArray getJSonArrayFromFile(StaticJsonDocument<LIST_SIZE> *doc_list, String filename);
-void saveNewlog();
+JsonArray getJSonArrayFromFile(fs::FS &fs, StaticJsonDocument<LIST_SIZE> *doc_list, const char * path);
+//void saveNewlog();
 
 
 #endif  // FILESPIFFS_H

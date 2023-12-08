@@ -12,6 +12,7 @@
 #include <UnixTime.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
+#include <cmath> // 
 
 #define P_MOSI      3
 #define P_MISO      4
@@ -39,6 +40,17 @@
 #define SDA_MAIN    16
 #define SCL_MAIN    17
 
+int16_t x_lit = 450;   //(display.width() - tbw) / 2;
+int16_t y_lit = 125;  //(display.height() - tbh) / 2;
+int16_t x_pes = 450;   //(display.width() - tbw) / 2;
+int16_t y_pes = 212;  //(display.height() - tbh) / 2;
+
+
+uint16_t w; // Un poco de margen
+uint16_t h;
+uint16_t w2; // Un poco de margen
+uint16_t h2;
+
 const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 
 GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
@@ -62,7 +74,8 @@ unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
 //float uprice = 9.8; //price of 1 litre
-volatile uint32_t litros, print_litros, print_pesos, pesos;
+volatile uint32_t print_litros, print_pesos, pesos;
+volatile float litros;
 
 boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0, newcommand = 0, new_litros = 0;
 uint8_t mem_address = 0;
@@ -122,10 +135,10 @@ void recv(int len)
     //Serial.println(error.f_str());
   }
 
-  litros = doc_aux["litros"].as<uint32_t>();
-  print_litros = litros;
+  litros = doc_aux["litros"];
+  print_litros = doc_aux["litros_check"];
   pesos = doc["precio"].as<uint32_t>();
-  print_pesos = pesos;
+  print_pesos = doc_aux["precio_check"];
 }
 
 // Called when the I2C slave is read from
@@ -354,7 +367,7 @@ void setup1()
 {
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
-  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  display.epd2.selectSPI(SPI, SPISettings(16000000, MSBFIRST, SPI_MODE0));
   gpio_set_function(P_MISO, GPIO_FUNC_SPI);
   gpio_set_function(P_SCK, GPIO_FUNC_SPI);
   gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
@@ -362,9 +375,19 @@ void setup1()
   display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
   //delay(500);
   display.setFullWindow();
-  display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
 
-  display.powerOff();
+
+  display.firstPage();
+  do
+  {
+    //display.fillScreen(GxEPD_WHITE);
+    display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+  }
+  while (display.nextPage());
+
+
+  //display.powerOff();
+  display.hibernate();
   digitalWrite(25, LOW);
 }
 
@@ -383,8 +406,14 @@ void loop1()
       //{
       Serial.println("Display Main Screen");
       //display.init(0);
+      
       display.setFullWindow();
-      display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+      display.firstPage();
+      //do
+      //{
+        display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+      //}
+      //while (display.nextPage());
 
       print_icons();
 
@@ -393,29 +422,30 @@ void loop1()
       unixtime = doc_aux["time"].as<uint32_t>();
       //serializeJson(doc_aux["time"],Serial);
       stamp.getDateTime(unixtime);
-      Serial.print("TIME");
-      Serial.println(unixtime);
-      Serial.println(stamp.day);
-      Serial.println(stamp.month);
-      Serial.println(stamp.year);
-      Serial.println(stamp.hour);
-      Serial.println(stamp.minute);
 
-      display.setTextColor(GxEPD_BLACK);
-      display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-      display.setCursor(237, 49);
-      display.setFont(&FreeMonoBold9pt7b);
-      display.print(stamp.day);
-      display.print("/");
-      display.print(stamp.month);
-      display.print("/");
-      display.print(stamp.year);
-      display.print("  ");
-      display.print(stamp.hour);
-      display.print(":");
-      display.print(stamp.minute);
-      display.displayWindow(237, 10, 490, 45);
-      display.powerOff();
+      /*Serial.print("TIME");
+        Serial.println(unixtime);
+        Serial.println(stamp.day);
+        Serial.println(stamp.month);
+        Serial.println(stamp.year);
+        Serial.println(stamp.hour);
+        Serial.println(stamp.minute);
+
+        display.setTextColor(GxEPD_BLACK);
+        display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
+        display.setCursor(237, 49);
+        display.setFont(&FreeMonoBold9pt7b);
+        display.print(stamp.day);
+        display.print("/");
+        display.print(stamp.month);
+        display.print("/");
+        display.print(stamp.year);
+        display.print("  ");
+        display.print(stamp.hour);
+        display.print(":");
+        display.print(stamp.minute);
+        display.displayWindow(237, 10, 490, 45);
+        display.powerOff();*/
 
 
       Serial.println("goto STATE 1");
@@ -440,10 +470,23 @@ void loop1()
 
       Serial.print("\t");
 
+      print_litros = ceil(litros);
+      print_pesos = pesos;
+      
+      Serial.print("Print_Litros: ");
+      Serial.print(print_litros);
 
+      Serial.print("\t");
 
       Serial.print("precio: ");
+      Serial.print(pesos);
+
+      Serial.print("\t");
+
+      Serial.print("Print_Precio: ");
       Serial.println(pesos);
+
+      //print_litros
 
       new_litros = false;
       newcommand = false;
@@ -456,12 +499,26 @@ void loop1()
           digitalWrite(27, !digitalRead(27));
 
         //Show litros
+        String litStr = String(print_litros);  // Convierte el número a String
+        int16_t tbx, tby; uint16_t tbw, tbh;
+        // Obtener las dimensiones del texto
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-        display.setCursor(450, 169);
-        display.print(print_litros);
-        display.displayWindow(450, 125, 250, 50);
+        display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+
+        w = tbw + 10; // Un poco de margen
+        h = tbh + 10;
+
+        display.setPartialWindow(x_lit, y_lit, w, h);
+        display.firstPage();
+
+
+        do {
+          display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
+          display.print(litStr);
+        } while (display.nextPage());
+
 
         //Show price
         //display.setTextColor(GxEPD_BLACK);
@@ -475,6 +532,7 @@ void loop1()
       }
 
       shown = true;
+      //print_litros = ceil(litros);
 
       break;
 
@@ -500,20 +558,69 @@ void loop1()
       if (shown == true)
       {
         Serial.println("Final Numbers");
-        display.setTextColor(GxEPD_BLACK);
-        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-        display.setCursor(450, 169);
-        display.print(print_litros);
-        display.displayWindow(450, 125, 250, 50);
+        //Serial.print("Litros: ");
+        //Serial.print(litros);
 
-        //Show price
+        //Serial.print("\t");
+
+        //print_litros = ceil(litros);
+        Serial.print("Print_Litros: ");
+        Serial.print(print_litros);
+
+        Serial.print("\t");
+
+        Serial.print("precio: ");
+        Serial.println(print_pesos);
+
+
+        String litStr = String(print_litros);  // Convierte el número a String
+        int16_t tbx, tby; uint16_t tbw, tbh;
+        // Obtener las dimensiones del texto
         display.setTextColor(GxEPD_BLACK);
         display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
-        display.setCursor(450, 256);
-        display.print(print_pesos);
-        display.displayWindow(450, 212, 250, 50);
+        display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+
+        w = tbw + 10; // Un poco de margen
+        h = tbh + 10;
+
+        display.setPartialWindow(x_lit, y_lit, w, h);
+        display.firstPage();
+
+
+        do {
+          display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
+          display.print(litStr);
+        } while (display.nextPage());
+
+
+        String pesosStr = String(print_pesos);  // Convierte el número a String
+        display.getTextBounds(pesosStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+        w2 = tbw + 10; // Un poco de margen
+        h2 = tbh + 10;
+
+        display.setPartialWindow(x_pes, y_pes, w2, h2);
+        display.firstPage();
+        do {
+          display.setCursor(x_pes - tbx, y_pes - tby); // Ajustar la posición del cursor
+          display.print(pesosStr);
+        } while (display.nextPage());
+
+
+        /*display.setTextColor(GxEPD_BLACK);
+          display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+          display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
+          display.setCursor(450, 169);
+          display.print(print_litros);
+          display.displayWindow(450, 125, 250, 50);
+
+          //Show price
+          display.setTextColor(GxEPD_BLACK);
+          display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+          display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
+          display.setCursor(450, 256);
+          display.print(print_pesos);
+          display.displayWindow(450, 212, 250, 50);*/
         Serial.println("Show price");
         //delay(5000);
         //Serial.println("goto STATE 3");

@@ -12,12 +12,13 @@ int anio;
 int hora;
 int minuto;
 int dia_hoy;
+int segundo;
 
 const char* ntpServer = "pool.ntp.org";
 //long  gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
 //int   daylightOffset_sec = obj["dayOff"].as<int>();               // Horario de verano, disabled
-long  gmtOffset_sec;
-int   daylightOffset_sec;
+int32_t  gmtOffset_sec;
+int32_t   daylightOffset_sec;
 bool ntpConnected = false;
 bool rtcUpdated = false;
 bool rtc_ready = false;
@@ -32,7 +33,7 @@ void init_clock()
   //  Wire1.setSDA(2);
   //Wire1.setSCL(3);
   //Wire.begin();
-  //delay(100);
+  delay(100);
   if (!rtc.begin(&Wire))
   {
     Serial.println("{\"rtc_init\":false}");
@@ -43,8 +44,8 @@ void init_clock()
   {
     Serial.println("{\"rtc_init\":true}");
     delay(10);
-    gmtOffset_sec = obj["gmtOff"].as<long>();
-    daylightOffset_sec = obj["dayOff"].as<int>();
+    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
+    daylightOffset_sec = obj["dayOff"].as<int32_t>();
     rtc_ready = true;
 
     // For New devices
@@ -68,6 +69,7 @@ void init_clock()
 
     now = rtc.now();
     status_doc["time"] = now.unixtime();
+    doc["time"] = now.unixtime();
 
     // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
     const uint32_t unixTime2050 = 2524608000;
@@ -92,8 +94,8 @@ void init_clock()
     Serial.print(now.second(), DEC);
     Serial.println("\"}");
 
-    gmtOffset_sec = obj["gmtOff"].as<long>();
-    daylightOffset_sec = obj["dayOff"].as<int>();
+    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
+    daylightOffset_sec = obj["dayOff"].as<int32_t>();
 
     Serial.print("{\"gmtOff\":");
     Serial.print(gmtOffset_sec);
@@ -116,13 +118,17 @@ void update_clock()
     if (rtcUpdated == false)
     {
       // New connection to NTP server
+      // ---------------------------- Time NTP
+      WiFiUDP ntpUDP;
+      NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
+
       if (ntpConnected == false)
       {
         //Serial.println("{\"ntp\":\"connecting...\"}");
         //timeClient.begin();
         timeClient.end();
-        gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
-        daylightOffset_sec = obj["dayOff"].as<int>();               // Horario de verano, disabled
+        gmtOffset_sec = obj["gmtOff"].as<int32_t>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
+        daylightOffset_sec = obj["dayOff"].as<int32_t>();               // Horario de verano, disabled
         timeClient = NTPClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
         timeClient.begin();
         Serial.println("{\"ntp\":\"connected\"}");
@@ -159,6 +165,8 @@ void update_clock()
       {
         now = rtc.now();
         status_doc["time"] = now.unixtime();
+        doc["time"] = now.unixtime();
+
         Serial.print("{\"time_rtc\":\"");
         Serial.print(now.year(), DEC);
         Serial.print('/');
@@ -198,6 +206,7 @@ void read_clock()
     {
       now = rtc.now();
       status_doc["time"] = now.unixtime();
+      doc["time"] = now.unixtime();
 
       // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
       const uint32_t unixTime2050 = 2524608000;
@@ -209,12 +218,13 @@ void read_clock()
       }
 
       //dias = int(round(round(now.unixtime() - last_ac.unixtime()) / 86400L));
-      dias = (now.unixtime() - last_ac.unixtime()) / 86400;
+      //dias = (now.unixtime() - last_ac.unixtime()) / 86400;
       mes = now.month();
       anio = now.year();
       dia_hoy = now.day();
       hora = now.hour();
       minuto = now.minute();
+      segundo = now.second();
 
       Serial.print("{\"time\":\"");
       Serial.print(now.year(), DEC);
@@ -242,7 +252,7 @@ void read_clock()
       lcd.print(":");
       lcd.print(minuto);
       lcd.print(":");
-      lcd.print(now.second());
+      lcd.print(segundo);
 
     }
   }

@@ -41,7 +41,7 @@ void mqtt_init()
     Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     Mclient.setCallback(callback);
-
+    Mclient.setKeepAlive(30);
   }
 
 
@@ -72,6 +72,48 @@ void mqtt_send()
 {
   Mclient.publish(buffer_union_publish, buffer_msg);
 }
+
+
+// --------------------------------------------------- mqtt_send_file
+void mqtt_send_file(String file_to_send)
+{
+  send_log = false;
+  File file = SD.open(file_to_send);
+  if (!file) {
+    Serial.print("Error al abrir el archivo: ");
+    Serial.println(file_to_send);
+    return;
+  }
+
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, file_to_send.c_str());
+
+
+  while (file.available())
+  {
+    String line = file.readStringUntil('\n');
+    if (line.length() > 0) {
+      // Verificar si la línea es un JSON válido
+      //StaticJsonDocument<256> doc;
+      //DeserializationError error = deserializeJson(doc, line);
+      //if (error) {
+      //Serial.print("Error al parsear JSON: ");
+      //Serial.println(error.c_str());
+      //continue;
+      //}
+
+      // Publicar la línea
+      Mclient.publish(buffer_union_publish, line.c_str(), line.length());
+      delay(100); // Pequeña pausa para evitar saturar el cliente MQTT
+      esp_task_wdt_reset();
+    }
+  }
+
+  file.close();
+  Serial.println("Archivo enviado");
+}
+
 
 //---------------------------------------------------- mqtt_send_list
 void mqtt_send_list()
@@ -166,7 +208,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 
     //
     // Flag save ListData
-    
+
     //Serial.print("New List Data: ");
     //serializeJson(obj_list,Serial);
     //Serial.println();
@@ -246,24 +288,46 @@ void callback(char* topic, byte* payload, unsigned int length)
     return;
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic)) == 0)
+    //else  if (strcmp(topic,strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic , get_topic))) == 0)
   {
     if (strcmp(jsonPayload, "delete") == 0)
     {
       clear_log = true;
       return;
-    } else if (strcmp(jsonPayload, "get") == 0)
-    {
-      send_log = true;
-      Serial.println("prepare send");
-      return;
-    }
-    else if (strcmp(jsonPayload, "print") == 0)
-    {
-      print_log = true;
-      Serial.println("Print All Logs");
-      return;
     }
 
+    // else if (strcmp(jsonPayload, "get") == 0)
+    //{
+    //send_log = true;
+    //Serial.println("prepare send");
+    //return;
+    //}
+    //else if (strcmp(jsonPayload, "print") == 0)
+    //{
+    //print_log = true;
+    //Serial.println("Print All Logs");
+    //return;
+    //}
+
+  }
+  else  if (strcmp(topic, (strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic ), print_topic))) == 0)
+  {
+    print_log = true;
+    Serial.print("Print Logs: ");
+    consult_filelog = "/logs/";
+    consult_filelog += jsonPayload;
+    Serial.println(consult_filelog);
+    return;
+  }
+
+  else  if (strcmp(topic, (strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic ), get_topic))) == 0)
+  {
+    send_log = true;
+    Serial.print("Prepare to SEND file: ");
+    //consult_filelog = "/logs/";
+    file_to_send = jsonPayload;
+    Serial.println(file_to_send);
+    return;
   }
   return;
 }

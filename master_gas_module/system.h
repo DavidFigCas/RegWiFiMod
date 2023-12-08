@@ -1,6 +1,14 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <Arduino.h>
+#include <ArduinoJson.h>
+//#include <vector>
+#include <PubSubClient.h>
+#include <WiFi.h>
+//#include <LittleFS.h>
+
+
 #define   PRESS   LOW
 //#define LIST_SIZE   4096
 //#define LOG_SIZE   4096
@@ -16,6 +24,18 @@
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+
+// --------------------------------sd card
+//#define UART_BAUD           9600
+//#define PIN_DTR             25
+//#define PIN_TX              27  
+//#define PIN_RX              26
+//#define PWR_PIN             4
+
+#define SD_MISO             2
+#define SD_MOSI             15
+#define SD_SCLK             14
+#define SD_CS               13
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -40,6 +60,8 @@
 #include <Adafruit_SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 #include <cmath> // 
+#include "SD.h"
+#include "SPI.h"
 
 
 #include "version.h"
@@ -54,9 +76,14 @@
 #include "firebasedb.h"
 #include "oled_display.h"
 #include  "glcd_display.h"
+#include  "sd_card_service.h"
 
 
 //15 seconds WDT
+
+// sd card
+extern bool sd_ready;
+
 extern bool buttonState;
 extern bool lastButtonState;
 extern unsigned long buttonPressTime;
@@ -84,7 +111,7 @@ extern char tempChar;
 extern uint8_t resultadoBytes[200];
 extern uint32_t pendingPrint;
 
-extern char resultado[200];
+extern char resultado[400];
 
 extern const char* unidades[];
 extern const char* decenas[];
@@ -102,16 +129,28 @@ extern unsigned long tiempoAnterior2;
 extern unsigned long tiempoActual2;
 extern volatile bool startCounting2;
 
+// ----------------------------------------GPS intervalos para gps
+extern unsigned long previousMillisGPS;  // Variable para almacenar la última vez que se ejecutó el evento
+extern const long intervalGPS;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
+extern unsigned long currentMillisGPS; 
+
+// ------------------------------------- wifi flag
+extern bool server_running;
+
+extern String gps_name_file;
+extern String gps_str;
+
 
 extern uint32_t start_process_time;
 extern float litros;
+extern uint32_t acumulado_litros;
 extern float pulsos_litro;
 extern float precio;
 extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;
 
-extern int folio;
+extern uint32_t folio;
 extern char b[200];
 extern char buff[200];
 extern int i;
@@ -135,7 +174,12 @@ void reset_config();
 bool strToBool(String str);
 float mapfloat(float x, float in_min, float in_max, float out_min, float out_max);
 void loadConfig();
+/*static*/ void Cfg_get(/*struct jsonrpc_request * r*/);
 void system_init();
 void search_nclient(uint32_t aux_client);
 void register_client();
+void saveNewlog();
+void read_logs(String consult);
+
+
 #endif

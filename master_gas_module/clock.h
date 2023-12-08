@@ -17,10 +17,11 @@ extern int anio;
 extern int dia_hoy;
 extern int hora;
 extern int minuto;
+extern int segundo;
 
 extern const char* ntpServer;
-extern long  gmtOffset_sec;
-extern int   daylightOffset_sec;
+extern int32_t  gmtOffset_sec;
+extern int32_t   daylightOffset_sec;
 extern bool ntpConnected;
 extern bool rtcUpdated;
 extern bool rtc_ready;

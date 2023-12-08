@@ -8,7 +8,6 @@
 void setup()
 {
   system_init();
-  oled_display_text(VERSION);    // Draw 'stylized' characters
   search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
@@ -16,9 +15,18 @@ void setup()
   buttonState = LOW;
   lastButtonState = HIGH;
 
+
+
+  // Reset Display state
+  doc_aux["STATE"] = 0;
+  doc_aux["time"] = now.unixtime();
+  serializeJson(doc_aux, b);
+  Wire.beginTransmission(DISPLAY_ADD);
+  Wire.write((const uint8_t*)b, (strlen(b)));
+  Wire.endTransmission();
+  delay(TIME_SPACE);
+
   oled_display_number(0);    // Draw 'stylized' characters
-
-
   //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
 }
 
@@ -28,11 +36,6 @@ void loop()
 {
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
-  read_clock();
-
-
-
-
   // ----------------------------------------------- leer
 
   // --------------------- leer display
@@ -86,14 +89,13 @@ void loop()
 
   // ----------------------------------- Serial Monitor
 
-  /* Serial.print("Display: ");
-    serializeJson(doc_display, Serial);
-    Serial.println();
+  //Serial.print("Display: ");
+  //serializeJson(doc_display, Serial);
+  //Serial.println();
 
-
-    Serial.print("Encoder: ");
-    serializeJson(doc_encoder, Serial);
-    Serial.println();*/
+  //Serial.print("Encoder: ");
+  //serializeJson(doc_encoder, Serial);
+  //Serial.println();
 
   //Serial.print("main_status: ");
   //serializeJson(status_doc, Serial);
@@ -157,6 +159,7 @@ void loop()
         //encoder_reset = true;
         read_clock();
         saveNewlog();
+
       }
       oled_display_number(litros_check);
     }
@@ -209,10 +212,10 @@ void loop()
       //if (millis() - startTimeToPrint >= 1000)
       //{ // Han pasado 10 segundos
       //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), dia_hoy, mes, (anio - 2000), hora, minuto, folio);
-      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+      printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio - 1, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
-      saveConfig = true;
+      //saveConfig = true;
       //new_log = true;
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
@@ -243,7 +246,9 @@ void loop()
   {
     doc_aux["flow"] = doc_encoder["flow"].as<bool>();
     doc_aux["litros"] = litros;
+    doc_aux["litros_check"] = litros_check;
     doc_aux["precio"] = precio;
+    doc_aux["precio_check"] = precio_check;
     doc_aux["uprice"] = uprice;
   }
 
@@ -279,8 +284,20 @@ void loop()
   // ------------------------------------------- Clear Log
   if (clear_log == true)
   {
-    obj_log.clear();
-    Serial.println(saveJSonArrayToAFile(&obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    //obj_log.clear();
+    //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_clear_spiffs\":true}" : "{\"log_clear_spiffs\":false}");
+    // if (saveJSonArrayToAFile(SD, &obj_log, filelog.c_str()))
+    //{
+    Serial.println("{\"log_clear_SD\":true}");
+    //clear_log = false;
+    //ESP.restart();
+    //}
+    //else
+    //{
+    //Serial.println("{\"log_clear_SD\":false}");
+    //sd_ready = false;
+
+    //}
     clear_log = false;
   }
 
@@ -288,81 +305,87 @@ void loop()
   // ------------------------------------------- Print LOG
   if (print_log == true)
   {
-    printing_logs();
+    read_logs(consult_filelog);
     print_log = false;
   }
 
 
-  // ---------------------------------------------------------------- internet
-  if (((millis() - mainRefresh > mainTime) && ((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())))
+  // ---------------------------------------------------------------- MAIN TIME
+  if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
+
+    read_clock();
     gps_update();
+    save_gps_log();
 
-    // ----------------------------------------- check internet
-    if (wifi_check())
+
+
+
+    // -------------------------------------------solo si no esta en proceso de surtido
+
+    if (((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull()))
     {
-      update_clock();
-      if (mqtt_check())
+
+      // ----------------------------------------- check internet
+
+      if (!sd_ready)
+        SD_Init();
+
+
+      if (wifi_check())
       {
-        // ------------------------------------------- Send Log
-        if (send_log == true)
+        update_clock();
+        if (mqtt_check())
         {
-          Serial.println("{\"mqtt_log\":\"sending\"}");
+          // ------------------------------------------- Send Log
+          if (send_log == true)
+          {
+            mqtt_send_file(file_to_send);
+          }
 
-          //saveNewlog();
+          // ------------------------------------------- Send STATUS
+          //if (send_log == true)
+          {
+            Serial.println("{\"mqtt_status\":\"sending\"}");
 
-          strcpy(buffer_union_publish, obj["id"].as<const char*>());
-          strcat(buffer_union_publish, publish_topic);
-          strcat(buffer_union_publish, log_topic);
+            //saveNewlog();
 
-          JsonArray logObject = obj_log;
-          size_t serializedLength = measureJson(logObject) + 1;
-          char tempBuffer[serializedLength];
-          serializeJson(logObject, tempBuffer, serializedLength);
-          strcpy(buffer_msg, tempBuffer);
+            strcpy(buffer_union_publish, obj["id"].as<const char*>());
+            strcat(buffer_union_publish, publish_topic);
+            strcat(buffer_union_publish, status_topic);
 
-          Mclient.publish(buffer_union_publish, buffer_msg);
-          send_log = false;
-        }
+            //JsonArray logObject = obj_log;
+            //size_t serializedLength = measureJson(logObject) + 1;
+            char tempBuffer[STATUS_SIZE];
+            serializeJson(status_doc, tempBuffer);
+            strcpy(buffer_msg_status, tempBuffer);
 
-        // ------------------------------------------- Send Log
-        //if (send_log == true)
-        {
-          Serial.println("{\"mqtt_status\":\"sending\"}");
+            Mclient.publish(buffer_union_publish, buffer_msg_status);
+            //send_log = false;
+          }
 
-          //saveNewlog();
-
-          strcpy(buffer_union_publish, obj["id"].as<const char*>());
-          strcat(buffer_union_publish, publish_topic);
-          strcat(buffer_union_publish, status_topic);
-
-          //JsonArray logObject = obj_log;
-          //size_t serializedLength = measureJson(logObject) + 1;
-          char tempBuffer[STATUS_SIZE];
-          serializeJson(status_doc, tempBuffer);
-          strcpy(buffer_msg_status, tempBuffer);
-
-          Mclient.publish(buffer_union_publish, buffer_msg_status);
-          //send_log = false;
-        }
-        if (send_list == true)
-        {
-          mqtt_send_list();
-          send_list = false;
+          // ------------------------------------------- Send LIST
+          if (send_list == true)
+          {
+            mqtt_send_list();
+            send_list = false;
+          }
         }
       }
+
     }
 
-
   }
+
+
 
 
   // ----------------------------------------- save new List
   if (flag_new_list == true)
   {
     flag_new_list = false;
-    
+
     Serial.print("Saving List on Loop: ");
     //serializeJson(doc_list,Serial);
     //Serial.println();
@@ -372,9 +395,10 @@ void loop()
 
 
   // ----------------------------------------- save new data
-  if (saveConfig)  // Data change
+  if (saveConfig == true)  // Data change
   {
-    //saveConfig = false;
+    saveConfig = false;
+
     //Serial.println("{\"upload_config_from_loop\":true}");
     //saveConfigData();
 
@@ -419,16 +443,16 @@ void loop()
     //
     //}
 
-    saveConfig = false;
   }
 
 
   // leer boton para imprimir reporte diario
   // Si el botón cambia de no presionado a presionado
-  if (lastButtonState == HIGH && buttonState == LOW) {
+  if (lastButtonState == HIGH && buttonState == LOW)
+  {
     Serial.println("PUSH");
     buttonPressTime = millis();
-    wifiAP(true);
+
   }
 
   // Si el botón cambia de presionado a no presionado
@@ -437,40 +461,44 @@ void loop()
     if (millis() - buttonPressTime < longPressDuration)
     {
       Serial.println("Short press detected!");
+      read_clock();
+      consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
       print_log = true;
     }
-    else if (millis() - buttonPressTime >= (2 * longPressDuration)) // Reinicio de fabrica
+    else if (millis() - buttonPressTime >= (4 * longPressDuration)) // Reinicio de fabrica
     {
       Serial.println("Super Long press detected!");
+
       obj.clear();
-      obj = getJSonFromFile(&doc, filedefault);
+      obj = getJSonFromFile(SPIFFS, &doc, filedefault);
+
+
+      //print_log = false;
+      //clear_log = true;
+      //folio = 1;
+      //obj["folio"] = folio;
+
+      consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      deleteFile(SD,consult_filelog.c_str());
+
+      
+      saveConfig = true;
       Serial.println("{\"default_config\":true}");
       saveConfigData();
       ESP.restart();
+
     }
     else if (millis() - buttonPressTime >= longPressDuration) // Reinicia el log
     {
+
       Serial.println("Long press detected!");
-      print_log = false;
-      clear_log = true;
-      folio = 0;
-      obj["folio"] = folio;
-      saveConfig = true;
-      //saveNewlog();
+      wifiAP(true);
     }
 
 
   }
 
   lastButtonState = buttonState;
-
-  //if (digitalRead(BT_REPORT) == LOW)
-  //{
-  //Serial.println("PUSH");
-
-  //print_log = true;
-  //}
-
 
   esp_task_wdt_reset();
 }
