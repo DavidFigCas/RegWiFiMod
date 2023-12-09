@@ -65,12 +65,17 @@ void setup()
   //CCP = 0xD8;
   //CLKCTRL.MCLKCTRLA = 1;
   //CLKCTRL.OSC32KCTRLA = 1;
-  
+  parpadeo(3, 10);
 
- mySerial.begin(9600); // para depurar
+
+  delay(2000);
+
+  mySerial.begin(9600); // para depurar
   Serial1.begin(9600); // START UART para el módulo Sigfox
 
   Wire.begin();
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT_PULLUP);
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
@@ -113,17 +118,18 @@ void setup()
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
 
-
+  //ADC0.CTRLA&=~ADC_ENABLE_bm;
 
   //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   //sleep_enable();
-  //sleep_mode(); 
+  //sleep_cpu();
+  //sleep_mode();
 }
 
 // --------------------------------------------------------------------- loop
 void loop()
 {
-
+  //sleep_cpu();
 
   switch (STATE)
   {
@@ -185,7 +191,7 @@ void loop()
       break;
 
     case ESPERA:
-      espera_larga(150); // 15 = 1.5 min, 150 = 15mi
+      espera_larga(1); // 15 = 1.5 min, 150 = 15mi
       STATE = INICIO;
       break;
   }
@@ -259,6 +265,18 @@ void resetRadio()
   digitalWrite(RESET_RADIO, LOW);    // Radio OK;
   pinMode(RESET_RADIO, INPUT);
   delay(50);
+
+  mySerial.print("RESET:");
+  Serial1.print("AT$RC\n");
+  delay(10);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+    response = true;
+  }
+
 
   mySerial.print("AT:");
   Serial1.print("AT\r");

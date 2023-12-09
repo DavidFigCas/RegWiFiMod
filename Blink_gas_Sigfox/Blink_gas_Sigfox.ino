@@ -25,6 +25,7 @@
 #include <SoftwareSerial.h>
 #include "Wire.h"
 #include <AS5600.h>
+#include <avr/sleep.h>
 
 #define RX_PIN   PIN_PB4
 #define TX_PIN   PIN_PA5
@@ -33,48 +34,90 @@
 int contador;
 uint16_t p;
 
-SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
-AS5600 encoder; 
+//SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
+//AS5600 encoder;
 
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+  //F_CPU;
+  CCP = 0xD8;
+  CLKCTRL.MCLKCTRLA = 1;
+  CLKCTRL.OSC32KCTRLA = 1;
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(PIN_PA3, OUTPUT);
-  mySerial.begin(9600);
-  Wire.begin();
-  mySerial.write('A'); // Enviar el carácter 'A'
+  digitalWrite(PIN_PA3, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(10);                       // wait for a second
+  digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
+  delay(10);
+  //mySerial.begin(9600);
+  //Wire.begin();
+  //mySerial.write('A'); // Enviar el carácter 'A'
+
+  pinMode(PIN_PA0, INPUT);
+  pinMode(PIN_PA1, INPUT);
+  pinMode(PIN_PA2, INPUT);
+  pinMode(PIN_PA3, INPUT);
+  pinMode(PIN_PA4, INPUT);
+  pinMode(PIN_PA5, INPUT);
+  pinMode(PIN_PA6, INPUT);
+  pinMode(PIN_PA7, INPUT);
+
+  pinMode(PIN_PB0, INPUT);
+  pinMode(PIN_PB1, INPUT);
+  pinMode(PIN_PB2, INPUT);
+  pinMode(PIN_PB3, INPUT);
+  pinMode(PIN_PB4, INPUT);
+  pinMode(PIN_PB5, INPUT);
+  //pinMode(PIN_PB6, INPUT);
+  //pinMode(PIN_PB7, INPUT);
+
+  pinMode(PIN_PC0, INPUT);
+  pinMode(PIN_PC1, INPUT);
+  pinMode(PIN_PC2, INPUT);
+  pinMode(PIN_PC3, INPUT);
+  //pinMode(PIN_PC4, INPUT);
+  //pinMode(PIN_PC5, INPUT);
+  //pinMode(PIN_PC6, INPUT);
+  //pinMode(PIN_PC7, INPUT);
+
+  ADC0.CTRLA &= ~ADC_ENABLE_bm;
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  sleep_cpu();
 
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(PIN_PA3, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);    
-  mySerial.print("Sensor: "); // Enviar el carácter 'A'// wait for a second  
-  p = encoder.getAngle();
-  mySerial.println(p); // Enviar el carácter 'A'// wait for a second
+  sleep_cpu();
+  //digitalWrite(PIN_PA3, HIGH);   // turn the LED on (HIGH is the voltage level)
+  //delay(100);                       // wait for a second
+  //digitalWrite(PIN_PA3, LOW);    // turn the LED off by making the voltage LOW
+  //delay(100);
+  // mySerial.print("Sensor: "); // Enviar el carácter 'A'// wait for a second
+  // p = encoder.getAngle();
+  // mySerial.println(p); // Enviar el carácter 'A'// wait for a second
 
   //byte error, address;
   //int nDevices = 0;
 
-  delay(500);
+  //delay(500);
 
- /* mySerial.println("Scanning for I2C devices ...");
-  for(address = 0x01; address < 0x7f; address++){
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    if (error == 0){
-      mySerial.printf("I2C device found at address 0x%02X\n", address);
-      nDevices++;
-    } else if(error != 2){
-      mySerial.printf("Error %d at address 0x%02X\n", error, address);
+  /* mySerial.println("Scanning for I2C devices ...");
+    for(address = 0x01; address < 0x7f; address++){
+     Wire.beginTransmission(address);
+     error = Wire.endTransmission();
+     if (error == 0){
+       mySerial.printf("I2C device found at address 0x%02X\n", address);
+       nDevices++;
+     } else if(error != 2){
+       mySerial.printf("Error %d at address 0x%02X\n", error, address);
+     }
     }
-  }
-  if (nDevices == 0){
-    mySerial.println("No I2C devices found");
-  }*/
+    if (nDevices == 0){
+     mySerial.println("No I2C devices found");
+    }*/
 }
