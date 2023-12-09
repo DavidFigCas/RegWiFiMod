@@ -15,8 +15,8 @@ int DA = D3;               // Salida 1 para motor
 int DB = D4;               // Salida 2 para motor
 int ENA = D1;              // Pin ENA del puente H
 int ENB = D2;              // Pin ENA del puente H
-int tiempoEspera = 5000;  // Tiempo de espera en milisegundos
-int tiempoMovimiento = 60000;  // Tiempo de espera en milisegundos
+int tiempoEspera = 15000;  // Tiempo de espera en milisegundos
+int tiempoMovimiento = 70000;  // Tiempo de espera en milisegundos
 int vel = 255;            // Valor de velocidad inicial
 volatile int state = 0;
 volatile unsigned long previousMillis = 0;
@@ -127,8 +127,8 @@ ICACHE_RAM_ATTR void botonIzqPresionado()
 void detenerMotor()
 {
   Serial.println("STOP");
-  digitalWrite(DA, LOW);
-  digitalWrite(DB, LOW);
+  digitalWrite(DA, HIGH);
+  digitalWrite(DB, HIGH);
   analogWrite(ENA, 0); // Detener el motor
   analogWrite(ENB, 0); // Detener el motor
 }
@@ -141,12 +141,12 @@ void direccion(int dir)
   Serial.println(vel);
   if (dir == 1)
   {
-    digitalWrite(DA, HIGH);
+    digitalWrite(DA, LOW);
     digitalWrite(DB, HIGH);
   }
   else
   {
-    digitalWrite(DA, LOW);
+    digitalWrite(DA, HIGH);
     digitalWrite(DB, LOW);
   }
 }
