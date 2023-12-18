@@ -53,9 +53,13 @@ long promedio_angulo;
 long promedio_angulo_anterior;
 uint8_t txData[4];
 unsigned int STATE = 0;
+volatile uint16_t countRTC_CLK = 0;
+volatile uint16_t sleepTimerTime  =  900; // time sleep in second
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 AS5600 encoder;
+
+
 
 
 // --------------------------------------------------------------------- setup
@@ -65,6 +69,8 @@ void setup()
   //CCP = 0xD8;
   //CLKCTRL.MCLKCTRLA = 1;
   //CLKCTRL.OSC32KCTRLA = 1;
+  RTC_init();
+
   parpadeo(3, 10);
 
 
@@ -84,7 +90,7 @@ void setup()
   encoder.setFastFilter(0);
   encoder.setSlowFilter(3);
 
-  parpadeo(3, 10);
+  //parpadeo(3, 10);
 
   resetRadio();
 
@@ -174,19 +180,19 @@ void loop()
       {
         resetRadio();
         mySerial.println("Sensor OK");
-        parpadeo(2, 50);
-        SendHEXdata();
-        sleepRadio();
+        parpadeo(3, 50);
       }
       else
       {
         resetRadio();
-        p = 0;
+        //p = 0;
         mySerial.print("Sensor no colocado");
-        SendHEXdata();
-        sleepRadio();
+        parpadeo(1, 50);
+
 
       }
+      SendHEXdata();
+      sleepRadio();
       STATE = ESPERA;
       break;
 
@@ -240,7 +246,10 @@ void espera_larga(uint32_t espera)
   {
 
     mySerial.println(espera - i);
-    delay(6000);
+
+
+    
+    //delay(6000);
 
     // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
     if (i % 10 == 0)
@@ -250,6 +259,8 @@ void espera_larga(uint32_t espera)
   }
 
   mySerial.println();
+
+  SleepInDownModeInterruptRTC();
 }
 
 
@@ -334,4 +345,39 @@ void parpadeo(uint16_t cantidad, uint32_t ms)
     delay(ms); // LED apagado durante 500 ms
   }
   //pinMode(LED_1, INPUT);
+}
+
+// --------------------------------------------------------------------- RTC_init
+void RTC_init(void)
+{
+  /* Initialize RTC: */
+  while (RTC.STATUS > 0)
+  {
+    ;                                   /* Wait for all register to be synchronized */
+  }
+  RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
+
+  RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
+
+  RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc /* RTC Clock Cycles 32768, resulting in 32.768kHz/32768 = 1Hz */
+                 | RTC_PITEN_bm;                       /* Enable PIT counter: enabled */
+}
+
+ISR(RTC_PIT_vect)
+{
+  RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
+  countRTC_CLK++;
+}
+
+
+//----------------------------------------------------------------------- SleepInDownModeInterruptRTC
+void SleepInDownModeInterruptRTC()
+{
+
+  while (countRTC_CLK < sleepTimerTime)
+  {
+    sleep_cpu();
+  }
+  countRTC_CLK = 0;
+
 }
