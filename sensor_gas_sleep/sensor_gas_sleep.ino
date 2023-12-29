@@ -17,13 +17,14 @@ void setup()
 void enterSleep()
 {
   
+   power_all_disable();
   for (int i = 0; i < NUM_DIGITAL_PINS; i++) {
     pinMode(i, INPUT);
     digitalWrite(i, HIGH);
   }
   
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
-  power_all_disable();
+ 
   
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Modo de sueño más bajo
   sleep_enable(); // Habilitar el modo de sueño
@@ -37,10 +38,10 @@ void enterSleep()
 
 void loop() {
   // Parpadear LED
-  digitalWrite(LED_PIN, HIGH);
+  //digitalWrite(LED_PIN, HIGH);
   //enterSleep();
   delay(500);
-  digitalWrite(LED_PIN, LOW);
+  //digitalWrite(LED_PIN, LOW);
   delay(500);
   enterSleep();
   enterSleep();
