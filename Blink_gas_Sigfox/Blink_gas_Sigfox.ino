@@ -22,10 +22,11 @@
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink
 */
 
-#include <SoftwareSerial.h>
-#include "Wire.h"
-#include <AS5600.h>
+//#include <SoftwareSerial.h>
+//#include "Wire.h"
+//#include <AS5600.h>
 #include <avr/sleep.h>
+#include <avr/power.h>
 
 #define RX_PIN   PIN_PB4
 #define TX_PIN   PIN_PA5
@@ -41,9 +42,9 @@ uint16_t p;
 // the setup function runs once when you press reset or power the board
 void setup() {
   //F_CPU;
-  CCP = 0xD8;
-  CLKCTRL.MCLKCTRLA = 1;
-  CLKCTRL.OSC32KCTRLA = 1;
+  //CCP = 0xD8;
+  //CLKCTRL.MCLKCTRLA = 1;
+  //CLKCTRL.OSC32KCTRLA = 1;
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(PIN_PA3, OUTPUT);
@@ -82,7 +83,21 @@ void setup() {
   //pinMode(PIN_PC6, INPUT);
   //pinMode(PIN_PC7, INPUT);
 
+  for (int i = 0; i < NUM_DIGITAL_PINS; i++) {
+    pinMode(i, INPUT);
+    digitalWrite(i, LOW);
+  }
+  
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
+  power_all_disable(); 
+
+  //power_adc_disable(); // Deshabilita el ADC
+  //power_spi_disable(); // Deshabilita el SPI
+  //power_timer0_disable(); // Deshabilita el Timer 0
+  //power_timer1_disable(); // Deshabilita el Timer 1
+  //power_twi_disable(); // Deshabilita el I2C
+
+  
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();

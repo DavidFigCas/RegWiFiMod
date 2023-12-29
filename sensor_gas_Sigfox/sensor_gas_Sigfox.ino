@@ -54,7 +54,7 @@ long promedio_angulo_anterior;
 uint8_t txData[4];
 unsigned int STATE = 0;
 volatile uint16_t countRTC_CLK = 0;
-volatile uint16_t sleepTimerTime  =  900; // time sleep in second
+volatile uint16_t sleepTimerTime  =  30; // time sleep in second
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 AS5600 encoder;
@@ -79,41 +79,21 @@ void setup()
   mySerial.begin(9600); // para depurar
   Serial1.begin(9600); // START UART para el módulo Sigfox
 
-  Wire.begin();
+  //Wire.begin();
   pinMode(PIN_PB1, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
   // Sensor en bajo consumo
-  encoder.setPowerMode(3);
-  encoder.setFastFilter(0);
-  encoder.setSlowFilter(3);
+  //encoder.setPowerMode(3);
+  //encoder.setFastFilter(0);
+  //encoder.setSlowFilter(3);
 
   //parpadeo(3, 10);
 
   resetRadio();
-
-
-
-  mySerial.print("ID:");
-  Serial1.print("AT$I=10\r");
-  delay(10);
-  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    mySerial.write(data); // Enviar ese byte a mySerial
-  }
-  mySerial.println();
-
-
-  mySerial.print("PAC:");
-  Serial1.print("AT$I=11\r");
-  delay(10);
-  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    mySerial.write(data); // Enviar ese byte a mySerial
-  }
-  mySerial.println();
+  initRadio();
 
   // config ADC para leer voltaje interno
   analogReference(INTERNAL1V024); //INTERNAL2V048
@@ -145,8 +125,8 @@ void loop()
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 
       p = 0;
-      if (encoder.magnetTooWeak()) //encoder.detectMagnet()
-      {
+      /*if (encoder.magnetTooWeak()) //encoder.detectMagnet()
+        {
 
         for (int i = 0; i < 10; i++)
         {
@@ -157,13 +137,13 @@ void loop()
         }
         p = p / 10;
 
-      }
-      else if (encoder.detectMagnet())
-      {
+        }
+        else if (encoder.detectMagnet())
+        {
         p = encoder.readAngle();
-      }
+        }
 
-
+      */
 
       mySerial.print("Sensor: ");
       mySerial.print(p);
@@ -176,19 +156,16 @@ void loop()
 
     //----------------------------------------------------------- Procesa y envia los datos
     case PROCESO:
+      resetRadio();
       if ((p > 200) && (p < 3830))
       {
-        resetRadio();
         mySerial.println("Sensor OK");
         parpadeo(3, 50);
       }
       else
       {
-        resetRadio();
-        //p = 0;
         mySerial.print("Sensor no colocado");
         parpadeo(1, 50);
-
 
       }
       SendHEXdata();
@@ -248,7 +225,7 @@ void espera_larga(uint32_t espera)
     mySerial.println(espera - i);
 
 
-    
+
     //delay(6000);
 
     // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
@@ -307,6 +284,7 @@ void resetRadio()
   }
 
   //return response;
+  initRadio();
 }
 
 
@@ -329,6 +307,29 @@ void sleepRadio()
 
   //espera_larga();
   //sleep_enable();
+}
+
+//------------------------------------------ initRadio
+void initRadio()
+{
+  mySerial.print("ID:");
+  Serial1.print("AT$I=10\r");
+  delay(10);
+  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+  }
+  mySerial.println();
+
+
+  mySerial.print("PAC:");
+  Serial1.print("AT$I=11\r");
+  delay(10);
+  while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+  }
+  mySerial.println();
 }
 
 
@@ -376,6 +377,12 @@ void SleepInDownModeInterruptRTC()
 
   while (countRTC_CLK < sleepTimerTime)
   {
+    for (int i = 0; i < NUM_DIGITAL_PINS; i++) {
+      pinMode(i, INPUT);
+      digitalWrite(i, LOW);
+    }
+
+    ADC0.CTRLA &= ~ADC_ENABLE_bm;
     sleep_cpu();
   }
   countRTC_CLK = 0;
