@@ -20,7 +20,7 @@ void enterSleep()
    power_all_disable();
   for (int i = 0; i < NUM_DIGITAL_PINS; i++) {
     pinMode(i, INPUT);
-    digitalWrite(i, HIGH);
+    digitalWrite(i, LOW);
   }
   
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
