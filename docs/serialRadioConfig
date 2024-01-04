@@ -1,0 +1,78 @@
+'254'
+'192'
+AT:p4=0\r
+AT:p4=0\r
+AT:p4=1\r
+AT:p4=0\r
+AT$DR=905200000\r
+ATS400=<000001FF><00000000><00000000>,1\r
+AT$WR\r
+AT$RC\r
+ATS410=0\r
+AT$I=10\r
+AT$I=11\r
+AT$SL=004135A6E0CAFC8A22345190\r
+
+---- espacio de 1.6s
+
+AT$I=10\r
+AT$I=11\r
+AT$SL=004135A6E0CAFC8A22345190\r
+
+---- espacio de 1.6s
+
+AT$I=10\r
+AT$I=11\r
+AT$SL=004135A6E0CAFC8A22345190\r
+
+---- espacio de 1.6s
+
+AT$SL=093AA17111511203\r '0''0'
+
+---- espacio de 1.9s
+
+AT$SL=093AA17111511203\r '0''0'
+
+---- espacio de 1.9s
+
+AT$SL=093AA17111511203\r '0''0'
+
+---- espacio de 1.9s
+
+AT$SL=093AA17111511203\r '0''0'
+
+---- espacio de 1.9s
+
+AT$SL=093AA17111511203\r '0''0'
+
+---- espacio de 2.5s
+
+AT:p4=0\r
+AT:p4=1\r
+AT:p4=0\r
+AT:p4=1\r
+AT:p4=0\r
+AT:p4=1\r
+AT:p4=0\r
+
+AT$p=2\r
+
+---- espacio de 60s
+
+AT:p4=0\r
+AT:p4=1\r
+
+---- espacio de 1.6s
+
+AT:p4=0\r
+AT$RC\r
+AT\r
+AT$V?\r
+AT$V?\r
+AT$V?\r
+AT$SF=094325aaaaaaB511\r '0' '0'
+
+---- espacio de 3s
+
+AT$p=2\r
+
