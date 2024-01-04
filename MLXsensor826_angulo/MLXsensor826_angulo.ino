@@ -85,11 +85,16 @@ void loop() {
     posture_length++;
 
   }
-  mySerial.print((int16_t)posture[1] << 8 | posture[2]);
+
+  int16_t x = (int16_t)posture[1] << 8 | posture[2];
+  int16_t y = (int16_t)posture[3] << 8 | posture[4];
+  int16_t z = (int16_t)posture[5] << 8 | posture[6];
+
+  mySerial.print(x);
   mySerial.print("\t");
-  mySerial.print((int16_t)posture[3] << 8 | posture[4]);
+  mySerial.print(y);
   mySerial.print("\t");
-  mySerial.print((int16_t)posture[5] << 8 | posture[6]);
+  mySerial.print(z);
 
   mySerial.println();
   delay(100); // Espera un segundo para la próxima lectura
