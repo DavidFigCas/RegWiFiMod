@@ -65,19 +65,19 @@ AS5600 encoder;
 // --------------------------------------------------------------------- setup
 void setup()
 {
-  //F_CPU;
-  //CCP = 0xD8;
-  //CLKCTRL.MCLKCTRLA = 1;
-  //CLKCTRL.OSC32KCTRLA = 1;
-  RTC_init();
 
-  parpadeo(3, 10);
+
+  //RTC_init();
+
+
 
 
   delay(2000);
 
   mySerial.begin(9600); // para depurar
   Serial1.begin(9600); // START UART para el módulo Sigfox
+
+ 
 
   //Wire.begin();
   pinMode(PIN_PB1, INPUT_PULLUP);
@@ -93,7 +93,10 @@ void setup()
   //parpadeo(3, 10);
 
   resetRadio();
+  delay(30);
   initRadio();
+   
+   parpadeo(3, 1000);
 
   // config ADC para leer voltaje interno
   analogReference(INTERNAL1V024); //INTERNAL2V048
@@ -124,7 +127,7 @@ void loop()
       //bat = analogRead(BAT_PIN);
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 
-      p = 0;
+      p = 1234;
       /*if (encoder.magnetTooWeak()) //encoder.detectMagnet()
         {
 
@@ -156,25 +159,27 @@ void loop()
 
     //----------------------------------------------------------- Procesa y envia los datos
     case PROCESO:
+    delay(50);
       resetRadio();
       if ((p > 200) && (p < 3830))
       {
         mySerial.println("Sensor OK");
-        parpadeo(3, 50);
+        parpadeo(3, 500);
       }
       else
       {
         mySerial.print("Sensor no colocado");
-        parpadeo(1, 50);
+        parpadeo(1, 500);
 
       }
       SendHEXdata();
-      sleepRadio();
+      //sleepRadio();
       STATE = ESPERA;
       break;
 
     case ESPERA:
-      espera_larga(1); // 15 = 1.5 min, 150 = 15mi
+      //espera_larga(); // 15 = 1.5 min, 150 = 15mi
+      delay(10000);
       STATE = INICIO;
       break;
   }
@@ -185,6 +190,17 @@ void loop()
 void SendHEXdata() {
 
   mySerial.println("SendHEX");
+
+  mySerial.print("RESET:");
+  Serial1.print("AT$RC\n");
+  delay(30);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    mySerial.write(data); // Enviar ese byte a mySerial
+    //response = true;
+  }
 
   txData[0] = (p >> 8) & 0xFF;
   txData[1] = p & 0xFF;
@@ -201,6 +217,11 @@ void SendHEXdata() {
   Serial1.print(txData[2], HEX);
   if (txData[3] < 0x10) Serial1.print("0");
   Serial1.print(txData[3], HEX);
+  
+  if (txData[0] < 0x10) Serial1.print("0");
+  Serial1.print(txData[0], HEX);
+  if (txData[1] < 0x10) Serial1.print("0");
+  Serial1.print(txData[1], HEX);
   Serial1.print("\r");
 
   delay(20);
@@ -231,13 +252,13 @@ void espera_larga(uint32_t espera)
     // Cada 10 iteraciones, 10*6 segundos = 60 segundos = 1 minuto
     if (i % 10 == 0)
     {
-      parpadeo(1, 100);
+      parpadeo(1, 1000);
     }
   }
 
   mySerial.println();
 
-  SleepInDownModeInterruptRTC();
+  // SleepInDownModeInterruptRTC();
 }
 
 
@@ -254,21 +275,11 @@ void resetRadio()
   pinMode(RESET_RADIO, INPUT);
   delay(50);
 
-  mySerial.print("RESET:");
-  Serial1.print("AT$RC\n");
-  delay(10);
-  //while (!Serial1.available());
-  while (Serial1.available())
-  { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    mySerial.write(data); // Enviar ese byte a mySerial
-    response = true;
-  }
 
 
   mySerial.print("AT:");
   Serial1.print("AT\r");
-  delay(10);
+  delay(30);
   //while (!Serial1.available());
   while (Serial1.available())
   { // Verificar si hay datos disponibles en Serial1
@@ -284,6 +295,7 @@ void resetRadio()
   }
 
   //return response;
+  delay(50);
   initRadio();
 }
 
@@ -314,7 +326,7 @@ void initRadio()
 {
   mySerial.print("ID:");
   Serial1.print("AT$I=10\r");
-  delay(10);
+  delay(30);
   while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
     char data = Serial1.read(); // Leer un byte desde Serial1
     mySerial.write(data); // Enviar ese byte a mySerial
@@ -324,12 +336,13 @@ void initRadio()
 
   mySerial.print("PAC:");
   Serial1.print("AT$I=11\r");
-  delay(10);
+  delay(30);
   while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
     char data = Serial1.read(); // Leer un byte desde Serial1
     mySerial.write(data); // Enviar ese byte a mySerial
   }
   mySerial.println();
+  delay(50);
 }
 
 
@@ -337,15 +350,27 @@ void initRadio()
 void parpadeo(uint16_t cantidad, uint32_t ms)
 {
   // Parpadeo del LED
-  pinMode(LED_1, OUTPUT);
+  //pinMode(LED_1, OUTPUT);
   for (uint16_t i = 0; i < cantidad; i++)
   {
-    digitalWrite(LED_1, HIGH);
+    //digitalWrite(LED_1, HIGH);
+    mySerial.print("OFF:");
+    Serial1.print("AT:P4=0\r");
+    delay(50);
+    mySerial.print("OFF:");
+    Serial1.print("AT:P4=0\r");
     delay(ms); // LED encendido durante 500 ms
-    digitalWrite(LED_1, LOW);
+    mySerial.print("ON:");
+    Serial1.print("AT:P4=1\r");
+    //digitalWrite(LED_1, LOW);
     delay(ms); // LED apagado durante 500 ms
   }
   //pinMode(LED_1, INPUT);
+  mySerial.print("OFF:");
+  Serial1.print("AT:P4=0\r");
+  delay(50);
+  
+  mySerial.println();
 }
 
 // --------------------------------------------------------------------- RTC_init
