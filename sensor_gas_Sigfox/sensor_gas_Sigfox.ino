@@ -57,9 +57,16 @@ volatile uint16_t countRTC_CLK = 0;
 volatile uint16_t sleepTimerTime  =  30; // time sleep in second
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
-AS5600 encoder;
+//AS5600 encoder;
 
-
+double calcularAngulo(double x, double y) {
+    double angulo = atan2(y, x); // Calcula el ángulo en radianes
+    angulo = angulo * (180.0 / M_PI); // Convierte de radianes a grados
+    if (angulo < 0) {
+        angulo = 360 + angulo; // Normaliza el ángulo para que esté en el rango 0-360
+    }
+    return angulo;
+}
 
 
 // --------------------------------------------------------------------- setup

@@ -3,23 +3,42 @@
 
 #define RX_PIN        -1
 #define TX_PIN        PIN_PA4
-const byte MLX90393_ADDRESS = 0x0C;
-double x,y,z,a;
+const byte MLX90393_ADDRESS = 0x0F;
+double x, y, z, a,phaseShift=90;
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 
-void setup() {
+
+double calcularAngulo(double x, double y)
+{
+  x = x * (-1);
+  double angulo = atan2(y, x); // Calcula el ángulo en radianes
+  angulo = angulo * (180.0 / M_PI); // Convierte de radianes a grados
+  angulo += phaseShift; // Agrega o resta el defase en grados
+
+  // Normaliza el ángulo para que esté en el rango 0-360
+  if (angulo < 0) {
+    angulo += 360;
+  } else if (angulo >= 360) {
+    angulo -= 360;
+  }
+  return angulo;
+}
+
+void setup()
+{
   delay(3000); // Espera un segundo para la próxima lectura
   mySerial.begin(9600 ); // para depurar
   mySerial.println("MLX Starting");
   pinMode(PIN_PB1, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
   pinMode(PIN_PB3, OUTPUT);
-
+  delay(3000);
 
   digitalWrite(PIN_PB3, HIGH);
+  delay(3000);
   Wire.begin();
-
+  delay(3000);
   // Configura el MLX90393
   //Wire.beginTransmission(MLX90393_ADDRESS);
   //Wire.write(0x60); // Comando para configurar el sensor
@@ -37,7 +56,7 @@ void setup() {
   //Wire.requestFrom(MLX90393_ADDRESS, 4);
   //while (Wire.available())
   //{
-    //mySerial.println(Wire.read());
+  //mySerial.println(Wire.read());
   //}
   delay(50);
 
@@ -49,14 +68,15 @@ void setup() {
   //Wire.requestFrom(MLX90393_ADDRESS, 32); // Solicita 6 bytes (2 por eje)
   //while (Wire.available())
   //{
-    //mySerial.println(Wire.read());
+  //mySerial.println(Wire.read());
   //}
   //delay(50);
 }
 
 uint8_t posture[30];
 int posture_length = 0;
-void loop() {
+void loop()
+{
 
   // Configura el MLX90393
   Wire.beginTransmission(MLX90393_ADDRESS);
@@ -93,11 +113,14 @@ void loop() {
   mySerial.print(",\"y\":");
   y = (int16_t)posture[3] << 8 | posture[4];
   mySerial.print(y);
-  mySerial.print(",\"z\":");
-  z = (int16_t)posture[5] << 8 | posture[6];
-  mySerial.print(z);
+  mySerial.print(",\"a\":");
+  a = calcularAngulo(x, y);
+  if ((abs(x) + abs(y)) >= 1700)
+    mySerial.print(a);
+  else
+    mySerial.print(-1);
   mySerial.print("}");
-  
+
 
   mySerial.println();
   delay(100); // Espera un segundo para la próxima lectura
