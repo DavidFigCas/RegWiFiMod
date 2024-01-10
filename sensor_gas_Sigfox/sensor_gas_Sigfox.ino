@@ -25,48 +25,38 @@
 
 #include <SoftwareSerial.h>
 #include "Wire.h"
-#include <AS5600.h>
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 // Librería megaTinyCore para leer Vdd fácilmente (ver ejemplo "readTempVcc")
 #include <megaTinyCore.h>
 
 #define RX_PIN        -1
-//#define RX_PIN        PIN_PB4
+//#define RX_PIN      PIN_PB4
 //#define TX_PIN      PIN_PA0
 #define TX_PIN        PIN_PA4
-#define LED_1         PIN_PA3
-//#define LED_1         PIN_PC3
 #define RESET_RADIO   PIN_PB4
 #define BAT_PIN       -1
 
 #define INICIO    0
 #define PROCESO   1
 #define ESPERA    2
-#define F_CPU 32768UL // Define la frecuencia del reloj como 32.768 kHz
 
-int contador;
-long p; //promedio?
+//int contador;
 uint16_t bat; //voltaje de la batería (Vdd)
-long angulo;
 long promedio_angulo;
 long promedio_angulo_anterior;
 uint8_t txData[4];
 unsigned int STATE = 0;
 volatile uint16_t countRTC_CLK = 0;
 volatile uint16_t sleepTimerTime  =  30; // time sleep in second
+const byte MLX90393_ADDRESS = 0x0F;
+double x, y, phaseShift = 90;
+int a;
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 //AS5600 encoder;
 
-double calcularAngulo(double x, double y) {
-    double angulo = atan2(y, x); // Calcula el ángulo en radianes
-    angulo = angulo * (180.0 / M_PI); // Convierte de radianes a grados
-    if (angulo < 0) {
-        angulo = 360 + angulo; // Normaliza el ángulo para que esté en el rango 0-360
-    }
-    return angulo;
-}
+
 
 
 // --------------------------------------------------------------------- setup
@@ -82,13 +72,19 @@ void setup()
   delay(2000);
 
   mySerial.begin(9600); // para depurar
-  Serial1.begin(9600); // START UART para el módulo Sigfox
+  //Serial1.begin(9600); // START UART para el módulo Sigfox
 
- 
 
-  //Wire.begin();
+
+  Wire.begin();
   pinMode(PIN_PB1, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
+  pinMode(PIN_PB3, OUTPUT);
+  delay(3000);
+  //Wire.begin();
+  delay(3000);
+
+  digitalWrite(PIN_PB3, HIGH);
   mySerial.println("GasSensor Init"); // Enviar el carácter 'A'
 
 
@@ -99,11 +95,11 @@ void setup()
 
   //parpadeo(3, 10);
 
-  resetRadio();
+  //resetRadio();
   delay(30);
-  initRadio();
-   
-   parpadeo(3, 1000);
+  //initRadio();
+
+  parpadeo(3, 1000);
 
   // config ADC para leer voltaje interno
   analogReference(INTERNAL1V024); //INTERNAL2V048
@@ -120,6 +116,7 @@ void setup()
   //sleep_enable();
   //sleep_cpu();
   //sleep_mode();
+  delay(3000);
 }
 
 // --------------------------------------------------------------------- loop
@@ -131,10 +128,9 @@ void loop()
   {
     //----------------------------------------------------------- Leer sensores
     case INICIO:
-      //bat = analogRead(BAT_PIN);
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 
-      p = 1234;
+      //p = 0;
       /*if (encoder.magnetTooWeak()) //encoder.detectMagnet()
         {
 
@@ -155,10 +151,12 @@ void loop()
 
       */
 
-      mySerial.print("Sensor: ");
-      mySerial.print(p);
+      leerSensor();
+
+      mySerial.print("Sen: ");
+      mySerial.print(a);
       mySerial.print("\t\t");
-      mySerial.print("Battery: ");
+      mySerial.print("Bat: ");
       mySerial.println(bat);
       STATE = PROCESO;
       break;
@@ -166,27 +164,27 @@ void loop()
 
     //----------------------------------------------------------- Procesa y envia los datos
     case PROCESO:
-    delay(50);
-      resetRadio();
+      delay(50);
+    /*resetRadio();
       if ((p > 200) && (p < 3830))
       {
-        mySerial.println("Sensor OK");
-        parpadeo(3, 500);
+      mySerial.println("Sensor OK");
+      parpadeo(3, 500);
       }
       else
       {
-        mySerial.print("Sensor no colocado");
-        parpadeo(1, 500);
+      mySerial.print("Sensor no colocado");
+      parpadeo(1, 500);
 
       }
       SendHEXdata();
       //sleepRadio();
       STATE = ESPERA;
-      break;
+      break;*/
 
     case ESPERA:
       //espera_larga(); // 15 = 1.5 min, 150 = 15mi
-      delay(10000);
+      delay(1000);
       STATE = INICIO;
       break;
   }
@@ -209,8 +207,9 @@ void SendHEXdata() {
     //response = true;
   }
 
-  txData[0] = (p >> 8) & 0xFF;
-  txData[1] = p & 0xFF;
+  //a = static_cast<int>(a); // Convert 'a' to an integer type
+  txData[0] = (a >> 8) & 0xFF;
+  txData[1] = a & 0xFF;
   txData[2] = (bat >> 8) & 0xFF;
   txData[3] = bat  & 0xFF;
 
@@ -224,11 +223,6 @@ void SendHEXdata() {
   Serial1.print(txData[2], HEX);
   if (txData[3] < 0x10) Serial1.print("0");
   Serial1.print(txData[3], HEX);
-  
-  if (txData[0] < 0x10) Serial1.print("0");
-  Serial1.print(txData[0], HEX);
-  if (txData[1] < 0x10) Serial1.print("0");
-  Serial1.print(txData[1], HEX);
   Serial1.print("\r");
 
   delay(20);
@@ -358,26 +352,26 @@ void parpadeo(uint16_t cantidad, uint32_t ms)
 {
   // Parpadeo del LED
   //pinMode(LED_1, OUTPUT);
-  for (uint16_t i = 0; i < cantidad; i++)
+  /*for (uint16_t i = 0; i < cantidad; i++)
   {
     //digitalWrite(LED_1, HIGH);
-    mySerial.print("OFF:");
-    Serial1.print("AT:P4=0\r");
+    //mySerial.print("OFF:");
+    mySerial.print("AT:P4=0\r");
     delay(50);
-    mySerial.print("OFF:");
-    Serial1.print("AT:P4=0\r");
+    //mySerial.print("OFF:");
+    mySerial.print("AT:P4=0\r");
     delay(ms); // LED encendido durante 500 ms
-    mySerial.print("ON:");
-    Serial1.print("AT:P4=1\r");
+    //mySerial.print("ON:");
+    mySerial.print("AT:P4=1\r");
     //digitalWrite(LED_1, LOW);
     delay(ms); // LED apagado durante 500 ms
   }
   //pinMode(LED_1, INPUT);
-  mySerial.print("OFF:");
-  Serial1.print("AT:P4=0\r");
+  //mySerial.print("OFF:");
+  mySerial.print("AT:P4=0\r");
   delay(50);
-  
-  mySerial.println();
+
+  mySerial.println();*/
 }
 
 // --------------------------------------------------------------------- RTC_init
@@ -419,4 +413,86 @@ void SleepInDownModeInterruptRTC()
   }
   countRTC_CLK = 0;
 
+}
+
+// ----------------------------------------------------------- calcularAngulo
+double calcularAngulo(double x, double y)
+{
+  x = x * (-1);
+  double angulo = atan2(y, x); // Calcula el ángulo en radianes
+  angulo = angulo * (180.0 / M_PI); // Convierte de radianes a grados
+  angulo += phaseShift; // Agrega o resta el defase en grados
+
+  // Normaliza el ángulo para que esté en el rango 0-360
+  if (angulo < 0) {
+    angulo += 360;
+  } else if (angulo >= 360) {
+    angulo -= 360;
+  }
+  return angulo;
+}
+
+void leerSensor()
+{
+  // Configura el MLX90393
+
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT_PULLUP);
+  pinMode(PIN_PB3, OUTPUT);
+  digitalWrite(PIN_PB3, HIGH);
+  delay(50);
+
+  uint8_t posture[30];
+  int posture_length = 0;
+  Wire.beginTransmission(MLX90393_ADDRESS);
+  Wire.write(0x3E); // Comando para configurar el sensor
+  Wire.endTransmission();
+  Wire.requestFrom(MLX90393_ADDRESS, 4);
+  while (Wire.available())
+  {
+    //mySerial.println(Wire.read());
+    Wire.read();
+  }
+  //mySerial.println("\n ");
+  delay(50);
+
+  // Configura el MLX90393
+  Wire.beginTransmission(MLX90393_ADDRESS);
+  Wire.write(0x4E); // Comando para configurar el sensor
+  Wire.endTransmission();
+  // Lee los datos
+  Wire.requestFrom(MLX90393_ADDRESS, 10); // Solicita 6 bytes (2 por eje)
+  int i = -1;  // Comienza con -1 para ignorar el primer byte
+  posture_length = 0;
+  while (Wire.available())
+  {
+    byte data = Wire.read();  // Lee el dato actual
+    posture[posture_length] = data;
+    posture_length++;
+
+  }
+  x = (int16_t)posture[1] << 8 | posture[2];
+  y = (int16_t)posture[3] << 8 | posture[4];
+  if ((abs(x) + abs(y)) < 1700)
+    a = -1;
+  else
+    a = static_cast<int>(calcularAngulo(x, y));
+
+  /*mySerial.print("{\"x\":");
+    x = (int16_t)posture[1] << 8 | posture[2];
+    mySerial.print(x);
+    mySerial.print(",\"y\":");
+    y = (int16_t)posture[3] << 8 | posture[4];
+    mySerial.print(y);
+    mySerial.print(",\"a\":");
+    a = static_cast<int>(calcularAngulo(x, y));
+    //a = ;
+    if ((abs(x) + abs(y)) < 1700)
+    a = -1;
+    mySerial.print(a);
+    mySerial.print("}");
+
+
+    mySerial.println();*/
+  delay(100); // Espera un segundo para la próxima lectura
 }
