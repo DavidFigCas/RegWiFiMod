@@ -17,7 +17,6 @@
 
 //int contador;
 uint16_t bat; //voltaje de la batería (Vdd)
-uint8_t txData[4];
 unsigned int STATE = 0;
 volatile uint16_t countRTC_CLK = 0;
 volatile uint16_t sleepTime  =  60; // time sleep in seconds
@@ -37,6 +36,9 @@ void setup()
   initSensor();
   configMLX();
   delay(100);
+  analogReference(INTERNAL1V024); //INTERNAL2V048
+  // descartar primera lectura para mejor medición
+  readSupplyVoltage();
 
 }
 
@@ -53,9 +55,7 @@ void loop()
       countRTC_CLK = 0;
       //initRadio();
       initSensor();
-      analogReference(INTERNAL1V024); //INTERNAL2V048
-      // descartar primera lectura para mejor medición
-      readSupplyVoltage();
+
 
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
       leerSensor();
@@ -74,6 +74,9 @@ void loop()
 
     case ESPERA:
       espera_larga();
+      //analogReference(INTERNAL1V024); //INTERNAL2V048
+      // descartar primera lectura para mejor medición
+      //readSupplyVoltage();
       STATE = INICIO;
       break;
   }
@@ -95,6 +98,7 @@ void SendHEXdata() {
   //mySerial.write(data); // Enviar ese byte a mySerial
   //response = true;
   //}
+  uint8_t txData[4];
 
   //a = static_cast<int>(a); // Convert 'a' to an integer type
   txData[0] = (angulo >> 8) & 0xFF;
@@ -138,7 +142,7 @@ void espera_larga()
   // La ejecución se detiene aquí hasta que ocurre una interrupción
   sleep_disable(); // Deshabilitar modo de sueño después de despertar
   power_all_enable();
-
+  ADC0.CTRLA |= ADC_ENABLE_bm;
 }
 
 
@@ -382,19 +386,21 @@ void leerSensor()
   }
   x = (int16_t)posture[1] << 8 | posture[2];
   y = (int16_t)posture[3] << 8 | posture[4];
-  if ((abs(x) + abs(y)) < 1700)
+  if ((abs(x) + abs(y)) < 1000)
     angulo = 0;
   else
     angulo = static_cast<int>(calcularAngulo(x, y));
 
   /*Serial1.print("{\"x\":");
-    Serial1.print(x);
-    Serial1.print(",\"y\":");
-    Serial1.print(y);
-    Serial1.print(",\"a\":");
-    Serial1.print(angulo);
-    Serial1.print("}");
-    Serial1.println();*/
+  Serial1.print(x);
+  Serial1.print(",\"y\":");
+  Serial1.print(y);
+  Serial1.print(",\"a\":");
+  Serial1.print(angulo);
+  Serial1.print(",\"v\":");
+  Serial1.print(bat);
+  Serial1.print("}");
+  Serial1.println();*/
   //delay(100); // Espera un segundo para la próxima lectura
 }
 

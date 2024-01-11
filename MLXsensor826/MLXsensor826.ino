@@ -1,10 +1,13 @@
 #include "Wire.h"
+#include <megaTinyCore.h>     // Librería megaTinyCore para leer Vdd fácilmente (ver ejemplo "readTempVcc")
 //#include <SoftwareSerial.h>
 
 //#define RX_PIN        -1
 //#define TX_PIN        PIN_PA1
 const byte MLX90393_ADDRESS = 0x0C;
 double x, y, z, a, phaseShift = 90;
+uint16_t bat;
+int angulo;
 
 //SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 
@@ -18,7 +21,7 @@ double calcularAngulo(double x, double y)
 
   // Normaliza el ángulo para que esté en el rango 0-360
   if (angulo < 0) {
-    angulo += 360;  
+    angulo += 360;
   } else if (angulo >= 360) {
     angulo -= 360;
   }
@@ -46,7 +49,7 @@ void setup()
   //delay(5000);
 
   /*Serial1.println("Scanning for I2C devices ...");
-  for (address = 0x01; address < 0x7f; address++) {
+    for (address = 0x01; address < 0x7f; address++) {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
     if (error == 0) {
@@ -55,10 +58,10 @@ void setup()
     } else if (error != 2) {
       Serial1.printf("Error %d at address 0x%02X\n", error, address);
     }
-  }
-  if (nDevices == 0) {
+    }
+    if (nDevices == 0) {
     Serial1.println("No I2C devices found");
-  }*/
+    }*/
   // Configura el MLX90393
   Wire.beginTransmission(MLX90393_ADDRESS);
   Wire.write(0x60); // Comando para configurar el sensor
@@ -90,9 +93,13 @@ void setup()
   while (Wire.available())
   {
     Wire.read();
-  //mySerial.println();
+    //mySerial.println();
   }
   delay(50);
+
+  analogReference(INTERNAL1V024); //INTERNAL2V048
+  // descartar primera lectura para mejor medición
+  readSupplyVoltage();
 }
 
 uint8_t posture[30];
@@ -136,17 +143,48 @@ void loop()
   y = (int16_t)posture[3] << 8 | posture[4];
   Serial1.print(y);
   Serial1.print(",\"a\":");
-  a = calcularAngulo(x, y);
-  if ((abs(x) + abs(y)) >= 1700)
-    Serial1.print(a);
+  if ((abs(x) + abs(y)) >= 1000)
+    angulo = calcularAngulo(x, y);
   else
-    Serial1.print(-1);
-  Serial1.print("}");
+    angulo = 0;
 
+  Serial1.print(angulo);
+  Serial1.print("}");
 
   Serial1.println();
 
-  
+  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+  Serial1.println(bat);
+
+  uint8_t txData[4];
+
+  //a = static_cast<int>(a); // Convert 'a' to an integer type
+  txData[0] = (angulo >> 8) & 0xFF;
+  txData[1] = angulo & 0xFF;
+  txData[2] = (bat >> 8) & 0xFF;
+  txData[3] = bat  & 0xFF;
+
+
+  //Serial1.print ("AT$SF=");
+  if (txData[0] < 0x10) Serial1.print("0");
+  Serial1.print(txData[0], HEX);
+  if (txData[1] < 0x10) Serial1.print("0");
+  Serial1.print(txData[1], HEX);
+  if (txData[2] < 0x10) Serial1.print("0");
+  Serial1.print(txData[2], HEX);
+  if (txData[3] < 0x10) Serial1.print("0");
+  Serial1.print(txData[3], HEX);
+  Serial1.print("\r");
+
+  delay(50);
+  //while (!Serial1.available());
+  //while (Serial1.available())
+  //{ // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //response = true;
+  //}
+  //mySerial.println();
   delay(1000); // Espera un segundo para la próxima lectura
 
 }
