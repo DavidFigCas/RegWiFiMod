@@ -18,9 +18,9 @@
 //int contador;
 uint16_t bat; //voltaje de la batería (Vdd)
 unsigned int STATE = 0;
-volatile uint16_t countRTC_CLK = 0;
-volatile uint16_t sleepTime  =  60; // time sleep in seconds
-const byte MLX90393_ADDRESS = 0x0C;
+volatile uint32_t countRTC_CLK = 0;
+volatile uint32_t sleepTime  =  15; // time sleep in seconds
+const byte MLX90393_ADDRESS = 0x0F;
 double x, y, phaseShift = 90;
 int angulo, angulo_anterior, porcentaje_cambio;
 
@@ -30,6 +30,7 @@ int angulo, angulo_anterior, porcentaje_cambio;
 // --------------------------------------------------------------------- setup
 void setup()
 {
+  //pinMode(PIN_PA0, INPUT_PULLUP);
   RTC_init();
   resetRadio();
   initRadio();
@@ -39,7 +40,7 @@ void setup()
   analogReference(INTERNAL1V024); //INTERNAL2V048
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
-
+  //parpadeo(3,100);
 }
 
 // --------------------------------------------------------------------- loop
@@ -143,6 +144,7 @@ void espera_larga()
   sleep_disable(); // Deshabilitar modo de sueño después de despertar
   power_all_enable();
   ADC0.CTRLA |= ADC_ENABLE_bm;
+  initRadio();
 }
 
 
@@ -233,8 +235,8 @@ void parpadeo(uint16_t cantidad, uint32_t ms)
 {
   // Parpadeo del LED
   //pinMode(LED_1, OUTPUT);
-  /*for (uint16_t i = 0; i < cantidad; i++)
-    {
+  for (uint16_t i = 0; i < cantidad; i++)
+  {
     //digitalWrite(LED_1, HIGH);
     //mySerial.print("OFF:");
     Serial1.print("AT:P4=0\r");
@@ -246,14 +248,14 @@ void parpadeo(uint16_t cantidad, uint32_t ms)
     Serial1.print("AT:P4=1\r");
     //digitalWrite(LED_1, LOW);
     delay(ms); // LED apagado durante 500 ms
-    }
-    //pinMode(LED_1, INPUT);
-    //mySerial.print("OFF:");
-    Serial1.print("AT:P4=0\r");
-    delay(50);
+  }
+  //pinMode(LED_1, INPUT);
+  //mySerial.print("OFF:");
+  Serial1.print("AT:P4=0\r");
+  delay(50);
 
-    //mySerial.println();
-  */
+  //mySerial.println();
+
 }
 
 // --------------------------------------------------------------------- RTC_init
@@ -300,6 +302,8 @@ ISR(RTC_PIT_vect)
 // ----------------------------------------------------------- initSensor
 void initSensor()
 {
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT_PULLUP);
   Wire.begin();
   delay(50);
 }
@@ -392,15 +396,15 @@ void leerSensor()
     angulo = static_cast<int>(calcularAngulo(x, y));
 
   /*Serial1.print("{\"x\":");
-  Serial1.print(x);
-  Serial1.print(",\"y\":");
-  Serial1.print(y);
-  Serial1.print(",\"a\":");
-  Serial1.print(angulo);
-  Serial1.print(",\"v\":");
-  Serial1.print(bat);
-  Serial1.print("}");
-  Serial1.println();*/
+    Serial1.print(x);
+    Serial1.print(",\"y\":");
+    Serial1.print(y);
+    Serial1.print(",\"a\":");
+    Serial1.print(angulo);
+    Serial1.print(",\"v\":");
+    Serial1.print(bat);
+    Serial1.print("}");
+    Serial1.println();*/
   //delay(100); // Espera un segundo para la próxima lectura
 }
 
@@ -410,11 +414,12 @@ void enterSleep()
 {
 
   power_all_disable();
-  Serial1.end();
+ 
+  //Serial1.end();
   //Wire.end();
-  pinMode(PIN_PA0, INPUT);
-  pinMode(PIN_PA1, INPUT);
-  pinMode(PIN_PA2, INPUT);
+  //pinMode(PIN_PA0, INPUT);
+  //pinMode(PIN_PA1, INPUT);
+  //pinMode(PIN_PA2, INPUT);
   pinMode(PIN_PA3, INPUT);
   pinMode(PIN_PA4, INPUT);
   pinMode(PIN_PA5, INPUT);
@@ -434,9 +439,9 @@ void enterSleep()
   pinMode(PIN_PC2, INPUT);
   pinMode(PIN_PC3, INPUT);
 
-  digitalWrite(PIN_PA0, HIGH);
-  digitalWrite(PIN_PA1, HIGH);
-  digitalWrite(PIN_PA2, HIGH);
+  //digitalWrite(PIN_PA0, HIGH);
+  //digitalWrite(PIN_PA1, HIGH);
+  //digitalWrite(PIN_PA2, HIGH);
   digitalWrite(PIN_PA3, HIGH);
   digitalWrite(PIN_PA4, HIGH);
   digitalWrite(PIN_PA5, HIGH);
@@ -454,7 +459,7 @@ void enterSleep()
   digitalWrite(PIN_PC1, HIGH);
   digitalWrite(PIN_PC2, HIGH);
   digitalWrite(PIN_PC3, HIGH);
-  Serial1.end();
+  //Serial1.end();
 
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
 

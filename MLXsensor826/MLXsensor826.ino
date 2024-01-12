@@ -4,7 +4,7 @@
 
 //#define RX_PIN        -1
 //#define TX_PIN        PIN_PA1
-const byte MLX90393_ADDRESS = 0x0C;
+const byte MLX90393_ADDRESS = 0x0F;
 double x, y, z, a, phaseShift = 90;
 uint16_t bat;
 int angulo;
@@ -33,8 +33,8 @@ void setup()
   //delay(3000); // Espera un segundo para la próxima lectura
   Serial1.begin(9600 ); // para depurar
   Serial1.println("MLX Starting");
-  //pinMode(PIN_PB1, INPUT_PULLUP);
-  //pinMode(PIN_PB0, INPUT_PULLUP);
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT_PULLUP);
   //pinMode(PIN_PA6, OUTPUT);
   delay(3000);
 
@@ -48,7 +48,7 @@ void setup()
 
   //delay(5000);
 
-  /*Serial1.println("Scanning for I2C devices ...");
+  Serial1.println("Scanning for I2C devices ...");
     for (address = 0x01; address < 0x7f; address++) {
     Wire.beginTransmission(address);
     error = Wire.endTransmission();
@@ -61,7 +61,7 @@ void setup()
     }
     if (nDevices == 0) {
     Serial1.println("No I2C devices found");
-    }*/
+    }
   // Configura el MLX90393
   Wire.beginTransmission(MLX90393_ADDRESS);
   Wire.write(0x60); // Comando para configurar el sensor
