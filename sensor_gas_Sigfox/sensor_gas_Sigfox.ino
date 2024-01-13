@@ -46,10 +46,10 @@ void setup()
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
   //parpadeo(3,100);
-  //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
-  //leerSensor();
-  //resetRadio();
-  //SendHEXdata();
+  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+  leerSensor();
+  resetRadio();
+  SendHEXdata();
 }
 
 // --------------------------------------------------------------------- loop
