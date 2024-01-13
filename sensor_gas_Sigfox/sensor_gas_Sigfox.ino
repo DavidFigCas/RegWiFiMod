@@ -15,14 +15,19 @@
 #define PROCESO   1
 #define ESPERA    2
 
-//int contador;
-uint16_t bat; //voltaje de la batería (Vdd)
 unsigned int STATE = 0;
+uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
-volatile uint32_t sleepTime  =  15; // time sleep in seconds
+volatile uint32_t count_DELTA = 0;
+
+volatile uint32_t sleepTime  =  3600; // TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  600;   // TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+int delta = 5;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
+
 const byte MLX90393_ADDRESS = 0x0F;
 double x, y, phaseShift = 90;
-int angulo, angulo_anterior, porcentaje_cambio;
+int angulo, angulo_anterior;
+byte tipo_cambio;
 
 
 
@@ -41,6 +46,10 @@ void setup()
   // descartar primera lectura para mejor medición
   readSupplyVoltage();
   //parpadeo(3,100);
+  //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+  //leerSensor();
+  //resetRadio();
+  //SendHEXdata();
 }
 
 // --------------------------------------------------------------------- loop
@@ -52,12 +61,8 @@ void loop()
   {
     //----------------------------------------------------------- Leer sensores
     case INICIO:
-
-      countRTC_CLK = 0;
-      //initRadio();
+      tipo_cambio = 0;
       initSensor();
-
-
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
       leerSensor();
       STATE = PROCESO;
@@ -66,14 +71,38 @@ void loop()
 
     //----------------------------------------------------------- Procesa y envia los datos
     case PROCESO:
-      //delay(50);
-      resetRadio();
-      SendHEXdata();
-      sleepRadio();
+
+
+      if ((angulo_anterior - angulo) > delta)
+      {
+        tipo_cambio = 1;
+        resetRadio();
+        SendHEXdata();
+        //sleepRadio();
+      }
+      else if (((angulo - angulo_anterior) > delta))
+      {
+        tipo_cambio = 2;
+        resetRadio();
+        SendHEXdata();
+        //sleepRadio();
+      }
+
+      if (countRTC_CLK == 0)
+      {
+
+        //tipo_cambio = 0;
+        resetRadio();
+        SendHEXdata();
+        //sleepRadio();
+      }
+
       STATE = ESPERA;
       break;
 
     case ESPERA:
+      angulo_anterior = angulo;
+      sleepRadio();
       espera_larga();
       //analogReference(INTERNAL1V024); //INTERNAL2V048
       // descartar primera lectura para mejor medición
@@ -85,7 +114,8 @@ void loop()
 
 
 // ----------------------------------------------------------- sendHexData
-void SendHEXdata() {
+void SendHEXdata()
+{
 
   //mySerial.println("SendHEX");
 
@@ -101,9 +131,10 @@ void SendHEXdata() {
   //}
   uint8_t txData[4];
 
-  //a = static_cast<int>(a); // Convert 'a' to an integer type
-  txData[0] = (angulo >> 8) & 0xFF;
-  txData[1] = angulo & 0xFF;
+  int aux_angulo = angulo + (tipo_cambio * 4096);
+
+  txData[0] = (aux_angulo >> 8) & 0xFF;
+  txData[1] = aux_angulo & 0xFF;
   txData[2] = (bat >> 8) & 0xFF;
   txData[3] = bat  & 0xFF;
 
@@ -135,16 +166,25 @@ void SendHEXdata() {
 //---------------------------------------------- espera_larga
 void espera_larga()
 {
-  while (countRTC_CLK < sleepTime)
+  while ((countRTC_CLK < sleepTime) && (count_DELTA < deltaTime))
   {
     enterSleep();
   }
-  countRTC_CLK = 0;
-  // La ejecución se detiene aquí hasta que ocurre una interrupción
+
+  if (count_DELTA >= deltaTime)
+  {
+    count_DELTA = 0;
+  }
+
+  if (countRTC_CLK >= sleepTime)
+  {
+    countRTC_CLK = 0;
+  }
+
   sleep_disable(); // Deshabilitar modo de sueño después de despertar
   power_all_enable();
   ADC0.CTRLA |= ADC_ENABLE_bm;
-  initRadio();
+
 }
 
 
@@ -296,6 +336,8 @@ ISR(RTC_PIT_vect)
 {
   RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
   countRTC_CLK++;
+  count_DELTA++;
+
 }
 
 
@@ -356,9 +398,6 @@ void leerSensor()
 {
   // Configura el MLX90393
 
-
-
-
   uint8_t posture[30];
   int posture_length = 0;
   Wire.beginTransmission(MLX90393_ADDRESS);
@@ -406,6 +445,7 @@ void leerSensor()
     Serial1.print("}");
     Serial1.println();*/
   //delay(100); // Espera un segundo para la próxima lectura
+
 }
 
 
@@ -414,7 +454,7 @@ void enterSleep()
 {
 
   power_all_disable();
- 
+
   //Serial1.end();
   //Wire.end();
   //pinMode(PIN_PA0, INPUT);
