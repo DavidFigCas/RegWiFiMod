@@ -3,14 +3,14 @@
 
 #define RX_PIN        -1
 #define TX_PIN        PIN_PA4
-const byte MLX90393_ADDRESS = 0x0C;
+const byte MLX90393_ADDRESS = 0x0F;
 
-SoftwareSerial mySerial(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
+//SoftwareSerial Serial1(RX_PIN, TX_PIN); // Reemplaza RX_PIN y TX_PIN con los números de pin reales
 
 void setup() {
   delay(3000); // Espera un segundo para la próxima lectura
-  mySerial.begin(9600 ); // para depurar
-  mySerial.println("MLX Starting");
+ Serial1.begin(9600 ); // para depurar
+  Serial1.println("MLX Starting");
   pinMode(PIN_PB1, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
   pinMode(PIN_PB3, OUTPUT);
@@ -36,7 +36,7 @@ void setup() {
   Wire.requestFrom(MLX90393_ADDRESS, 4);
   while (Wire.available())
   {
-    mySerial.println(Wire.read());
+    Serial1.println(Wire.read());
   }
   delay(50);
 
@@ -48,7 +48,7 @@ void setup() {
   Wire.requestFrom(MLX90393_ADDRESS, 32); // Solicita 6 bytes (2 por eje)
   while (Wire.available())
   {
-    mySerial.println(Wire.read());
+    Serial1.println(Wire.read());
   }
   //delay(50);
 }
@@ -64,10 +64,10 @@ void loop() {
   Wire.requestFrom(MLX90393_ADDRESS, 4);
   while (Wire.available())
   {
-    //mySerial.println(Wire.read());
+    //Serial1.println(Wire.read());
     Wire.read();
   }
-  //mySerial.println("\n ");
+  //Serial1.println("\n ");
   delay(50);
 
   // Configura el MLX90393
@@ -90,12 +90,12 @@ void loop() {
   int16_t y = (int16_t)posture[3] << 8 | posture[4];
   int16_t z = (int16_t)posture[5] << 8 | posture[6];
 
-  mySerial.print(x);
-  mySerial.print("\t");
-  mySerial.print(y);
-  mySerial.print("\t");
-  mySerial.print(z);
+  Serial1.print(x);
+  Serial1.print("\t");
+  Serial1.print(y);
+  Serial1.print("\t");
+  Serial1.print(z);
 
-  mySerial.println();
+  Serial1.println();
   delay(100); // Espera un segundo para la próxima lectura
 }

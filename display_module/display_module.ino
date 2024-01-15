@@ -372,7 +372,7 @@ void setup1()
   gpio_set_function(P_SCK, GPIO_FUNC_SPI);
   gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
 
-  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
+  display.init(1); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
   //delay(500);
   display.setFullWindow();
 

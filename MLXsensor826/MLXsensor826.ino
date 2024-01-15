@@ -36,12 +36,12 @@ void setup()
   pinMode(PIN_PB1, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
   //pinMode(PIN_PA6, OUTPUT);
-  delay(3000);
+  //delay(3000);
 
   //digitalWrite(PIN_PA6, HIGH);
   //delay(3000);
   Wire.begin();
-  //delay(1000);
+  delay(1000);
 
   byte error, address;
   int nDevices = 0;
@@ -136,25 +136,27 @@ void loop()
 
   }
 
-  Serial1.print("{\"x\":");
+  //Serial1.print("{\"x\":");
   x = (int16_t)posture[1] << 8 | posture[2];
-  Serial1.print(x);
-  Serial1.print(",\"y\":");
+  //Serial1.print(x);
+  //Serial1.print(",\"y\":");
   y = (int16_t)posture[3] << 8 | posture[4];
-  Serial1.print(y);
-  Serial1.print(",\"a\":");
+  //Serial1.print("\t");
+  //Serial1.print(y);
+  //Serial1.print(",\"a\":");
   if ((abs(x) + abs(y)) >= 1000)
     angulo = calcularAngulo(x, y);
   else
     angulo = 0;
 
+  //  Serial1.print("\t");
   Serial1.print(angulo);
-  Serial1.print("}");
+  //Serial1.print("}");
 
   Serial1.println();
 
-  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
-  Serial1.println(bat);
+  //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+  //Serial1.println(bat);
 
   uint8_t txData[4];
 
@@ -166,7 +168,7 @@ void loop()
 
 
   //Serial1.print ("AT$SF=");
-  if (txData[0] < 0x10) Serial1.print("0");
+  /*if (txData[0] < 0x10) Serial1.print("0");
   Serial1.print(txData[0], HEX);
   if (txData[1] < 0x10) Serial1.print("0");
   Serial1.print(txData[1], HEX);
@@ -176,7 +178,7 @@ void loop()
   Serial1.print(txData[3], HEX);
   Serial1.print("\r");
 
-  delay(50);
+  delay(50);*/
   //while (!Serial1.available());
   //while (Serial1.available())
   //{ // Verificar si hay datos disponibles en Serial1

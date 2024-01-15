@@ -1,22 +1,22 @@
-#define ENABLE_GxEPD2_GFX 0
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_SharpMem.h>
+//#define ENABLE_GxEPD2_GFX 0
 #include "icons.h"
-#include <GxEPD2_BW.h>
-#include <Fonts/FreeMonoBold9pt7b.h>
+//#include <GxEPD2_BW.h>
+//#include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/CodenameCoderFree4F_Bold40pt7b.h>
 //#include "i2c_fifo.h"
 //#include "i2c_slave.h"
 #include "pico/stdlib.h"
 //#include "hardware/i2c.h"
-#include "GxEPD2_display_selection_new_style.h"
+//#include "GxEPD2_display_selection_new_style.h"
 //#include <pico/multicore.h>
 #include <UnixTime.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <cmath> // 
 
-#define P_MOSI      3
-#define P_MISO      4
-#define P_SCK       2
 #define MEASURE_TEMP0  0
 #define  MEASURE_AUX  2
 #define  MEASURE_TEMP1  4
@@ -46,6 +46,8 @@ int16_t x_pes = 450;   //(display.width() - tbw) / 2;
 int16_t y_pes = 212;  //(display.height() - tbh) / 2;
 
 
+
+
 uint16_t w; // Un poco de margen
 uint16_t h;
 uint16_t w2; // Un poco de margen
@@ -53,7 +55,20 @@ uint16_t h2;
 
 const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 
-GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
+
+
+
+// any pins can be used
+#define SHARP_SCK  2
+#define SHARP_MOSI 3
+#define SHARP_SS   1
+#define BLACK 0
+#define WHITE 1
+
+// Set the size of the display here, e.g. 144x168!
+Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
+
+//GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
 UnixTime stamp(0);
 
 bool flag_print = true;
@@ -232,41 +247,42 @@ void showPartialUpdate()
   uint16_t box_h = 50;
   uint16_t cursor_y = box_y + box_h - 6;
   float value = 13.95;
-  uint16_t incr = display.epd2.hasFastPartialUpdate ? 1 : 3;
+  //uint16_t incr = display.epd2.hasFastPartialUpdate ? 1 : 3;
+  uint16_t incr = 1;
   display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-  display.setTextColor(GxEPD_BLACK);
-  display.setFullWindow();
+  display.setTextColor(BLACK);
+  //display.setFullWindow();
   // show where the update box is
   display.setRotation(0);
   for (uint16_t i = 1; i <= 10; i += incr) {
     //digitalWrite(27,1);
-    display.fillRect(box_x, box_y, box_w, box_h, GxEPD_WHITE);
+    display.fillRect(box_x, box_y, box_w, box_h, WHITE);
     display.setCursor(box_x, cursor_y);
     display.print(value * i, 2);
-    display.displayWindow(box_x, box_y, box_w, box_h);
+    //display.displayWindow(box_x, box_y, box_w, box_h);
     //digitalWrite(27,0);
     delay(500);
   }
   delay(1000);
-  display.fillRect(box_x, box_y, box_w, box_h, GxEPD_WHITE);
-  display.displayWindow(box_x, box_y, box_w, box_h);
+  display.fillRect(box_x, box_y, box_w, box_h, WHITE);
+  //display.displayWindow(box_x, box_y, box_w, box_h);
   delay(1000);
 }
 
 
 void drawBitmaps()
 {
-  display.setFullWindow();
+  //display.setFullWindow();
   //drawBitmaps200x200();
   showBigPic();
 
 }
 void showBigPic() {
   //bool mirror_y = (display.epd2.panel != GxEPD2::GDE0213B1);
-  display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-  display.drawImage(nopaper, 30, 285, 64, 64, false, false, true);
-  display.drawImage(printer_on, 95, 285, 64, 64, false, false, true);
-  display.drawImage(wifi_on, 160, 285, 64, 64, false, false, true);
+  //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+  //display.drawImage(nopaper, 30, 285, 64, 64, false, false, true);
+  //display.drawImage(printer_on, 95, 285, 64, 64, false, false, true);
+  //display.drawImage(wifi_on, 160, 285, 64, 64, false, false, true);
 }
 
 
@@ -367,27 +383,30 @@ void setup1()
 {
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
-  display.epd2.selectSPI(SPI, SPISettings(16000000, MSBFIRST, SPI_MODE0));
-  gpio_set_function(P_MISO, GPIO_FUNC_SPI);
-  gpio_set_function(P_SCK, GPIO_FUNC_SPI);
-  gpio_set_function(P_MOSI, GPIO_FUNC_SPI);
+  //display.epd2.selectSPI(SPI, SPISettings(16000000, MSBFIRST, SPI_MODE0));
+  //gpio_set_function(SHARP_MISO, GPIO_FUNC_SPI);
+  gpio_set_function(SHARP_SCK, GPIO_FUNC_SPI);
+  gpio_set_function(SHARP_MOSI, GPIO_FUNC_SPI);
 
-  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
+  display.begin();
+  display.clearDisplay();
+
+//  display.init(0); // default 10ms reset pulse, e.g. for bare panels with DESPI-C02
   //delay(500);
-  display.setFullWindow();
+  //display.setFullWindow();
 
 
-  display.firstPage();
-  do
-  {
+  //display.firstPage();
+  //do
+  //{
     //display.fillScreen(GxEPD_WHITE);
-    display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
-  }
-  while (display.nextPage());
+   // display.drawImage(Bitmap800x480_2, 0, 0, 800, 480, false, false, true);
+  //}
+  //while (display.nextPage());
 
 
   //display.powerOff();
-  display.hibernate();
+  //display.hibernate();
   digitalWrite(25, LOW);
 }
 
@@ -407,11 +426,11 @@ void loop1()
       Serial.println("Display Main Screen");
       //display.init(0);
       
-      display.setFullWindow();
-      display.firstPage();
+      //display.setFullWindow();
+      //display.firstPage();
       //do
       //{
-        display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
       //}
       //while (display.nextPage());
 
@@ -502,22 +521,22 @@ void loop1()
         String litStr = String(print_litros);  // Convierte el número a String
         int16_t tbx, tby; uint16_t tbw, tbh;
         // Obtener las dimensiones del texto
-        display.setTextColor(GxEPD_BLACK);
-        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+        display.setTextColor(BLACK);
+        //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
 
 
         w = tbw + 10; // Un poco de margen
         h = tbh + 10;
 
-        display.setPartialWindow(x_lit, y_lit, w, h);
-        display.firstPage();
+        //display.setPartialWindow(x_lit, y_lit, w, h);
+        //display.firstPage();
 
 
-        do {
+        //do {
           display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
           display.print(litStr);
-        } while (display.nextPage());
+        //} while (display.nextPage());
 
 
         //Show price
@@ -576,22 +595,22 @@ void loop1()
         String litStr = String(print_litros);  // Convierte el número a String
         int16_t tbx, tby; uint16_t tbw, tbh;
         // Obtener las dimensiones del texto
-        display.setTextColor(GxEPD_BLACK);
-        display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+        display.setTextColor(BLACK);
+        //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
 
 
         w = tbw + 10; // Un poco de margen
         h = tbh + 10;
 
-        display.setPartialWindow(x_lit, y_lit, w, h);
-        display.firstPage();
+        //display.setPartialWindow(x_lit, y_lit, w, h);
+        //display.firstPage();
 
 
-        do {
+        //do {
           display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
           display.print(litStr);
-        } while (display.nextPage());
+        //} while (display.nextPage());
 
 
         String pesosStr = String(print_pesos);  // Convierte el número a String
@@ -599,12 +618,12 @@ void loop1()
         w2 = tbw + 10; // Un poco de margen
         h2 = tbh + 10;
 
-        display.setPartialWindow(x_pes, y_pes, w2, h2);
-        display.firstPage();
-        do {
+        //display.setPartialWindow(x_pes, y_pes, w2, h2);
+        //display.firstPage();
+        //do {
           display.setCursor(x_pes - tbx, y_pes - tby); // Ajustar la posición del cursor
           display.print(pesosStr);
-        } while (display.nextPage());
+        //} while (display.nextPage());
 
 
         /*display.setTextColor(GxEPD_BLACK);
@@ -658,13 +677,13 @@ void loop1()
         //} while (display.nextPage());
 
         //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
-        display.firstPage();
-        do {
-          display.setFullWindow();
-          display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
-        } while (display.nextPage());
+        //display.firstPage();
+        //do {
+          //display.setFullWindow();
+          //display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
+        //} while (display.nextPage());
 
-        display.powerOff();
+        //display.powerOff();
       }
 
 
@@ -691,24 +710,24 @@ void print_icons()
   if (doc_aux["wifi"].as<bool>() == true) // ------------------ Wifi
   {
     Serial.println("Wifi On");
-    display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
+    //display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
   }
   else
   {
     Serial.println("Wifi OFF");
-    display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
+    //display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
   }
 
   //if ((error_byte >> 6) & 0x01)       // ------------------ valve
   if (doc_aux["valve"].as<bool>() == true)
   {
     Serial.println("Valve On");
-    display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
+    //display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
   }
   else
   {
     Serial.println("Valve OFF");
-    display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
+    //display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
   }
 
 
@@ -716,43 +735,43 @@ void print_icons()
     //if ((error_byte >> 3) & 0x01)
   {
     Serial.println("GPS On");
-    display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
+    //display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
   }
   else
   {
     Serial.println("GPS OFF");
-    display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
+    //display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["clock"].as<bool>() == true)    // ------------------ clock
     // if ((error_byte >> 2) & 0x01)
   {
     Serial.println("Clock On");
-    display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
+    //display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
   }
   else
   {
     Serial.println("Clock OFF");
-    display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
+    //display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["printer"].as<bool>() == true)    // ------------------ printer
     //if ((error_byte >> 5) & 0x01)
   {
     Serial.println("Printer OK");
-    display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
+    //display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
   }
   else
   {
     Serial.println("Printer Offline");
-    display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
+    //display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
   }
 
   if (doc_aux["paper"].as<bool>() == false)    // ------------------ paper
     //if ((error_byte >> 4) & 0x01)
   {
     Serial.println("NO PAPER");
-    display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+    //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
   }
   else
   {
