@@ -20,12 +20,12 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  36; // TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  6;   // TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600; // TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  60;   // TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 5;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-double x, y, phaseShift = 90;
+double x, y, phaseShift = 105;
 int angulo, angulo_anterior;
 byte tipo_cambio;
 
@@ -434,7 +434,7 @@ void leerSensor()
   else
     angulo = static_cast<int>(calcularAngulo(x, y));
 
-  /*Serial1.print("{\"x\":");
+ /* Serial1.print("{\"x\":");
     Serial1.print(x);
     Serial1.print(",\"y\":");
     Serial1.print(y);
