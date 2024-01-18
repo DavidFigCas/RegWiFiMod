@@ -44,7 +44,7 @@ void mqtt_init()
     Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     Mclient.setCallback(callback);
-    Mclient.setKeepAlive(30);
+    Mclient.setKeepAlive(3600);
   }
 
 
@@ -204,6 +204,7 @@ void mqtt_send_report()
   //servicios, litros_suma, total_ventas, reporte, acumulado_litros, folio_ini, folio_fin, litros_ini, litros_fin
   send_report = false;
   Serial.println("{\"mqtt_report\":\"sending\"}");
+  status_doc["last_report"]["file"] = file_to_send;
   status_doc["last_report"]["servicios"] = servicios;
   status_doc["last_report"]["litros_suma"] = litros_suma;
   status_doc["last_report"]["total_ventas"] = total_ventas;

@@ -1,4 +1,4 @@
-#define MAX_DELTA   10
+#define MAX_DELTA   10      // Pulsos detectados en 500ms (Intervalo2)
 #define LED_1      25
 #define LED_2     27
 #define LED_3     28
@@ -47,6 +47,11 @@ unsigned long tiempoActual;
 const unsigned long intervalo2 = 500;  // Intervalo de tiempo (1 minuto en milisegundos)
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
+
+unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 
+unsigned long noDelta_timeCounter = 0;// Maximo tiempo desde que se detecto STOP_FLOW
+
+
 
 bool newcommand = false;
 
@@ -130,23 +135,33 @@ void loop()
     delta = new_value - old_value;
     if (delta < MAX_DELTA)
     {
-      flow = false;
-      digitalWrite(25, LOW);
-      encoder.reset();
-      if (STATE == 1)
+      noDelta_timeCounter++;
+      if (noDelta_timeCounter >= noDelta_timeSTOP)
       {
-        STATE = 2;
+        flow = false;
+        digitalWrite(25, LOW);
+        encoder.reset();
+        if (STATE == 1)
+        {
+          STATE = 2;
+        }
       }
+
     }
     else
     {
-      Serial.println("Flow detected");
+      if (flow == false)
+      {
+        Serial.println("Flow detected");
+      }
       flow = true;
+      noDelta_timeCounter = 0;
       digitalWrite(25, HIGH);
       if (STATE == 0)
       {
         STATE = 1;
       }
+
     }
     old_value = new_value;
     //Serial.print("Delta: ");

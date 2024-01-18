@@ -21,7 +21,7 @@ void setup()
   doc_aux["STATE"] = 0;
   doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
-  
+
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
@@ -309,6 +309,7 @@ void loop()
     read_logs(consult_filelog);
     print_log = false;
     send_report = true;
+
   }
 
 
@@ -358,9 +359,11 @@ void loop()
             mqtt_send_event();
           }
 
-          if(send_report == true)
+          if (send_report == true)
           {
+            file_to_send = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
             mqtt_send_report();
+            send_file = true;
           }
 
           // ------------------------------------------- Send LIST
@@ -477,9 +480,9 @@ void loop()
       //obj["folio"] = folio;
 
       consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-      deleteFile(SD,consult_filelog.c_str());
+      deleteFile(SD, consult_filelog.c_str());
 
-      
+
       saveConfig = true;
       Serial.println("{\"default_config\":true}");
       saveConfigData();
