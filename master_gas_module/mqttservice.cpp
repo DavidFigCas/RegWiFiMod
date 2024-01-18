@@ -21,6 +21,9 @@ char buffer_msg[LOG_SIZE];
 char buffer_msg_status[STATUS_SIZE];
 char buffer_msg_list[LIST_SIZE];
 volatile boolean send_log = false;
+volatile boolean send_file = false;
+volatile boolean send_event = false;
+volatile boolean send_report = false;
 volatile boolean send_list = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
@@ -77,7 +80,7 @@ void mqtt_send()
 // --------------------------------------------------- mqtt_send_file
 void mqtt_send_file(String file_to_send)
 {
-  send_log = false;
+  send_file = false;
   File file = SD.open(file_to_send);
   if (!file) {
     Serial.print("Error al abrir el archivo: ");
@@ -132,6 +135,100 @@ void mqtt_send_list()
 
   Serial.println("{\"mqtt_list\":\"sending\"}");
 
+
+}
+
+//----------------------------------------------------- mqtt_send_log
+void mqtt_send_log()
+{
+  send_log = false;
+  Serial.println("{\"mqtt_status\":\"sending\"}");
+
+  //saveNewlog();
+
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, status_topic);
+
+  //JsonArray logObject = obj_log;
+  //size_t serializedLength = measureJson(logObject) + 1;
+  char tempBuffer[STATUS_SIZE];
+  serializeJson(status_doc, tempBuffer);
+  strcpy(buffer_msg_status, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg_status);
+
+}
+
+// ---------------------------------------------------- mqtt_send_event
+void mqtt_send_event()
+{
+  send_event = false;
+  Serial.println("{\"mqtt_event\":\"sending\"}");
+  status_doc["last_service"]["cliente"] = obj_in["cliente"].as<unsigned int>();
+  status_doc["last_service"]["name"] = status_doc["client"]["nombre"];
+  status_doc["last_service"]["litros"] = litros_check;
+  status_doc["last_service"]["precio"] = precio_check;
+  status_doc["last_service"]["folio"] = folio - 1;
+  status_doc["last_service"]["start_timestamp"] = start_process_time;
+  status_doc["last_service"]["end_timestamp"] = now.unixtime();
+  //status_doc["elapsed_time"] = millis() / 1000;
+  //status_doc["last_service"]["state"] = STATE;
+
+
+
+  //if (!obj["gps"]["lat"].isNull())
+  //{
+  status_doc["last_service"]["lat"] = obj["lat"];
+  status_doc["last_service"]["lon"] = obj["lon"];
+
+
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, status_topic);
+
+  //JsonArray logObject = obj_log;
+  //size_t serializedLength = measureJson(logObject) + 1;
+  char tempBuffer[STATUS_SIZE];
+  serializeJson(status_doc, tempBuffer);
+  strcpy(buffer_msg_status, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg_status);
+  status_doc.remove("last_service");
+}
+
+
+//--------------------------------------------------- mqtt_send_report
+void mqtt_send_report()
+{
+  //servicios, litros_suma, total_ventas, reporte, acumulado_litros, folio_ini, folio_fin, litros_ini, litros_fin
+  send_report = false;
+  Serial.println("{\"mqtt_report\":\"sending\"}");
+  status_doc["last_report"]["servicios"] = servicios;
+  status_doc["last_report"]["litros_suma"] = litros_suma;
+  status_doc["last_report"]["total_ventas"] = total_ventas;
+  status_doc["last_report"]["reporte"] = reporte;
+  status_doc["last_report"]["acumulado_litros"] = acumulado_litros;
+  status_doc["last_report"]["folio_inicial"] = folio_ini;
+  status_doc["last_report"]["folio_final"] = folio_fin;
+  status_doc["last_report"]["litros_inicial"] = litros_ini;
+  status_doc["last_report"]["litros_fin"] = litros_fin;
+  status_doc["last_report"]["lat"] = obj["lat"];
+  status_doc["last_report"]["lon"] = obj["lon"];
+
+
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, status_topic);
+
+  //JsonArray logObject = obj_log;
+  //size_t serializedLength = measureJson(logObject) + 1;
+  char tempBuffer[STATUS_SIZE];
+  serializeJson(status_doc, tempBuffer);
+  strcpy(buffer_msg_status, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg_status);
+  status_doc.remove("last_report");
 
 }
 
@@ -256,6 +353,7 @@ void callback(char* topic, byte* payload, unsigned int length)
   }
   else  if (strcmp(topic, strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), config_topic)) == 0)
   {
+    send_log = true;
     StaticJsonDocument<LIST_SIZE> conf_mqtt_doc;
     Serial.println("Config Update");
 
@@ -322,7 +420,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 
   else  if (strcmp(topic, (strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic ), get_topic))) == 0)
   {
-    send_log = true;
+    send_file = true;
     Serial.print("Prepare to SEND file: ");
     //consult_filelog = "/logs/";
     file_to_send = jsonPayload;

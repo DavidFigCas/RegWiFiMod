@@ -74,7 +74,7 @@
 #include "gps_service.h"
 #include  "printerservice.h"
 #include "firebasedb.h"
-#include "oled_display.h"
+//#include "oled_display.h"
 #include  "glcd_display.h"
 #include  "sd_card_service.h"
 
@@ -151,6 +151,16 @@ extern uint32_t litros_check;
 extern uint32_t precio_check;
 
 extern uint32_t folio;
+extern uint32_t reporte;
+extern uint32_t litros_suma;
+extern uint32_t servicios;
+extern uint32_t total_ventas;
+extern uint32_t folio_ini;
+extern uint32_t folio_fin;
+extern uint32_t litros_ini;
+extern uint32_t litros_fin;
+
+
 extern char b[200];
 extern char buff[200];
 extern int i;

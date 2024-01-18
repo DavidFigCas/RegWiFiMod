@@ -79,6 +79,15 @@ uint32_t precio_check;
 
 uint32_t folio;
 uint32_t reporte;
+uint32_t litros_suma = 0;
+uint32_t servicios = 0;
+uint32_t total_ventas = 0;
+uint32_t folio_ini;
+uint32_t folio_fin;
+uint32_t litros_ini;
+uint32_t litros_fin;
+
+
 char b[200];
 char buff[200];
 int i;
@@ -99,38 +108,38 @@ volatile uint32_t pesos;
 
 
 // -------------------------------------------------------------- read_logs
-void read_logs(String consult) 
+void read_logs(String consult)
 {
   Serial.println("READ ALL LOGS");
 
   //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
   File file = SD.open(consult.c_str(), FILE_READ);
-  if (!file) 
+  if (!file)
   {
     Serial.print("Error al abrir el archivo: ");
     Serial.println(consult);
 
     printReport();
-    
+
     return;
   }
 
-  uint32_t litros_suma = 0;
-  uint32_t servicios = 0;
-  uint32_t total_ventas = 0;
-  uint32_t folio_ini;
-  uint32_t folio_fin;
-  uint32_t litros_ini;
-  uint32_t litros_fin;
-  
+  litros_suma = 0;
+  servicios = 0;
+  total_ventas = 0;
+  //folio_ini;
+  //folio_fin;
+  //uint32_t litros_ini;
+  //uint32_t litros_fin;
 
-  while (file.available()) 
+
+  while (file.available())
   {
     String line = file.readStringUntil('\n');
     StaticJsonDocument<256> doc;
     DeserializationError error = deserializeJson(doc, line);
 
-    if (error) 
+    if (error)
     {
       Serial.print("Error al parsear JSON: ");
       Serial.println(error.c_str());
@@ -141,7 +150,7 @@ void read_logs(String consult)
     uint32_t litros = doc["litros"];
     uint32_t precio = doc["precio"];
 
-    if(servicios == 0)
+    if (servicios == 0)
     {
       folio_ini = doc["folio"];
     }
@@ -176,7 +185,7 @@ void saveNewlog()
   status_doc["last_service"]["folio"] = folio;
   status_doc["last_service"]["start_timestamp"] = start_process_time;
   status_doc["last_service"]["end_timestamp"] = now.unixtime();
-  status_doc["last_service"]["state"] = STATE;
+  //status_doc["last_service"]["state"] = STATE;
   status_doc["last_service"]["litros"] = litros_check;
   status_doc["last_service"]["precio"] = precio_check;
   status_doc["last_service"]["cliente"] = obj_in["cliente"].as<unsigned int>();
@@ -243,9 +252,9 @@ void saveNewlog()
 
   folio++;
   obj["folio"] = folio;
-  status_doc["folio"] = folio; 
+  status_doc["folio"] = folio;
   saveConfig = true;
-} 
+}
 
 // ------------------------------------------------------------ register_client
 void register_client()
@@ -373,8 +382,8 @@ void system_init()
 
 
   status_doc["ver"] = VERSION;
-  oled_display_init();
-  oled_display_text(VERSION);    // Draw 'stylized' characters
+  //oled_display_init();
+  //oled_display_text(VERSION);    // Draw 'stylized' characters
 
 
 
@@ -385,7 +394,7 @@ void system_init()
     wifi_init();
     mqtt_init();
     //mqtt_check();
-    rtcUpdated = false;
+    rtcUpdated = true;  // Not auto update
     ntpConnected = false;
     init_clock();        // I2C for clock
   }
@@ -400,6 +409,8 @@ void system_init()
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
   pinMode(BT_REPORT, INPUT_PULLUP);
+
+  send_log = true;
 }
 
 // ----------------------------------------------------------------------------------------------- factory_reset3 change
@@ -528,7 +539,7 @@ void reset_config()
 
 
 
-  //if (obj["test"].as<bool>() == true)
+  if (obj["test"].as<bool>() == true)
   {
     // Comment for production
     serializeJson(obj, Serial);
@@ -626,6 +637,9 @@ void loadConfig()
   //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
   pulsos_litro =  obj["pulsos_litro"];
   status_doc["pulsos_litro"] = pulsos_litro;
+
+  gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
+  daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
 
 
   Serial.println("{\"config\":true}");

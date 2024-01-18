@@ -12,7 +12,7 @@ void save_gps_log()
   {
     // Guarda cada minuto la posicion
     // ----------------------------------------------- 1 minute refresh
-    //if (millis() - previousMillisGPS >= intervalGPS)
+    if (millis() - previousMillisGPS >= intervalGPS)
     //if (millis() - previousMillisGPS >= 5000)
     {
       // Guarda la última vez que actualizaste el evento

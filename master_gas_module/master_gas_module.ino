@@ -21,13 +21,13 @@ void setup()
   doc_aux["STATE"] = 0;
   doc_aux["time"] = now.unixtime();
   serializeJson(doc_aux, b);
+  
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
   delay(TIME_SPACE);
 
-  oled_display_number(0);    // Draw 'stylized' characters
-  //printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
+  //oled_display_number(0);    // Draw 'stylized' characters
 }
 
 
@@ -36,6 +36,7 @@ void loop()
 {
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
+  status_doc["elapsed_time"] = millis() / 1000;
   // ----------------------------------------------- leer
 
   // --------------------- leer display
@@ -135,7 +136,7 @@ void loop()
       encoder_reset = false;
 
       //displays
-      oled_display_number(litros);
+      //oled_display_number(litros);
       lcd.setCursor(0, 0); // Establecer cursor en la primera línea
       lcd.print("LITROS:  "); // Escribir en la primera línea
       lcd.print(litros); // Escribir en la primera línea
@@ -159,9 +160,9 @@ void loop()
         //encoder_reset = true;
         read_clock();
         saveNewlog();
-
+        send_event = true;        // Send event to mqtt
       }
-      oled_display_number(litros_check);
+      //oled_display_number(litros_check);
     }
     else if (doc_encoder["STATE"] == 0)
     {
@@ -219,7 +220,7 @@ void loop()
       //new_log = true;
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
-      oled_display_number(0);
+      //oled_display_number(0);
       lcd.noBacklight();
     }
   }
@@ -307,6 +308,7 @@ void loop()
   {
     read_logs(consult_filelog);
     print_log = false;
+    send_report = true;
   }
 
 
@@ -339,30 +341,26 @@ void loop()
         if (mqtt_check())
         {
           // ------------------------------------------- Send Log
-          if (send_log == true)
+          if (send_file == true)
           {
             mqtt_send_file(file_to_send);
           }
 
           // ------------------------------------------- Send STATUS
-          //if (send_log == true)
+          if (send_log == true)
           {
-            Serial.println("{\"mqtt_status\":\"sending\"}");
+            mqtt_send_log();
+          }
 
-            //saveNewlog();
+          //------------------------------------------ Send Event (Sell)
+          if (send_event == true)
+          {
+            mqtt_send_event();
+          }
 
-            strcpy(buffer_union_publish, obj["id"].as<const char*>());
-            strcat(buffer_union_publish, publish_topic);
-            strcat(buffer_union_publish, status_topic);
-
-            //JsonArray logObject = obj_log;
-            //size_t serializedLength = measureJson(logObject) + 1;
-            char tempBuffer[STATUS_SIZE];
-            serializeJson(status_doc, tempBuffer);
-            strcpy(buffer_msg_status, tempBuffer);
-
-            Mclient.publish(buffer_union_publish, buffer_msg_status);
-            //send_log = false;
+          if(send_report == true)
+          {
+            mqtt_send_report();
           }
 
           // ------------------------------------------- Send LIST

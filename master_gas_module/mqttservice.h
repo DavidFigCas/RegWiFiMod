@@ -28,6 +28,9 @@ extern char buffer_msg_list[LIST_SIZE];
 extern const char* client_id;
 
 extern volatile boolean send_log;
+extern volatile boolean send_file;
+extern volatile boolean send_event;
+extern volatile boolean send_report;
 extern volatile boolean send_list;
 extern volatile boolean clear_log;
 extern volatile boolean new_log;
@@ -45,6 +48,9 @@ bool mqtt_check();
 void mqtt_send();
 void mqtt_send_list();
 void mqtt_send_file(String file_to_send);
+void mqtt_send_log();
+void mqtt_send_event();
+void mqtt_send_report();
 
 
 

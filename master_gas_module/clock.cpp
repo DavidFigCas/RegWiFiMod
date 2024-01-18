@@ -15,8 +15,8 @@ int dia_hoy;
 int segundo;
 
 const char* ntpServer = "pool.ntp.org";
-//long  gmtOffset_sec = obj["gmtOff"].as<long>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
-//int   daylightOffset_sec = obj["dayOff"].as<int>();               // Horario de verano, disabled
+//int32_t  gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
+//int32_t   daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
 int32_t  gmtOffset_sec;
 int32_t   daylightOffset_sec;
 bool ntpConnected = false;
