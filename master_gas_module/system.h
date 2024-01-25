@@ -1,29 +1,25 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-//#include <vector>
-#include <PubSubClient.h>
-#include <WiFi.h>
-//#include <LittleFS.h>
-
 
 #define   PRESS   LOW
 //#define LIST_SIZE   4096
 //#define LOG_SIZE   4096
 
-#define WDT_TIMEOUT     150
+#define WDT_TIMEOUT     15
 #define FILE_SIZE       1024
 #define LIST_SIZE       3048
 #define LOG_SIZE        3048
 #define STATUS_SIZE     2048
 #define BT_REPORT       0
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 32 // OLED display height, in pixels
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+//#define SCREEN_WIDTH 128 // OLED display width, in pixels
+//#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+//#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+//#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+// ----------------- LCD
+#define BLACK 0
+#define WHITE 1
 
 // --------------------------------sd card
 //#define UART_BAUD           9600
@@ -32,19 +28,22 @@
 //#define PIN_RX              26
 //#define PWR_PIN             4
 
+// --------------------------- SD CARD PINS
 #define SD_MISO             2
 #define SD_MOSI             15
 #define SD_SCLK             14
 #define SD_CS               13
 
+// ------------------------- LCD
+#define SHARP_SCK  18
+#define SHARP_MOSI 23
+#define SHARP_SS   5
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
-//#include <vector>
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-
-//#include <LittleFS.h>
 #include "FS.h"
 #include "SPIFFS.h"
 #include <Wire.h>
@@ -57,11 +56,11 @@
 #include <Firebase_ESP_Client.h>
 #include <esp_task_wdt.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <LiquidCrystal_I2C.h>
+#include <Adafruit_SharpMem.h>
 #include <cmath> // 
 #include "SD.h"
 #include "SPI.h"
+
 
 
 #include "version.h"
@@ -74,8 +73,8 @@
 #include "gps_service.h"
 #include  "printerservice.h"
 #include "firebasedb.h"
+//#include  "glcd_display.h"
 //#include "oled_display.h"
-#include  "glcd_display.h"
 #include  "sd_card_service.h"
 
 

@@ -375,6 +375,8 @@ void system_init()
   Serial.print("Version:"); Serial.println(VERSION);
   //delay(5000);
 
+  esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);
 
   delay(100);
   I2C_Init();
@@ -403,11 +405,10 @@ void system_init()
   SD_Init();
 
   gps_init();
-  init_glcd();
+  //init_glcd();
 
   // WatchDog Timer
-  esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
-  esp_task_wdt_add(NULL);
+  
   pinMode(BT_REPORT, INPUT_PULLUP);
 
   send_log = true;

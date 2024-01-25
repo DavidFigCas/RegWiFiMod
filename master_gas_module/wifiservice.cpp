@@ -130,7 +130,7 @@ bool wifiAP(bool force)
 // --------------------------------------------------- wifiINIT
 void wifi_init()
 {
-
+  Serial.println("{\"wifi\":{\"init\":true}}");
   if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
   {
     WiFi.mode(WIFI_STA);

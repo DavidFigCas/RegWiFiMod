@@ -38,7 +38,8 @@ int minorHalfSize; // 1/2 of lesser of display width or height
 
 void setup(void)
 {
-  Serial.begin(9600);
+  delay(3000);
+  Serial.begin(115200);
   Serial.println("Hello!");
 
   // start & clear the display
@@ -108,6 +109,7 @@ void setup(void)
 void loop(void) 
 {
   for(int i=0; i<4; i++) {
+    Serial.println("Print");
     display.setRotation(i);
     display.clearDisplay();
     // text display tests

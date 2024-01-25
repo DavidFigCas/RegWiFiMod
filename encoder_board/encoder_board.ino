@@ -1,4 +1,4 @@
-#define MAX_DELTA   10      // Pulsos detectados en 500ms (Intervalo2)
+#define MAX_DELTA   1      //10 Pulsos detectados en 500ms (Intervalo2)
 #define LED_1      25
 #define LED_2     27
 #define LED_3     28
@@ -44,11 +44,11 @@ const unsigned long intervalo = 100;  // Intervalo de tiempo (1 minuto en milise
 unsigned long tiempoAnterior = 0;
 unsigned long tiempoActual;
 
-const unsigned long intervalo2 = 500;  // Intervalo de tiempo (1 minuto en milisegundos)
+const unsigned long intervalo2 = 2000;  // Intervalo de tiempo (500 milisegundos)
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
-unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 
+unsigned long noDelta_timeSTOP = 6;// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
 unsigned long noDelta_timeCounter = 0;// Maximo tiempo desde que se detecto STOP_FLOW
 
 
@@ -80,8 +80,12 @@ void setup()
   pinMode(SOLENOID, OUTPUT);
   pinMode(BTN_START, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
-  pinMode(2, INPUT_PULLUP);
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+
+  //pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
+  
   encoder.begin();
   // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
   doc["valve_open"] = false;

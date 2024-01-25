@@ -161,13 +161,13 @@ void gps_update()
 // ----------------------------------------------------- smartDelay
 static void smartDelay(unsigned long ms)
 {
-  unsigned long start = millis();
+  unsigned long start_t = millis();
   //byte gps_char;
   //int co;
   //Serial.println("Get GPS");
   //do
   //{
-  while ((Serial2.available() && (millis() - start < ms)))
+  while ((Serial2.available() && (millis() - start_t < ms)))
   {
     //gps_char = Serial2.read();
     gps.encode(Serial2.read());

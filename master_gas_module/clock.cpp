@@ -241,7 +241,7 @@ void read_clock()
       Serial.println("\"}");
 
 
-      lcd.setCursor(0, 2); //
+      /*lcd.setCursor(0, 2); //
       lcd.print(dia_hoy);
       lcd.print("/");
       lcd.print(mes);
@@ -252,7 +252,7 @@ void read_clock()
       lcd.print(":");
       lcd.print(minuto);
       lcd.print(":");
-      lcd.print(segundo);
+      lcd.print(segundo);*/
 
     }
   }

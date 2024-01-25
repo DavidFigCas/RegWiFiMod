@@ -131,15 +131,15 @@ void loop()
         start_process_time = now.unixtime();
         startFlowing = true;
         stopFlowing = false;
-        lcd.backlight();
+        //lcd.backlight();
       }
       encoder_reset = false;
 
       //displays
       //oled_display_number(litros);
-      lcd.setCursor(0, 0); // Establecer cursor en la primera línea
-      lcd.print("LITROS:  "); // Escribir en la primera línea
-      lcd.print(litros); // Escribir en la primera línea
+      //lcd.setCursor(0, 0); // Establecer cursor en la primera línea
+      //lcd.print("LITROS:  "); // Escribir en la primera línea
+      //lcd.print(litros); // Escribir en la primera línea
 
     }
     else if (doc_encoder["STATE"] == 3)
@@ -221,7 +221,7 @@ void loop()
       Serial.println("###################      Done reset    #########################");
       startTimeToPrint = 0; // Resetea el tiempo de inicio para la próxima vez
       //oled_display_number(0);
-      lcd.noBacklight();
+      //lcd.noBacklight();
     }
   }
 
