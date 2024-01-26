@@ -116,12 +116,13 @@ void loop(void)
     display.setCursor(0,0);
     display.println("Hello, world!");
     display.setTextColor(WHITE, BLACK); // inverted text
-    display.println(3.141592);
+    display.println(i);
     display.setTextSize(2);
     display.setTextColor(BLACK);
     display.print("0x"); display.println(0xDEADBEEF, HEX);
     // Screen must be refreshed at least once per second
-    for(int j=0; j<4; j++) {
+    //for(int j=0; j<4; j++) 
+    {
       display.refresh();
       delay(500); // 1/2 sec delay
     } // x4 = 2 second pause between rotations

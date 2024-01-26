@@ -1,14 +1,6 @@
-#define ENABLE_GxEPD2_GFX 0
+
 #include "icons.h"
-//#include <GxEPD2_BW.h>
-//#include <Fonts/FreeMonoBold9pt7b.h>
-//#include <Fonts/CodenameCoderFree4F_Bold40pt7b.h>
-//#include "i2c_fifo.h"
-//#include "i2c_slave.h"
 #include "pico/stdlib.h"
-//#include "hardware/i2c.h"
-//#include "GxEPD2_display_selection_new_style.h"
-//#include <pico/multicore.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SharpMem.h>
 #include <UnixTime.h>
@@ -43,9 +35,7 @@ uint16_t h;
 uint16_t w2; // Un poco de margen
 uint16_t h2;
 
-//const uint TSC2007_ADDR = 0x48; // Адрес TSC2007 на шине I2C
 
-//GxEPD2_BW<GxEPD2_750_YT7, 480> display(GxEPD2_750_YT7(/*CS=*/ 1, /*DC=*/ 5, /*RST=*/ 6, /*BUSY=*/ 7)); // GDEY075T7 800x480, UC8179 (GD7965)
 Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
 UnixTime stamp(0);
 
@@ -66,18 +56,12 @@ const unsigned long intervalo2 = 250;  // Intervalo de tiempo (1 minuto en milis
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
-//float uprice = 9.8; //price of 1 litre
 volatile uint32_t print_litros, print_pesos, pesos;
 volatile float litros;
 
-//boolean new_num = 0, printer = 0, valve = 0, OK = 0, DEL = 0, stopCommand = 0, mem_address_written = 0, ask_litro = 0, ask_peso = 0, ask_data = 0, ask_state = 0, ask_todo = 0, error_status = 0, newcommand = 0, new_litros = 0;
-//uint8_t mem_address = 0;
-boolean dec = 0;
-uint16_t tx, ty, tz1, tz2;
 uint8_t STATE = 0;
-volatile uint8_t todo_byte = 0, state_byte = 0, error_byte = 0, j = 0;
-volatile uint8_t ltr_data[4], pes_data[4], uprice_data[2], litros_num[4], pesos_num[4], client_num[4], time_num[4];
-volatile boolean newData = 0, touch_data = 0, shown = 0, endprocess = 0;
+
+volatile boolean  shown = 0;
 volatile uint32_t number = 0;
 uint32_t unixtime, client;
 
@@ -346,7 +330,8 @@ void loop1()
     // -------------------------------------------------------- display litros
     case 1:
 
-      display.clearDisplay();
+      //display.clearDisplay();
+
       digitalWrite(27, LOW);
       digitalWrite(28, LOW);
 
@@ -403,11 +388,32 @@ void loop1()
 
         //do {
         //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
-        display.setTextSize(2);
-        display.setTextColor(BLACK);
-        display.setCursor(0, 0);
-        display.print(litStr);
+        display.setTextSize(5);
+        display.setTextColor(WHITE);
+        display.setCursor(10, 20);
+        // Dibuja un cuadro en blanco
+        int x = 10; // Posición X inicial del cuadro
+        int y = 10; // Posición Y inicial del cuadro
+        int width = 50; // Ancho del cuadro
+        int height = 30; // Altura del cuadro
+
+        display.drawRect(x, y, width, height, BLACK); // Dibuja un rectángulo (cuadro) en blanco
+
         display.refresh();
+
+        delay(100);
+
+        display.setTextColor(BLACK);
+        display.setCursor(10, 20);
+        //if (print_litros < 100)
+        //  display.print(" ");
+        //if (print_litros < 10)
+        //  display.print(" ");
+
+
+        display.print(litros);
+        display.refresh();
+        delay(100);
         //} while (display.nextPage());
 
 
