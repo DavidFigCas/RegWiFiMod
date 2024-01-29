@@ -20,12 +20,12 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  3600; // TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  60;   // TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600; //  3600 TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  60;   //  60  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 5;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-double x, y, phaseShift = 105;
+double x, y, phaseShift = 0;      // phaseSift = 105
 int angulo, angulo_anterior;
 byte tipo_cambio;
 
@@ -129,14 +129,30 @@ void SendHEXdata()
   //mySerial.write(data); // Enviar ese byte a mySerial
   //response = true;
   //}
-  uint8_t txData[4];
+  uint8_t txData[8];
 
   int aux_angulo = angulo + (tipo_cambio * 4096);
 
-  txData[0] = (aux_angulo >> 8) & 0xFF;
-  txData[1] = aux_angulo & 0xFF;
-  txData[2] = (bat >> 8) & 0xFF;
-  txData[3] = bat  & 0xFF;
+  // x = (int16_t)posture[1] << 8 | posture[2];
+  // y = (int16_t)posture[3] << 8 | posture[4];
+
+  //  txData[0] = (aux_angulo >> 8) & 0xFF;
+  //  txData[1] = aux_angulo & 0xFF;
+  //  txData[2] = (bat >> 8) & 0xFF;
+  //  txData[3] = bat  & 0xFF;
+
+  int x_int = static_cast<int>(x);
+  int y_int = static_cast<int>(y);
+
+  txData[0] = (x_int >> 8) & 0xFF;
+  txData[1] = x_int & 0xFF;
+  txData[2] = (y_int >> 8) & 0xFF;
+  txData[3] = y_int & 0xFF;
+  txData[5] = (aux_angulo >> 8) & 0xFF;
+  txData[5] = aux_angulo & 0xFF;
+  txData[6] = (bat >> 8) & 0xFF;
+  txData[7] = bat  & 0xFF;
+
 
 
   Serial1.print ("AT$SF=");
@@ -148,6 +164,14 @@ void SendHEXdata()
   Serial1.print(txData[2], HEX);
   if (txData[3] < 0x10) Serial1.print("0");
   Serial1.print(txData[3], HEX);
+  if (txData[4] < 0x10) Serial1.print("0");
+  Serial1.print(txData[4], HEX);
+  if (txData[5] < 0x10) Serial1.print("0");
+  Serial1.print(txData[5], HEX);
+  if (txData[6] < 0x10) Serial1.print("0");
+  Serial1.print(txData[6], HEX);
+  if (txData[7] < 0x10) Serial1.print("0");
+  Serial1.print(txData[7], HEX);
   Serial1.print("\r");
 
   delay(50);
@@ -434,16 +458,16 @@ void leerSensor()
   else
     angulo = static_cast<int>(calcularAngulo(x, y));
 
- /* Serial1.print("{\"x\":");
-    Serial1.print(x);
-    Serial1.print(",\"y\":");
-    Serial1.print(y);
-    Serial1.print(",\"a\":");
-    Serial1.print(angulo);
-    Serial1.print(",\"v\":");
-    Serial1.print(bat);
-    Serial1.print("}");
-    Serial1.println();*/
+   Serial1.print("{\"x\":");
+     Serial1.print(x);
+     Serial1.print(",\"y\":");
+     Serial1.print(y);
+     Serial1.print(",\"a\":");
+     Serial1.print(angulo);
+     Serial1.print(",\"v\":");
+     Serial1.print(bat);
+     Serial1.print("}");
+     Serial1.println();
   //delay(100); // Espera un segundo para la próxima lectura
 
 }

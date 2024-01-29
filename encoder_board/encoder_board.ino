@@ -48,7 +48,7 @@ const unsigned long intervalo2 = 2000;  // Intervalo de tiempo (500 milisegundos
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
-unsigned long noDelta_timeSTOP = 6;// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
 unsigned long noDelta_timeCounter = 0;// Maximo tiempo desde que se detecto STOP_FLOW
 
 

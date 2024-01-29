@@ -3,6 +3,8 @@
 #include "pico/stdlib.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SharpMem.h>
+//#include <Fonts/FreeMonoBold24pt7b.h>
+#include <U8g2_for_Adafruit_GFX.h>
 #include <UnixTime.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
@@ -37,6 +39,7 @@ uint16_t h2;
 
 
 Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
+U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
 UnixTime stamp(0);
 
 bool flag_print = true;
@@ -102,42 +105,6 @@ void req()
   serializeJson(doc, respx);
   Wire.write(respx, 199);
 }
-
-
-
-class PrintString : public Print, public String
-{
-  public:
-    size_t write(uint8_t data) override
-    {
-      return concat(char(data));
-    };
-};
-
-
-
-
-void drawBitmaps()
-{
-  //display.setFullWindow();
-  //drawBitmaps200x200();
-  showBigPic();
-
-}
-void showBigPic() {
-  //bool mirror_y = (display.epd2.panel != GxEPD2::GDE0213B1);
-  //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-  //display.drawImage(nopaper, 30, 285, 64, 64, false, false, true);
-  //display.drawImage(printer_on, 95, 285, 64, 64, false, false, true);
-  //display.drawImage(wifi_on, 160, 285, 64, 64, false, false, true);
-}
-
-
-struct bitmap_pair
-{
-  const unsigned char* black;
-  const unsigned char* red;
-};
 
 
 
@@ -232,7 +199,31 @@ void setup1()
   digitalWrite(25, HIGH);
 
   display.begin();
+  display.setRotation(1);
+  u8g2_for_adafruit_gfx.begin(display);
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
   display.clearDisplay();
+ 
+  /*u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);
+
+  //u8g2_for_adafruit_gfx.setFontDirection(1);            // left to right (this is default)
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+  
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_siji_t_6x10);  // icon font
+  u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
+  u8g2_for_adafruit_gfx.drawGlyph(0, 10, 0x0e200);  // Power Supply
+  u8g2_for_adafruit_gfx.drawGlyph(12, 10, 0x0e201);  // Charging
+  u8g2_for_adafruit_gfx.drawGlyph(24, 10, 0x0e10a);  // Right Arrow
+  u8g2_for_adafruit_gfx.drawGlyph(36, 10, 0x0e24b);  // full Battery
+
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);  // extended font
+  u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
+  u8g2_for_adafruit_gfx.setCursor(0,40);                // start writing at this position
+  u8g2_for_adafruit_gfx.print("<Ȧǀʘ>");            // UTF-8 string: "<" 550 448 664 ">"
+   display.refresh();                                    // make everything visible
+  delay(2000);*/
+  
+  //display.setFont(&FreeMono24pt7b);
 
   digitalWrite(25, LOW);
 }
@@ -256,16 +247,20 @@ void loop1()
         display.setRotation(1);
         display.clearDisplay();
         // text display tests
-        display.setTextSize(1);
+        //display.setTextSize(1);
         display.setTextColor(BLACK);
         display.setCursor(0, 0);
+        u8g2_for_adafruit_gfx.setCursor(0,20);                // start writing at this position
+        u8g2_for_adafruit_gfx.println("Hola mundo!");            
         display.println("Hello, world!");
         display.setTextColor(WHITE, BLACK); // inverted text
         display.println(3.141592);
-        display.setTextSize(2);
+        //display.setTextSize(2);
         display.setTextColor(BLACK);
         display.print("0x");
         display.print(0xDEADBEEF, HEX);
+
+        display.drawBitmap(240 - 64, 320 - 64, wifi_off, 64, 64, WHITE, BLACK);
         // Screen must be refreshed at least once per second
         //for (int j = 0; j < 4; j++)
         {
@@ -324,7 +319,8 @@ void loop1()
       //}
       //touch_data=0;
       STATE = 1;
-      display.clearDisplay();
+      //display.clearDisplay();
+      //display.setFont(&FreeMonoBold24pt7b);
       break;
 
     // -------------------------------------------------------- display litros
@@ -388,9 +384,9 @@ void loop1()
 
         //do {
         //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
-        display.setTextSize(5);
+        //display.setTextSize(5);
         display.setTextColor(WHITE);
-        display.setCursor(10, 20);
+
         // Dibuja un cuadro en blanco
         int x = 10; // Posición X inicial del cuadro
         int y = 10; // Posición Y inicial del cuadro
@@ -401,19 +397,28 @@ void loop1()
 
         display.refresh();
 
-        delay(100);
+        //delay(100);
 
+        //display.setTextSize(0);
         display.setTextColor(BLACK);
-        display.setCursor(10, 20);
+        display.setCursor(10, 100);
         //if (print_litros < 100)
         //  display.print(" ");
         //if (print_litros < 10)
         //  display.print(" ");
 
+        u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+        u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+        u8g2_for_adafruit_gfx.setFont(u8g2_font_inb57_mn);  // extended font
+        u8g2_for_adafruit_gfx.setCursor(10,100);                // start writing at this position
+        u8g2_for_adafruit_gfx.print(litros); 
 
-        display.print(litros);
+        u8g2_for_adafruit_gfx.setCursor(10,200);                // start writing at this position
+        u8g2_for_adafruit_gfx.print(pesos);  
+
+        //display.print(litros);
         display.refresh();
-        delay(100);
+        //delay(100);
         //} while (display.nextPage());
 
 
