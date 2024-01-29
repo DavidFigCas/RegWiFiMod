@@ -62,7 +62,7 @@ void loop()
 
 
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // --------------------- leer encoder
   // Read from the slave and print out
@@ -102,7 +102,7 @@ void loop()
   //serializeJson(status_doc, Serial);
   //Serial.println();
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // ----------------------------------------------- procesar
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
@@ -265,7 +265,7 @@ void loop()
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // ---------------------- encoder doc
   doc_aux.clear();
@@ -280,7 +280,7 @@ void loop()
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // ------------------------------------------- Clear Log
   if (clear_log == true)
