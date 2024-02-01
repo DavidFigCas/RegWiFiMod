@@ -15,13 +15,15 @@
 #define PROCESO   1
 #define ESPERA    2
 
+#define MIN_TESLA   900     //abajo de ese valor de la suma de x y, se considera que no hay iman
+
 unsigned int STATE = 0;
 uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
 volatile uint32_t sleepTime  =  3600; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  1;   //  60  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t deltaTime  =  60;   //  60  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 5;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
@@ -141,22 +143,22 @@ void SendHEXdata()
   // x = (int16_t)posture[1] << 8 | posture[2];
   // y = (int16_t)posture[3] << 8 | posture[4];
 
-  //  txData[0] = (aux_angulo >> 8) & 0xFF;
-  //  txData[1] = aux_angulo & 0xFF;
-  //  txData[2] = (bat >> 8) & 0xFF;
-  //  txData[3] = bat  & 0xFF;
+  txData[0] = (aux_angulo >> 8) & 0xFF;
+  txData[1] = aux_angulo & 0xFF;
+  txData[2] = (bat >> 8) & 0xFF;
+  txData[3] = bat  & 0xFF;
 
-  int x_int = static_cast<int>(x);
-  int y_int = static_cast<int>(y);
+  /*int x_int = static_cast<int>(x);
+    int y_int = static_cast<int>(y);
 
-  txData[0] = (x_int >> 8) & 0xFF;
-  txData[1] = x_int & 0xFF;
-  txData[2] = (y_int >> 8) & 0xFF;
-  txData[3] = y_int & 0xFF;
-  txData[5] = (aux_angulo >> 8) & 0xFF;
-  txData[5] = aux_angulo & 0xFF;
-  txData[6] = (bat >> 8) & 0xFF;
-  txData[7] = bat  & 0xFF;
+    txData[0] = (x_int >> 8) & 0xFF;
+    txData[1] = x_int & 0xFF;
+    txData[2] = (y_int >> 8) & 0xFF;
+    txData[3] = y_int & 0xFF;
+    txData[5] = (aux_angulo >> 8) & 0xFF;
+    txData[5] = aux_angulo & 0xFF;
+    txData[6] = (bat >> 8) & 0xFF;
+    txData[7] = bat  & 0xFF;*/
 
 
 
@@ -169,14 +171,14 @@ void SendHEXdata()
   Serial1.print(txData[2], HEX);
   if (txData[3] < 0x10) Serial1.print("0");
   Serial1.print(txData[3], HEX);
-  if (txData[4] < 0x10) Serial1.print("0");
-  Serial1.print(txData[4], HEX);
-  if (txData[5] < 0x10) Serial1.print("0");
-  Serial1.print(txData[5], HEX);
-  if (txData[6] < 0x10) Serial1.print("0");
-  Serial1.print(txData[6], HEX);
-  if (txData[7] < 0x10) Serial1.print("0");
-  Serial1.print(txData[7], HEX);
+  //if (txData[4] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[4], HEX);
+  //if (txData[5] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[5], HEX);
+  //if (txData[6] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[6], HEX);
+  //if (txData[7] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[7], HEX);
   Serial1.print("\r");
 
   delay(50);
@@ -443,8 +445,8 @@ void leerSensor()
 {
   // Configura el MLX90393
   //configMLX();
-  int a_aux;
-  int32_t prom;
+  int a_aux = 0;
+  int32_t prom = 0;
 
   for (int j = 0; j <= 9; j++)
   {
@@ -482,29 +484,31 @@ void leerSensor()
     y = (int16_t)posture[3] << 8 | posture[4];
     z = (int16_t)posture[5] << 8 | posture[6];
 
-    //if ((abs(x) + abs(y)) < 1000)
-    //  angulo = 0;
-    //else
-    angulo = static_cast<int>(calcularAngulo(x, y));
-    a_aux = angulo;
+    a_aux = static_cast<int>(calcularAngulo(x, y));
+
+    if ((abs(x) + abs(y)) < MIN_TESLA)
+    {
+      a_aux = 0;
+    }  
+      
     prom = prom + a_aux;
 
   }
 
-  angulo = prom/10;
-  //Serial1.print("{\"x\":");
-  //Serial1.print(x);
-  //Serial1.print(",\"y\":");
-  //Serial1.print(y);
-  //Serial1.print(",\"z\":");
-  //Serial1.print(z);
+  angulo = prom / 10;
+  Serial1.print("{\"x\":");
+  Serial1.print(x);
+  Serial1.print(",\"y\":");
+  Serial1.print(y);
+  Serial1.print(",\"z\":");
+  Serial1.print(z);
   Serial1.print(",\"r\":");
   Serial1.print(rad);
   Serial1.print(",\"a\":");
   Serial1.print(angulo);
-  //Serial1.print(",\"v\":");
-  //Serial1.print(bat);
-  //Serial1.print("}");
+  Serial1.print(",\"v\":");
+  Serial1.print(bat);
+  Serial1.print("}");
   Serial1.println();
   //delay(100); // Espera un segundo para la próxima lectura
 
