@@ -396,8 +396,8 @@ void system_init()
     wifi_init();
     mqtt_init();
     //mqtt_check();
-    rtcUpdated = true;  // Not auto update
-    ntpConnected = false;
+    rtcUpdated = false;  // TRUE:Not auto update
+    
     init_clock();        // I2C for clock
   }
 

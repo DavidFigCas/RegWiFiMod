@@ -110,7 +110,7 @@ void loop()
   if (!doc_encoder["current"].isNull())
   {
     litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
-    precio = litros * uprice;
+    precio = ceil(litros) * uprice;
   }
 
   display_reset = false;
@@ -234,23 +234,24 @@ void loop()
 
   if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
   {
-    doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
-    doc_aux["wifi"] = true;
-    doc_aux["gps"] = false;
-    doc_aux["clock"] = true;
-    doc_aux["printer"] = true;
-    doc_aux["paper"] = true;
+
     STATE_DISPLAY = 1;
 
   }
   else
   {
-    doc_aux["flow"] = doc_encoder["flow"].as<bool>();
-    doc_aux["litros"] = litros;
-    doc_aux["litros_check"] = litros_check;
-    doc_aux["precio"] = precio;
-    doc_aux["precio_check"] = precio_check;
-    doc_aux["uprice"] = uprice;
+    //doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
+    doc_aux["wifi"] = true;
+    //doc_aux["gps"] = false;
+    //doc_aux["clock"] = true;
+    //doc_aux["printer"] = true;
+    //doc_aux["paper"] = true;
+    //doc_aux["flow"] = doc_encoder["flow"].as<bool>();
+    doc_aux["litros"] = ceil(litros);
+    //doc_aux["litros_check"] = litros_check;
+    doc_aux["precio"] = int(precio);
+    //doc_aux["precio_check"] = precio_check;
+    //doc_aux["uprice"] = uprice;
   }
 
   doc_aux["STATE"] = STATE_DISPLAY;

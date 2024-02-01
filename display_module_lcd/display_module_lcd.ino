@@ -59,8 +59,8 @@ const unsigned long intervalo2 = 250;  // Intervalo de tiempo (1 minuto en milis
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
-volatile uint32_t print_litros, print_pesos, pesos;
-volatile float litros;
+volatile uint32_t litros, print_litros, print_pesos, pesos;
+//volatile float litros;
 
 uint8_t STATE = 0;
 
@@ -90,9 +90,11 @@ void recv(int len)
   }
 
   litros = doc_aux["litros"];
-  print_litros = doc_aux["litros_check"];
+  //print_litros = doc_aux["litros_check"];
+  print_litros = ceil(litros);
   pesos = doc["precio"].as<uint32_t>();
-  print_pesos = doc_aux["precio_check"];
+  //print_pesos = doc_aux["precio_check"];
+  print_pesos = pesos;
 }
 
 // Called when the I2C slave is read from
@@ -199,30 +201,40 @@ void setup1()
   digitalWrite(25, HIGH);
 
   display.begin();
-  display.setRotation(1);
-  u8g2_for_adafruit_gfx.begin(display);
-  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
   display.clearDisplay();
- 
+  delay(100);
+  //display.setRotation(1);
+  u8g2_for_adafruit_gfx.begin(display);
+
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_lubB19_tr);  // extended font
+  u8g2_for_adafruit_gfx.setCursor(5, 19 + 10);             // start writing at this position
+  u8g2_for_adafruit_gfx.print("Hola");
+
+  display.refresh();
+  delay(2000);
+  display.clearDisplay();
+
   /*u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);
 
-  //u8g2_for_adafruit_gfx.setFontDirection(1);            // left to right (this is default)
-  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
-  
-  u8g2_for_adafruit_gfx.setFont(u8g2_font_siji_t_6x10);  // icon font
-  u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
-  u8g2_for_adafruit_gfx.drawGlyph(0, 10, 0x0e200);  // Power Supply
-  u8g2_for_adafruit_gfx.drawGlyph(12, 10, 0x0e201);  // Charging
-  u8g2_for_adafruit_gfx.drawGlyph(24, 10, 0x0e10a);  // Right Arrow
-  u8g2_for_adafruit_gfx.drawGlyph(36, 10, 0x0e24b);  // full Battery
+    //u8g2_for_adafruit_gfx.setFontDirection(1);            // left to right (this is default)
+    u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
 
-  u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);  // extended font
-  u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
-  u8g2_for_adafruit_gfx.setCursor(0,40);                // start writing at this position
-  u8g2_for_adafruit_gfx.print("<Ȧǀʘ>");            // UTF-8 string: "<" 550 448 664 ">"
-   display.refresh();                                    // make everything visible
-  delay(2000);*/
-  
+    u8g2_for_adafruit_gfx.setFont(u8g2_font_siji_t_6x10);  // icon font
+    u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
+    u8g2_for_adafruit_gfx.drawGlyph(0, 10, 0x0e200);  // Power Supply
+    u8g2_for_adafruit_gfx.drawGlyph(12, 10, 0x0e201);  // Charging
+    u8g2_for_adafruit_gfx.drawGlyph(24, 10, 0x0e10a);  // Right Arrow
+    u8g2_for_adafruit_gfx.drawGlyph(36, 10, 0x0e24b);  // full Battery
+
+    u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);  // extended font
+    u8g2_for_adafruit_gfx.setFontMode(1);                 // use u8g2 transparent mode (this is default)
+    u8g2_for_adafruit_gfx.setCursor(0,40);                // start writing at this position
+    u8g2_for_adafruit_gfx.print("<Ȧǀʘ>");            // UTF-8 string: "<" 550 448 664 ">"
+    display.refresh();                                    // make everything visible
+    delay(2000);*/
+
   //display.setFont(&FreeMono24pt7b);
 
   digitalWrite(25, LOW);
@@ -233,6 +245,42 @@ void setup1()
 void loop1()
 {
 
+  Serial.println();
+  unixtime = doc_aux["time"].as<uint32_t>();
+  //serializeJson(doc_aux["time"],Serial);
+  stamp.getDateTime(unixtime);
+
+  //Serial.print("TIME");
+  //Serial.println(unixtime);
+  Serial.println(stamp.day);
+  Serial.println(stamp.month);
+  Serial.println(stamp.year);
+  Serial.println(stamp.hour);
+  Serial.println(stamp.minute);
+
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_ncenB12_tr);  // extended font
+  u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
+  u8g2_for_adafruit_gfx.print(stamp.day);
+  u8g2_for_adafruit_gfx.print("/");
+  u8g2_for_adafruit_gfx.print(stamp.month);
+  u8g2_for_adafruit_gfx.print("/");
+  u8g2_for_adafruit_gfx.print(stamp.year);
+
+  u8g2_for_adafruit_gfx.setCursor(220, 15);             // start writing at this position
+  u8g2_for_adafruit_gfx.print(stamp.hour);
+
+  if ((millis() / 1000) % 2 == 0)
+    u8g2_for_adafruit_gfx.print(":");
+  else
+    u8g2_for_adafruit_gfx.print("-");
+
+  u8g2_for_adafruit_gfx.print(stamp.minute);
+
+
+  display.drawBitmap(320 - 64, 240 - 64, wifi_off, 64, 64, WHITE, BLACK);
+  display.refresh();
 
   switch (STATE)
   {
@@ -244,23 +292,9 @@ void loop1()
       Serial.println("Display Main Screen");
       //for (int i = 0; i < 4; i++)
       {
-        display.setRotation(1);
-        display.clearDisplay();
-        // text display tests
-        //display.setTextSize(1);
-        display.setTextColor(BLACK);
-        display.setCursor(0, 0);
-        u8g2_for_adafruit_gfx.setCursor(0,20);                // start writing at this position
-        u8g2_for_adafruit_gfx.println("Hola mundo!");            
-        display.println("Hello, world!");
-        display.setTextColor(WHITE, BLACK); // inverted text
-        display.println(3.141592);
-        //display.setTextSize(2);
-        display.setTextColor(BLACK);
-        display.print("0x");
-        display.print(0xDEADBEEF, HEX);
+        //display.setRotation(1);
 
-        display.drawBitmap(240 - 64, 320 - 64, wifi_off, 64, 64, WHITE, BLACK);
+
         // Screen must be refreshed at least once per second
         //for (int j = 0; j < 4; j++)
         {
@@ -283,33 +317,7 @@ void loop1()
 
 
       //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-      unixtime = doc_aux["time"].as<uint32_t>();
-      //serializeJson(doc_aux["time"],Serial);
-      stamp.getDateTime(unixtime);
 
-      /*Serial.print("TIME");
-        Serial.println(unixtime);
-        Serial.println(stamp.day);
-        Serial.println(stamp.month);
-        Serial.println(stamp.year);
-        Serial.println(stamp.hour);
-        Serial.println(stamp.minute);
-
-        display.setTextColor(GxEPD_BLACK);
-        display.fillRect(237, 10, 490, 45, GxEPD_WHITE);
-        display.setCursor(237, 49);
-        display.setFont(&FreeMonoBold9pt7b);
-        display.print(stamp.day);
-        display.print("/");
-        display.print(stamp.month);
-        display.print("/");
-        display.print(stamp.year);
-        display.print("  ");
-        display.print(stamp.hour);
-        display.print(":");
-        display.print(stamp.minute);
-        display.displayWindow(237, 10, 490, 45);
-        display.powerOff();*/
 
 
       Serial.println("goto STATE 1");
@@ -327,6 +335,7 @@ void loop1()
     case 1:
 
       //display.clearDisplay();
+
 
       digitalWrite(27, LOW);
       digitalWrite(28, LOW);
@@ -370,7 +379,7 @@ void loop1()
         String litStr = String(print_litros);  // Convierte el número a String
         int16_t tbx, tby; uint16_t tbw, tbh;
         // Obtener las dimensiones del texto
-        display.setTextColor(BLACK);
+        //display.setTextColor(BLACK);
         //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
         //display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
 
@@ -385,7 +394,7 @@ void loop1()
         //do {
         //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
         //display.setTextSize(5);
-        display.setTextColor(WHITE);
+        //display.setTextColor(WHITE);
 
         // Dibuja un cuadro en blanco
         int x = 10; // Posición X inicial del cuadro
@@ -393,15 +402,15 @@ void loop1()
         int width = 50; // Ancho del cuadro
         int height = 30; // Altura del cuadro
 
-        display.drawRect(x, y, width, height, BLACK); // Dibuja un rectángulo (cuadro) en blanco
+        //display.drawRect(x, y, width, height, BLACK); // Dibuja un rectángulo (cuadro) en blanco
 
-        display.refresh();
+        //display.refresh();
 
         //delay(100);
 
         //display.setTextSize(0);
-        display.setTextColor(BLACK);
-        display.setCursor(10, 100);
+        //display.setTextColor(BLACK);
+        //display.setCursor(10, 100);
         //if (print_litros < 100)
         //  display.print(" ");
         //if (print_litros < 10)
@@ -409,12 +418,12 @@ void loop1()
 
         u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
         u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
-        u8g2_for_adafruit_gfx.setFont(u8g2_font_inb57_mn);  // extended font
-        u8g2_for_adafruit_gfx.setCursor(10,100);                // start writing at this position
-        u8g2_for_adafruit_gfx.print(litros); 
+        u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
+        u8g2_for_adafruit_gfx.setCursor(10, 92 + 10 + 19);             // start writing at this position
+        u8g2_for_adafruit_gfx.print(litros);
 
-        u8g2_for_adafruit_gfx.setCursor(10,200);                // start writing at this position
-        u8g2_for_adafruit_gfx.print(pesos);  
+        u8g2_for_adafruit_gfx.setCursor(10, (92 * 2) + 20 + 19);           // start writing at this position
+        u8g2_for_adafruit_gfx.print(pesos);
 
         //display.print(litros);
         display.refresh();

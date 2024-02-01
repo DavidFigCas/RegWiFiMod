@@ -20,13 +20,14 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  36; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  6;   //  60  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600; //  3600 TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  1;   //  60  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 5;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-double x, y, phaseShift = 0;      // phaseSift = 105
+double x, y, z, phaseShift = 0;     // phaseSift = 105
 int angulo, angulo_anterior;
+double a, rad;
 byte tipo_cambio;
 
 
@@ -64,7 +65,11 @@ void loop()
       tipo_cambio = 0;
       initSensor();
       bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+
+
       leerSensor();
+
+
       STATE = PROCESO;
       break;
 
@@ -378,40 +383,56 @@ void configMLX()
 {
   // Configura el MLX90393
 
+  /* Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x6E); // Comando para escribir en el registro
+    Wire.write(0x00); // Comando para configurar el sensor
+    //Wire.write(0x70); // Comando para configurar el sensor
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();*/
+
+  // Configuración del eje X
+  /* Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x60); // Comando para escribir en el registro
+    Wire.write(0x02); // Parte baja del registro de control (selecciona el eje X)
+    Wire.write(0xF8); // Parte alta del registro de control (máxima ganancia y resolución para el eje X)
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();
+    delay(50);
+
+    // Configuración del eje Y
+    Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x60); // Comando para escribir en el registro
+    Wire.write(0x04); // Parte baja del registro de control (selecciona el eje Y)
+    Wire.write(0xF8); // Parte alta del registro de control (máxima ganancia y resolución para el eje Y)
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();
+    delay(50);*/
+
   Wire.beginTransmission(MLX90393_ADDRESS);
   Wire.write(0x60); // Comando para configurar el sensor
   Wire.write(0x00); // Comando para configurar el sensor
+  //Wire.write(0xF0); // Parte alta del registro de control (configuración de ganancia máxima y resolución)
   Wire.write(0x70); // Comando para configurar el sensor
   Wire.write(0x00); // Comando para configurar el sensor
-  // Envía otros bytes de configuración según sea necesario
   Wire.endTransmission();
-  delay(50);
-  Wire.beginTransmission(MLX90393_ADDRESS);
-  Wire.write(0x4F); // Comando par  a configurar el sensor
-  Wire.endTransmission();
-  // Lee los datos
-  Wire.requestFrom(MLX90393_ADDRESS, 32); // Solicita 6 bytes (2 por eje)
-  while (Wire.available())
-  {
-    Wire.read();
-    //mySerial.println();
-  }
-
-  delay(150);
+  //delay(50);
 }
 
 // ----------------------------------------------------------- calcularAngulo
 double calcularAngulo(double x, double y)
 {
   x = x * (-1);
-  double a = atan2(y, x); // Calcula el ángulo en radianes
-  a = a * (180.0 / M_PI); // Convierte de radianes a grados
+  rad = atan2(y, x); // Calcula el ángulo en radianes
+
+  a = rad * (180.0 / M_PI); // Convierte de radianes a grados
   a += phaseShift; // Agrega o resta el defase en grados
 
   // Normaliza el ángulo para que esté en el rango 0-360
-  if (a < 0) {
+  if (a < 0)
+  {
     a += 360;
-  } else if (a >= 360) {
+  } else if (a >= 360)
+  {
     a -= 360;
   }
   return a;
@@ -421,54 +442,70 @@ double calcularAngulo(double x, double y)
 void leerSensor()
 {
   // Configura el MLX90393
+  //configMLX();
+  int a_aux;
+  int32_t prom;
 
-  uint8_t posture[30];
-  int posture_length = 0;
-  Wire.beginTransmission(MLX90393_ADDRESS);
-  Wire.write(0x3E); // Comando para configurar el sensor
-  Wire.endTransmission();
-  Wire.requestFrom(MLX90393_ADDRESS, 4);
-  while (Wire.available())
+  for (int j = 0; j <= 9; j++)
   {
-    //mySerial.println(Wire.read());
-    Wire.read();
-  }
-  //mySerial.println("\n ");
-  delay(50);
 
-  // Configura el MLX90393
-  Wire.beginTransmission(MLX90393_ADDRESS);
-  Wire.write(0x4E); // Comando para configurar el sensor
-  Wire.endTransmission();
-  // Lee los datos
-  Wire.requestFrom(MLX90393_ADDRESS, 10); // Solicita 6 bytes (2 por eje)
-  int i = -1;  // Comienza con -1 para ignorar el primer byte
-  posture_length = 0;
-  while (Wire.available())
-  {
-    byte data = Wire.read();  // Lee el dato actual
-    posture[posture_length] = data;
-    posture_length++;
+    uint8_t posture[30];
+    int posture_length = 0;
+    Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x3E); // /**> Start single-meas mode. */
+    Wire.endTransmission();
+    Wire.requestFrom(MLX90393_ADDRESS, 4);
+    while (Wire.available())
+    {
+      //mySerial.println(Wire.read());
+      Wire.read();
+    }
+    //mySerial.println("\n ");
+    delay(50);
 
-  }
-  x = (int16_t)posture[1] << 8 | posture[2];
-  y = (int16_t)posture[3] << 8 | posture[4];
-  
-  //if ((abs(x) + abs(y)) < 1000)
-  //  angulo = 0;
-  //else
+    // Configura el MLX90393
+    Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x4E); // /**> Read measurement. */
+    Wire.endTransmission();
+    // Lee los datos
+    Wire.requestFrom(MLX90393_ADDRESS, 10); // Solicita 6 bytes (2 por eje)
+    int i = -1;  // Comienza con -1 para ignorar el primer byte
+    posture_length = 0;
+    while (Wire.available())
+    {
+      byte data = Wire.read();  // Lee el dato actual
+      posture[posture_length] = data;
+      posture_length++;
+
+    }
+    x = (int16_t)posture[1] << 8 | posture[2];
+    y = (int16_t)posture[3] << 8 | posture[4];
+    z = (int16_t)posture[5] << 8 | posture[6];
+
+    //if ((abs(x) + abs(y)) < 1000)
+    //  angulo = 0;
+    //else
     angulo = static_cast<int>(calcularAngulo(x, y));
+    a_aux = angulo;
+    prom = prom + a_aux;
 
-   Serial1.print("{\"x\":");
-     Serial1.print(x);
-     Serial1.print(",\"y\":");
-     Serial1.print(y);
-     Serial1.print(",\"a\":");
-     Serial1.print(angulo);
-     Serial1.print(",\"v\":");
-     Serial1.print(bat);
-     Serial1.print("}");
-     Serial1.println();
+  }
+
+  angulo = prom/10;
+  //Serial1.print("{\"x\":");
+  //Serial1.print(x);
+  //Serial1.print(",\"y\":");
+  //Serial1.print(y);
+  //Serial1.print(",\"z\":");
+  //Serial1.print(z);
+  Serial1.print(",\"r\":");
+  Serial1.print(rad);
+  Serial1.print(",\"a\":");
+  Serial1.print(angulo);
+  //Serial1.print(",\"v\":");
+  //Serial1.print(bat);
+  //Serial1.print("}");
+  Serial1.println();
   //delay(100); // Espera un segundo para la próxima lectura
 
 }
