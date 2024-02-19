@@ -9,7 +9,7 @@
 extern char daysOfTheWeek[7][12];
 extern DateTime now;
 extern DateTime last_ac;
-extern RTC_DS3231 rtc;
+extern RTC_DS1307 rtc;
 
 extern int dias;
 extern int mes;
