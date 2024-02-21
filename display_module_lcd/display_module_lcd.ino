@@ -216,7 +216,7 @@ void setup1()
   delay(2000);
   display.clearDisplay();
 
-  /*u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_7x13_te);
 
     //u8g2_for_adafruit_gfx.setFontDirection(1);            // left to right (this is default)
     u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
@@ -233,7 +233,7 @@ void setup1()
     u8g2_for_adafruit_gfx.setCursor(0,40);                // start writing at this position
     u8g2_for_adafruit_gfx.print("<Ȧǀʘ>");            // UTF-8 string: "<" 550 448 664 ">"
     display.refresh();                                    // make everything visible
-    delay(2000);*/
+    delay(2000);
 
   //display.setFont(&FreeMono24pt7b);
 
