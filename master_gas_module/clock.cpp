@@ -1,7 +1,7 @@
 #include "clock.h"
 
 
-RTC_DS3231 rtc;
+RTC_DS1307 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 DateTime now;
 DateTime last_ac;
@@ -50,8 +50,8 @@ void init_clock()
     rtc_ready = true;
 
     // For New devices
-    //if (! rtc.isrunning())
-    if (rtc.lostPower())
+    if (! rtc.isrunning()) //DS13007
+    //if (rtc.lostPower())  //DS3231
     {
 
       // When time needs to be set on a new device, or after a power loss, the

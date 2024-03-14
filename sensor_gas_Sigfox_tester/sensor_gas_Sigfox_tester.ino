@@ -27,7 +27,8 @@ volatile uint32_t deltaTime  =  600;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-double x, y, z, phaseShift = 0;     // phaseSift = 105
+double z, phaseShift = 0;     // phaseSift = 105
+int x, y;
 int angulo, angulo_anterior;
 double a, rad;
 byte tipo_cambio;
@@ -138,7 +139,7 @@ void SendHEXdata()
   //}
   uint8_t txData[8];
 
-  int aux_angulo = angulo + (tipo_cambio * 4096);
+  int aux_angulo = angulo + (tipo_cambio * 4096);  // Se agrega el angulo mas el tipo de cambio
 
   // x = (int16_t)posture[1] << 8 | posture[2];
   // y = (int16_t)posture[3] << 8 | posture[4];
@@ -147,6 +148,12 @@ void SendHEXdata()
   txData[1] = aux_angulo & 0xFF;
   txData[2] = (bat >> 8) & 0xFF;
   txData[3] = bat  & 0xFF;
+
+  txData[4] = (x >> 8) & 0xFF;
+  txData[5] = x  & 0xFF;
+
+  txData[6] = (y >> 8) & 0xFF;
+  txData[7] = y  & 0xFF;
 
   /*int x_int = static_cast<int>(x);
     int y_int = static_cast<int>(y);
@@ -171,14 +178,14 @@ void SendHEXdata()
   Serial1.print(txData[2], HEX);
   if (txData[3] < 0x10) Serial1.print("0");
   Serial1.print(txData[3], HEX);
-  //if (txData[4] < 0x10) Serial1.print("0");
-  //Serial1.print(txData[4], HEX);
-  //if (txData[5] < 0x10) Serial1.print("0");
-  //Serial1.print(txData[5], HEX);
-  //if (txData[6] < 0x10) Serial1.print("0");
-  //Serial1.print(txData[6], HEX);
-  //if (txData[7] < 0x10) Serial1.print("0");
-  //Serial1.print(txData[7], HEX);
+  if (txData[4] < 0x10) Serial1.print("0");
+  Serial1.print(txData[4], HEX);
+  if (txData[5] < 0x10) Serial1.print("0");
+  Serial1.print(txData[5], HEX);
+  if (txData[6] < 0x10) Serial1.print("0");
+  Serial1.print(txData[6], HEX);
+  if (txData[7] < 0x10) Serial1.print("0");
+  Serial1.print(txData[7], HEX);
   Serial1.print("\r");
 
   delay(50);
