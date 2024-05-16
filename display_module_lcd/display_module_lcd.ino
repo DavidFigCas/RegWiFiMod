@@ -251,8 +251,13 @@ void loop1()
   // ------------------------------------------------------ menu bar
 
   //display.fillScreen(WHITE);
-  
+
   display.fillRect(0, 0, 320, 20, WHITE);
+
+  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
+  //display.drawLine(65, 20, 65, 0, BLACK);  // Dibuja la línea horizontal
+  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
+  //display.drawLine(195, 20, 195, 0, BLACK);  // Dibuja la línea horizontal
 
   unixtime = doc_aux["time"].as<uint32_t>();
   //serializeJson(doc_aux["time"],Serial);
@@ -268,24 +273,25 @@ void loop1()
   if (stamp.year < 2000)
   {
 
+
+
+    // ----------- hora
     u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-    u8g2_for_adafruit_gfx.print("00");
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print("00");
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print("0000");
-
-
-
-
-    u8g2_for_adafruit_gfx.setCursor(260, 15);             // start writing at this position
-    u8g2_for_adafruit_gfx.print("0");
+    u8g2_for_adafruit_gfx.print(" 0");
 
     if ((millis() / 1000) % 2 == 0)
       u8g2_for_adafruit_gfx.print(":");
     else
       u8g2_for_adafruit_gfx.print(" ");
     u8g2_for_adafruit_gfx.print("00");
+
+    // ------------ fecha
+    u8g2_for_adafruit_gfx.setCursor(200, 15);             // start writing at this position
+    u8g2_for_adafruit_gfx.print("00");
+    u8g2_for_adafruit_gfx.print("/");
+    u8g2_for_adafruit_gfx.print("00");
+    u8g2_for_adafruit_gfx.print("/");
+    u8g2_for_adafruit_gfx.print("0000");
   }
 
   // --------------------------------------------- Display time/date
@@ -293,22 +299,9 @@ void loop1()
   {
 
     u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-    if (stamp.day < 10)
-      u8g2_for_adafruit_gfx.print("0");
-    u8g2_for_adafruit_gfx.print(stamp.day);
-    u8g2_for_adafruit_gfx.print("/");
-    if (stamp.month < 10)
-      u8g2_for_adafruit_gfx.print("0");
-    u8g2_for_adafruit_gfx.print(stamp.month);
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print(stamp.year);
-
 
     if (stamp.hour < 10)
-      u8g2_for_adafruit_gfx.setCursor(280, 15);             // start writing at this position
-    else
-      u8g2_for_adafruit_gfx.setCursor(260, 15);             // start writing at this position
-
+      u8g2_for_adafruit_gfx.print(" ");
     u8g2_for_adafruit_gfx.print(stamp.hour);
 
     if ((millis() / 1000) % 2 == 0)
@@ -319,22 +312,35 @@ void loop1()
     if (stamp.minute < 10)
       u8g2_for_adafruit_gfx.print("0");
     u8g2_for_adafruit_gfx.print(stamp.minute);
+
+
+    u8g2_for_adafruit_gfx.setCursor(200, 15);             // start writing at this positiont
+    if (stamp.day < 10)
+      u8g2_for_adafruit_gfx.print(" ");
+    u8g2_for_adafruit_gfx.print(stamp.day);
+    u8g2_for_adafruit_gfx.print("/");
+
+    if (stamp.month < 10)
+      u8g2_for_adafruit_gfx.print("0");
+    u8g2_for_adafruit_gfx.print(stamp.month);
+    u8g2_for_adafruit_gfx.print("/");
+    u8g2_for_adafruit_gfx.print(stamp.year);
+
+
+
+
   }
 
-  // Dibujar una línea horizontal
-  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
 
-  // Dibujar una línea horizontal
-  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
 
-  /*if(doc_aux["wifi"] == true)
-    {
-    display.drawBitmap(320 - 64, 240 - 64, wifi_on, 64, 64, WHITE, BLACK);
-    }
-    else
-    {
-    display.drawBitmap(320 - 64, 240 - 64, wifi_off, 64, 64, WHITE, BLACK);
-    }*/
+  if (doc_aux["wifi"] == true)
+  {
+    display.drawBitmap(0, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(0, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
+  }
 
 
 
@@ -469,14 +475,14 @@ void loop1()
         //if (print_litros < 10)
         //  display.print(" ");
 
-        display.fillRect(0, 22, 340, 180, BLACK);
-        
+        display.fillRect(0, 22, 340, 180, WHITE);
+
         u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
         u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
         //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
         u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
         u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
-        
+
         if (litros < 10)
           u8g2_for_adafruit_gfx.print("     ");
         else if (litros < 100)
