@@ -94,9 +94,9 @@ void loop()
   //serializeJson(doc_display, Serial);
   //Serial.println();
 
-  //Serial.print("Encoder: ");
-  //serializeJson(doc_encoder, Serial);
-  //Serial.println();
+  Serial.print("Encoder: ");
+  serializeJson(doc_encoder, Serial);
+  Serial.println();
 
   //Serial.print("main_status: ");
   //serializeJson(status_doc, Serial);
@@ -114,6 +114,8 @@ void loop()
   }
 
   display_reset = false;
+
+
 
 
 
@@ -256,6 +258,9 @@ void loop()
 
   doc_aux["STATE"] = STATE_DISPLAY;
   doc_aux["time"] = now.unixtime();
+  doc_aux["folio"] = folio;
+  doc_aux["sd"] = sd_ready;
+  doc_aux["valve"] = doc_encoder["valve"].as<bool>();
   serializeJson(doc_aux, b);
 
   //Serial.print("Master to display: ");
@@ -272,6 +277,8 @@ void loop()
   doc_aux.clear();
   doc_aux["reset"] = encoder_reset;
   doc_aux["litros"] = litros;
+  if (!doc_display["valve"].isNull())
+    doc_aux["valve"] = doc_display["valve"];
   serializeJson(doc_aux, b);
   //Serial.print("Master to encoder: ");
   //serializeJson(doc, Serial);

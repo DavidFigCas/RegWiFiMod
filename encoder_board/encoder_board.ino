@@ -54,6 +54,7 @@ unsigned long noDelta_timeCounter = 0;// Maximo tiempo desde que se detecto STOP
 
 
 bool newcommand = false;
+bool dir = true;
 
 //---------------------------------------------------- setup
 void setup()
@@ -68,8 +69,8 @@ void setup()
   Wire.begin(I2C_SLAVE_ADDRESS);
   Wire.onReceive(recv);
   Wire.onRequest(req);
-  pinMode(25, OUTPUT);
-  digitalWrite(25, 0);
+  pinMode(LED_1, OUTPUT);
+  digitalWrite(LED_1, 0);
   pinMode(28, OUTPUT);
   digitalWrite(28, 0);
   pinMode(27, OUTPUT);
@@ -85,10 +86,11 @@ void setup()
 
   //pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
-  
+
   encoder.begin();
   // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
-  doc["valve_open"] = false;
+  // doc["valve_open"] = false;
+  close_valve();
 
 
 }
@@ -104,6 +106,14 @@ void loop()
     serializeJson(doc_aux, Serial);
     Serial.println();
     newcommand = false;
+
+    if (!doc_aux["valve"].isNull())
+    {
+      if (doc_aux["valve"].as<bool>() == true)
+        open_valve();
+      else
+        close_valve();
+    }
   }
 
   // ---------------------------------------------- read encoder
@@ -120,12 +130,15 @@ void loop()
     if (new_value < 0)
     {
       encoder.reset();
+      dir = false;
       Serial.println("no ok");
       //gpio_put(LED_1, 1);
       old_value = 0;
       new_value = 0;
       delta = 0;
     }
+    else
+      dir = true;
   }
 
   // ---------------------------------------------- check_delta
@@ -143,7 +156,7 @@ void loop()
       if (noDelta_timeCounter >= noDelta_timeSTOP)
       {
         flow = false;
-        digitalWrite(25, LOW);
+        digitalWrite(LED_1, LOW);
         encoder.reset();
         if (STATE == 1)
         {
@@ -160,7 +173,7 @@ void loop()
       }
       flow = true;
       noDelta_timeCounter = 0;
-      digitalWrite(25, HIGH);
+      digitalWrite(LED_1, HIGH);
       if (STATE == 0)
       {
         STATE = 1;
@@ -181,8 +194,8 @@ void loop()
       // ------------------------------------- start to moving
 
       // ---------------------- open valve button
-      if (buttonx == true)
-      {
+      /*if (buttonx == true)
+        {
         sleep_ms(150);
         while (digitalRead(BTN_START) == 0) {}
         Serial.println("Button_preset");
@@ -203,14 +216,14 @@ void loop()
           doc["valve_open"] = true;
         }
         buttonx = false;
-      }
+        }*/
       break;
 
     case 1: // ------------------------------------------------------process started
       current_value = new_value;
       // ---------------------- open valve button
-      if (buttonx == 1)
-      {
+      /*if (buttonx == 1)
+        {
         sleep_ms(150);
         while (gpio_get(BTN_START) == 0) {}
         act_button = !act_button;
@@ -229,13 +242,13 @@ void loop()
           //gpio_put(LED_1, 0);
         }
         buttonx = 0;
-      }
+        }*/
       break;
 
     case 2: //------------------------------------------------- stop process, close valve
       Serial.println("STATE 2");
       Serial.println("FLOW STOP");
-      digitalWrite(SOLENOID, LOW);
+      close_valve();
       STATE = 3;
       current_value = new_value;
       break;
@@ -266,12 +279,12 @@ void loop()
 
 
     // ------------------------------------- print states
-    doc["pulses"] = new_value;   //Commands
+    //doc["pulses"] = new_value;   //Commands
     doc["STATE"] = STATE;
-    doc["delta"] = delta;
+    //doc["delta"] = delta;
     doc["flow"] = flow;
     doc["current"] = current_value;
-    doc["valve_open"] = bool (digitalRead(SOLENOID));
+    doc["valve"] = !(bool (digitalRead(SOLENOID)));
     //memset(resp, 0, sizeof(resp));
     Serial.print("Encoder State: ");
     serializeJson(doc, resp);
@@ -302,22 +315,46 @@ void recv(int len)
 // --------------------------------------------------------------- Req
 void req()
 {
-  doc["pulses"] = new_value;   //Commands
+  //doc["pulses"] = new_value;   //Commands
   doc["STATE"] = STATE;
-  doc["delta"] = delta;
+  //doc["delta"] = delta;
   doc["flow"] = flow;
   doc["current"] = current_value;
-  doc["valve_open"] = bool (digitalRead(SOLENOID));
+  doc["valve"] = !(bool (digitalRead(SOLENOID)));
+  doc["dir"] = dir;
   //memset(resp, 0, sizeof(resp));
   serializeJson(doc, resp);
 
   Wire.write(resp, 199);
 }
 
-
+// ----------------------------------------------------------- open
 void open_valve()
 {
-  buttonx = true;
+  //buttonx = true;
+  if (digitalRead(SOLENOID) == HIGH)
+  {
+    //gpio_put(SOLENOID, 0);
+    //gpio_put(LED_1, 0);
+    Serial.println("Valve OPEN");
+    digitalWrite(SOLENOID, LOW);
+    //doc["valve"] = true;
+  }
+}
+
+// ----------------------------------------------------------- close
+void close_valve()
+{
+  //buttonx = false;
+  if (digitalRead(SOLENOID) == LOW)
+  {
+    Serial.println("Valve CLOSED");
+    digitalWrite(SOLENOID, HIGH);
+    //doc["valve"] = false;
+    //delay(100);
+    //gpio_put(SOLENOID, 1);
+    //gpio_put(LED_1, 1);
+  }
 }
 
 

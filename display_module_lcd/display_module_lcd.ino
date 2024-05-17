@@ -25,6 +25,7 @@
 
 #define SDA_MAIN    16
 #define SCL_MAIN    17
+#define buttonPin   15
 
 int16_t x_lit = 450;   //(display.width() - tbw) / 2;
 int16_t y_lit = 125;  //(display.height() - tbh) / 2;
@@ -67,6 +68,10 @@ uint8_t STATE = 0;
 volatile boolean  shown = 0;
 volatile uint32_t number = 0;
 uint32_t unixtime, client;
+uint32_t prevTime;
+unsigned int desconex_count;
+bool buttonState;
+bool prevButtonState;
 
 
 
@@ -88,22 +93,27 @@ void recv(int len)
     //Serial.print(F("deserializeJson() failed: "));
     //Serial.println(error.f_str());
   }
-
   litros = doc_aux["litros"];
   //print_litros = doc_aux["litros_check"];
   print_litros = ceil(litros);
-  pesos = doc["precio"].as<uint32_t>();
+  pesos = doc_aux["precio"].as<uint32_t>();
   //print_pesos = doc_aux["precio_check"];
   print_pesos = pesos;
+
+
 }
 
 // Called when the I2C slave is read from
 // ---------------------------------------------------------------------------- req
 void req()
 {
+  doc.clear();
   doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
   doc["litros"] = litros;
+  if (prevButtonState != buttonState)
+    doc["valve"] =  buttonState;
+  prevButtonState = buttonState;
   serializeJson(doc, respx);
   Wire.write(respx, 199);
 }
@@ -151,7 +161,7 @@ void setup()
   //pinMode(27, OUTPUT);
 
 
-
+  pinMode(buttonPin, INPUT_PULLUP);
 
 }
 
@@ -175,11 +185,25 @@ void loop() {
 
     //Serial.println(jsonStr);
 
-    Serial.print("aux: ");
+    Serial.print("Master: ");
     serializeJson(doc_aux, Serial);
     Serial.println();
-    Serial.print("resp: ");
+    Serial.print("Display: ");
     Serial.println(respx);
+
+
+    desconex_count++;
+
+    if (desconex_count > 15) // More than one minute desconected from main board
+    {
+      desconex_count = 0;
+
+      if (prevTime > doc_aux["time"])
+      {
+        doc_aux.clear();
+      }
+      prevTime = doc_aux["time"];
+    }
 
 
 
@@ -187,6 +211,26 @@ void loop() {
     // Salida: {"name":"John","age":30,"city":"New York"}
   }
 
+
+
+  // Verifica si el botón está presionado
+  if (digitalRead(buttonPin) == LOW)
+  {
+    while (digitalRead(buttonPin) == LOW)
+    {
+      //Serial.println("El botón está presionado");
+      //send_cmd
+      delay(50);
+    }
+    buttonState = !buttonState;
+  }
+  //else
+  //{
+  //Serial.println("El botón no está presionado");
+  //}
+
+  // Espera un momento para evitar el rebote del botón
+  delay(50);
 
   //delay(1000);
 
@@ -246,13 +290,13 @@ void setup1()
 void loop1()
 {
 
-  Serial.println();
+  //Serial.println();
 
   // ------------------------------------------------------ menu bar
 
   //display.fillScreen(WHITE);
 
-  display.fillRect(0, 0, 320, 20, WHITE);
+
 
   display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
   //display.drawLine(65, 20, 65, 0, BLACK);  // Dibuja la línea horizontal
@@ -269,35 +313,42 @@ void loop1()
   //u8g2_for_adafruit_gfx.setFont(u8g2_font_ncenB12_tr);  // extended font
   u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
 
+
+
+
   // -------------------------------------------------- NOT CLOCK
   if (stamp.year < 2000)
   {
 
+    /*
 
+        // ----------- hora
+        u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print(" 0");
 
-    // ----------- hora
-    u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-    u8g2_for_adafruit_gfx.print(" 0");
+        if ((millis() / 1000) % 2 == 0)
+          u8g2_for_adafruit_gfx.print(":");
+        else
+          u8g2_for_adafruit_gfx.print(" ");
+        u8g2_for_adafruit_gfx.print("00");
 
-    if ((millis() / 1000) % 2 == 0)
-      u8g2_for_adafruit_gfx.print(":");
-    else
-      u8g2_for_adafruit_gfx.print(" ");
-    u8g2_for_adafruit_gfx.print("00");
+        // ------------ fecha
+        u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print("00");
+        u8g2_for_adafruit_gfx.print("/");
+        u8g2_for_adafruit_gfx.print("00");
+        u8g2_for_adafruit_gfx.print("/");
+        u8g2_for_adafruit_gfx.print("0000");
 
-    // ------------ fecha
-    u8g2_for_adafruit_gfx.setCursor(200, 15);             // start writing at this position
-    u8g2_for_adafruit_gfx.print("00");
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print("00");
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print("0000");
+        u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print("0000000");*/
   }
 
   // --------------------------------------------- Display time/date
   else
   {
 
+    display.fillRect(0, 0, 320, 20, WHITE);
     u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
 
     if (stamp.hour < 10)
@@ -314,7 +365,7 @@ void loop1()
     u8g2_for_adafruit_gfx.print(stamp.minute);
 
 
-    u8g2_for_adafruit_gfx.setCursor(200, 15);             // start writing at this positiont
+    u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this positiont
     if (stamp.day < 10)
       u8g2_for_adafruit_gfx.print(" ");
     u8g2_for_adafruit_gfx.print(stamp.day);
@@ -327,11 +378,38 @@ void loop1()
     u8g2_for_adafruit_gfx.print(stamp.year);
 
 
+    u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
+    if (doc_aux["folio"] < 10)
+    {
+      u8g2_for_adafruit_gfx.print("      ");
+    }
+    else if (doc_aux["folio"] < 100)
+    {
+      u8g2_for_adafruit_gfx.print("     ");
+    }
+    else if (doc_aux["folio"] < 1000)
+    {
+      u8g2_for_adafruit_gfx.print("    ");
+    }
+    else if (doc_aux["folio"] < 10000)
+    {
+      u8g2_for_adafruit_gfx.print("   ");
+    }
+    else if (doc_aux["folio"] < 100000)
+    {
+      u8g2_for_adafruit_gfx.print("  ");
+    }
+    else if (doc_aux["folio"] < 1000000)
+    {
+      u8g2_for_adafruit_gfx.print(" ");
+    }
+    u8g2_for_adafruit_gfx.print(doc_aux["folio"].as<String>());
+
 
 
   }
 
-
+  // ------------------------------------------ Barra de iconos
 
   if (doc_aux["wifi"] == true)
   {
@@ -342,335 +420,369 @@ void loop1()
     display.drawBitmap(0, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
   }
 
+  if (doc_aux["sd"] == true)
+  {
+    display.drawBitmap(32 + 5, 240 - 32, sd_on_small, 32, 32, WHITE, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(32 + 5, 240 - 32, sd_off_small, 32, 32, WHITE, BLACK);
+  }
 
-
-
+  if (doc_aux["valve"] == true)
+  {
+    display.drawBitmap(64 + 10, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(64 + 10, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
+  }
 
   display.refresh();
 
-  switch (STATE)
+  // ----------------------------------------------- Contadores
+  // --------------------- Error no hay tarjeta principal
+  if (doc_aux.isNull())
   {
-    // -------------------------------------------------------- display icons
-    case 0:
-      digitalWrite(25, HIGH);
-      //if (flag_print == true)
-      //{
-      Serial.println("Display Main Screen");
-      //for (int i = 0; i < 4; i++)
-      {
-        //display.setRotation(1);
 
+    display.fillRect(0, 22, 340, 180, WHITE);
 
-        // Screen must be refreshed at least once per second
-        //for (int j = 0; j < 4; j++)
+    u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+    u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+    //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
+    u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
+    u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
+    u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
+  }
+
+  // ----------------------- Despliega los contadores
+  else
+  {
+    switch (STATE)
+    {
+      // -------------------------------------------------------- display icons
+      case 0:
+        digitalWrite(25, HIGH);
+        //if (flag_print == true)
+        //{
+        Serial.println("Display Main Screen");
+        //for (int i = 0; i < 4; i++)
         {
-          display.refresh();
-          delay(500); // 1/2 sec delay
-        } // x4 = 2 second pause between rotations
-      }
-
-      //display.init(0);
-
-      //display.setFullWindow();
-      //display.firstPage();
-      //do
-      //{
-      //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-      //}
-      //while (display.nextPage());
-
-      //print_icons();
+          //display.setRotation(1);
 
 
-      //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
+          // Screen must be refreshed at least once per second
+          //for (int j = 0; j < 4; j++)
+          {
+            display.refresh();
+            delay(500); // 1/2 sec delay
+          } // x4 = 2 second pause between rotations
+        }
 
+        //display.init(0);
 
-
-      Serial.println("goto STATE 1");
-
-      //delay(10000);
-      //flag_print = false;
-      //}
-      //touch_data=0;
-      STATE = 1;
-      //display.clearDisplay();
-      //display.setFont(&FreeMonoBold24pt7b);
-      break;
-
-    // -------------------------------------------------------- display litros
-    case 1:
-
-      //display.clearDisplay();
-
-
-      digitalWrite(27, LOW);
-      digitalWrite(28, LOW);
-
-
-      print_litros = ceil(litros);
-      print_pesos = pesos;
-
-      /* Serial.print("Litros: ");
-        Serial.print(litros);
-        Serial.print("\t");
-        Serial.print("Print_Litros: ");
-        Serial.print(print_litros);
-        Serial.print("\t");
-        Serial.print("precio: ");
-        Serial.print(pesos);
-        Serial.print("\t");
-        Serial.print("Print_Precio: ");
-        Serial.println(pesos);*/
-
-      //print_litros
-
-      //new_litros = false;
-      //newcommand = false;
-
-
-      //if (shown == 1)
-      {
-        digitalWrite(25, !digitalRead(25));
-        if (litros > 0)
-          digitalWrite(27, !digitalRead(27));
-
-        //Show litros
-        String litStr = String(print_litros);  // Convierte el número a String
-        int16_t tbx, tby; uint16_t tbw, tbh;
-        // Obtener las dimensiones del texto
-        //display.setTextColor(BLACK);
-        //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        //display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
-
-
-        w = tbw + 10; // Un poco de margen
-        h = tbh + 10;
-
-        //display.setPartialWindow(x_lit, y_lit, w, h);
+        //display.setFullWindow();
         //display.firstPage();
+        //do
+        //{
+        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
+        //}
+        //while (display.nextPage());
+
+        //print_icons();
 
 
-        //do {
-        //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
-        //display.setTextSize(5);
-        //display.setTextColor(WHITE);
-
-        // Dibuja un cuadro en blanco
-        int x = 10; // Posición X inicial del cuadro
-        int y = 10; // Posición Y inicial del cuadro
-        int width = 50; // Ancho del cuadro
-        int height = 30; // Altura del cuadro
-
-        //display.drawRect(x, y, width, height, BLACK); // Dibuja un rectángulo (cuadro) en blanco
-
-        //display.refresh();
-
-        //delay(100);
-
-        //display.setTextSize(0);
-        //display.setTextColor(BLACK);
-        //display.setCursor(10, 100);
-        //if (print_litros < 100)
-        //  display.print(" ");
-        //if (print_litros < 10)
-        //  display.print(" ");
-
-        display.fillRect(0, 22, 340, 180, WHITE);
-
-        u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
-        u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
-        //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
-        u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
-        u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
-
-        if (litros < 10)
-          u8g2_for_adafruit_gfx.print("     ");
-        else if (litros < 100)
-          u8g2_for_adafruit_gfx.print("    ");
-        else if (litros < 1000)
-          u8g2_for_adafruit_gfx.print("   ");
-        else if (litros < 10000)
-          u8g2_for_adafruit_gfx.print("  ");
-        else if (litros < 100000)
-          u8g2_for_adafruit_gfx.print("  ");
-        u8g2_for_adafruit_gfx.print(litros);
-
-        u8g2_for_adafruit_gfx.setCursor(10, (78 * 2) + 40);           // start writing at this position
-        if (pesos < 10)
-          u8g2_for_adafruit_gfx.print("     ");
-        else if (pesos < 100)
-          u8g2_for_adafruit_gfx.print("    ");
-        else if (pesos < 1000)
-          u8g2_for_adafruit_gfx.print("   ");
-        else if (pesos < 10000)
-          u8g2_for_adafruit_gfx.print("  ");
-        else if (pesos < 100000)
-          u8g2_for_adafruit_gfx.print("  ");
-        u8g2_for_adafruit_gfx.print(pesos);
-
-        //display.print(litros);
-        display.refresh();
-        //delay(100);
-        //} while (display.nextPage());
-
-
-        //Show price
-        //display.setTextColor(GxEPD_BLACK);
-        //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        //display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
-        //display.setCursor(450, 256);
-        //display.print(print_pesos/100);
-        //display.displayWindow(450, 212, 250, 50);
-        //shown = 0;
-        //digitalWrite(28, 0);
-      }
-
-      shown = true;
-      //print_litros = ceil(litros);
-
-      break;
-
-    // ---------------------------------------------------------- Final price
-    case 2:
-      digitalWrite(28, LOW);
-      Serial.println("STATE 2");
-      tiempoActual2 = millis();
-
-      if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
-      {
-        // Ha pasado 1 minuto
-        tiempoAnterior2 = tiempoActual2;
-        digitalWrite(27, !digitalRead(27));
-
-      }
+        //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
 
 
 
-      //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
-      //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+        Serial.println("goto STATE 1");
 
-      if (shown == true)
-      {
-        Serial.println("Final Numbers");
-        //Serial.print("Litros: ");
-        //Serial.print(litros);
+        //delay(10000);
+        //flag_print = false;
+        //}
+        //touch_data=0;
+        STATE = 1;
+        //display.clearDisplay();
+        //display.setFont(&FreeMonoBold24pt7b);
+        break;
 
-        //Serial.print("\t");
+      // -------------------------------------------------------- display litros
+      case 1:
 
-        //print_litros = ceil(litros);
-        Serial.print("Print_Litros: ");
-        Serial.print(print_litros);
-
-        Serial.print("\t");
-
-        Serial.print("precio: ");
-        Serial.println(print_pesos);
+        //display.clearDisplay();
 
 
-        String litStr = String(print_litros);  // Convierte el número a String
-        int16_t tbx, tby; uint16_t tbw, tbh;
-        // Obtener las dimensiones del texto
-        display.setTextColor(BLACK);
-        // display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-        display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+        digitalWrite(27, LOW);
+        digitalWrite(28, LOW);
 
 
-        w = tbw + 10; // Un poco de margen
-        h = tbh + 10;
+        print_litros = ceil(litros);
+        print_pesos = pesos;
 
-        //display.setPartialWindow(x_lit, y_lit, w, h);
-        //display.firstPage();
+        /* Serial.print("Litros: ");
+          Serial.print(litros);
+          Serial.print("\t");
+          Serial.print("Print_Litros: ");
+          Serial.print(print_litros);
+          Serial.print("\t");
+          Serial.print("precio: ");
+          Serial.print(pesos);
+          Serial.print("\t");
+          Serial.print("Print_Precio: ");
+          Serial.println(pesos);*/
 
+        //print_litros
 
-        //do {
-        //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
-        //display.print(litStr);
-        //} while (display.nextPage());
-
-
-        String pesosStr = String(print_pesos);  // Convierte el número a String
-        display.getTextBounds(pesosStr, 0, 0, &tbx, &tby, &tbw, &tbh);
-
-        w2 = tbw + 10; // Un poco de margen
-        h2 = tbh + 10;
-
-        //display.setPartialWindow(x_pes, y_pes, w2, h2);
-        //display.firstPage();
-        //do {
-        //display.setCursor(x_pes - tbx, y_pes - tby); // Ajustar la posición del cursor
-        //display.print(pesosStr);
-        //} while (display.nextPage());
+        //new_litros = false;
+        //newcommand = false;
 
 
-        /*display.setTextColor(GxEPD_BLACK);
-          display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-          display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
-          display.setCursor(450, 169);
-          display.print(print_litros);
-          display.displayWindow(450, 125, 250, 50);
+        //if (shown == 1)
+        {
+          digitalWrite(25, !digitalRead(25));
+          if (litros > 0)
+            digitalWrite(27, !digitalRead(27));
+
+          //Show litros
+          String litStr = String(print_litros);  // Convierte el número a String
+          int16_t tbx, tby; uint16_t tbw, tbh;
+          // Obtener las dimensiones del texto
+          //display.setTextColor(BLACK);
+          //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+          //display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+
+          w = tbw + 10; // Un poco de margen
+          h = tbh + 10;
+
+          //display.setPartialWindow(x_lit, y_lit, w, h);
+          //display.firstPage();
+
+
+          //do {
+          //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
+          //display.setTextSize(5);
+          //display.setTextColor(WHITE);
+
+          // Dibuja un cuadro en blanco
+          int x = 10; // Posición X inicial del cuadro
+          int y = 10; // Posición Y inicial del cuadro
+          int width = 50; // Ancho del cuadro
+          int height = 30; // Altura del cuadro
+
+          //display.drawRect(x, y, width, height, BLACK); // Dibuja un rectángulo (cuadro) en blanco
+
+          //display.refresh();
+
+          //delay(100);
+
+          //display.setTextSize(0);
+          //display.setTextColor(BLACK);
+          //display.setCursor(10, 100);
+          //if (print_litros < 100)
+          //  display.print(" ");
+          //if (print_litros < 10)
+          //  display.print(" ");
+
+          display.fillRect(0, 22, 340, 180, WHITE);
+
+          u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+          u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+          //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
+          u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+          u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
+
+          if (litros < 10)
+            u8g2_for_adafruit_gfx.print("     ");
+          else if (litros < 100)
+            u8g2_for_adafruit_gfx.print("    ");
+          else if (litros < 1000)
+            u8g2_for_adafruit_gfx.print("   ");
+          else if (litros < 10000)
+            u8g2_for_adafruit_gfx.print("  ");
+          else if (litros < 100000)
+            u8g2_for_adafruit_gfx.print("  ");
+          u8g2_for_adafruit_gfx.print(litros);
+
+          u8g2_for_adafruit_gfx.setCursor(10, (78 * 2) + 40);           // start writing at this position
+          if (pesos < 10)
+            u8g2_for_adafruit_gfx.print("     ");
+          else if (pesos < 100)
+            u8g2_for_adafruit_gfx.print("    ");
+          else if (pesos < 1000)
+            u8g2_for_adafruit_gfx.print("   ");
+          else if (pesos < 10000)
+            u8g2_for_adafruit_gfx.print("  ");
+          else if (pesos < 100000)
+            u8g2_for_adafruit_gfx.print("  ");
+          u8g2_for_adafruit_gfx.print(pesos);
+
+          //display.print(litros);
+          //display.refresh();
+          //delay(100);
+          //} while (display.nextPage());
+
 
           //Show price
-          display.setTextColor(GxEPD_BLACK);
-          display.setFont(&CodenameCoderFree4F_Bold40pt7b);
-          display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
-          display.setCursor(450, 256);
-          display.print(print_pesos);
-          display.displayWindow(450, 212, 250, 50);*/
-        Serial.println("Show price");
-        //delay(5000);
-        //Serial.println("goto STATE 3");
-        //STATE = 3;
-        shown = false;
-      }
-      flag_print = true;
-      delay(10);
-      break;
+          //display.setTextColor(GxEPD_BLACK);
+          //display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+          //display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
+          //display.setCursor(450, 256);
+          //display.print(print_pesos/100);
+          //display.displayWindow(450, 212, 250, 50);
+          //shown = 0;
+          //digitalWrite(28, 0);
+        }
 
-    // ---------------------------------------------------------- Bing Printer
-    case 3:
+        shown = true;
+        //print_litros = ceil(litros);
 
-      //digitalWrite(28, HIGH);
-      Serial.println("STATE 3");
-      digitalWrite(27, LOW);
-      digitalWrite(25, LOW);
-      tiempoActual2 = millis();
+        break;
 
-      if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
-      {
-        // Ha pasado 1 minuto
-        tiempoAnterior2 = tiempoActual2;
-        digitalWrite(28, !digitalRead(28));
+      // ---------------------------------------------------------- Final price
+      case 2:
+        digitalWrite(28, LOW);
+        Serial.println("STATE 2");
+        tiempoActual2 = millis();
 
-      }
+        if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+        {
+          // Ha pasado 1 minuto
+          tiempoAnterior2 = tiempoActual2;
+          digitalWrite(27, !digitalRead(27));
 
-      if (flag_print == true)
-      {
-        flag_print = false;
-        //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
-        //display.firstPage();
-        //do {
-        //  display.fillScreen(GxEPD_WHITE);  // Llena la pantalla de blanco (borra todo)
-        //} while (display.nextPage());
-
-        //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
-
-        //display.firstPage();
-        //do {
-        //display.setFullWindow();
-        //display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
-        //} while (display.nextPage());
-
-        //display.powerOff();
-      }
+        }
 
 
-      //STATE = 0;
-      //Serial.println("goto STATE 0");
-      delay(10);
-      break;
-    default:
-      break;
+
+        //litros = ((uint32_t)litros_num[0] << 24) | ((uint32_t)litros_num[1] << 16) | ((uint32_t)litros_num[2] << 8) | litros_num[3];
+        //pesos = ((uint32_t)pesos_num[0] << 24) | ((uint32_t)pesos_num[1] << 16) | ((uint32_t)pesos_num[2] << 8) | pesos_num[3];
+
+        if (shown == true)
+        {
+          Serial.println("Final Numbers");
+          //Serial.print("Litros: ");
+          //Serial.print(litros);
+
+          //Serial.print("\t");
+
+          //print_litros = ceil(litros);
+          Serial.print("Print_Litros: ");
+          Serial.print(print_litros);
+
+          Serial.print("\t");
+
+          Serial.print("precio: ");
+          Serial.println(print_pesos);
+
+
+          String litStr = String(print_litros);  // Convierte el número a String
+          int16_t tbx, tby; uint16_t tbw, tbh;
+          // Obtener las dimensiones del texto
+          display.setTextColor(BLACK);
+          // display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+          display.getTextBounds(litStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+
+          w = tbw + 10; // Un poco de margen
+          h = tbh + 10;
+
+          //display.setPartialWindow(x_lit, y_lit, w, h);
+          //display.firstPage();
+
+
+          //do {
+          //display.setCursor(x_lit - tbx, y_lit - tby); // Ajustar la posición del cursor
+          //display.print(litStr);
+          //} while (display.nextPage());
+
+
+          String pesosStr = String(print_pesos);  // Convierte el número a String
+          display.getTextBounds(pesosStr, 0, 0, &tbx, &tby, &tbw, &tbh);
+
+          w2 = tbw + 10; // Un poco de margen
+          h2 = tbh + 10;
+
+          //display.setPartialWindow(x_pes, y_pes, w2, h2);
+          //display.firstPage();
+          //do {
+          //display.setCursor(x_pes - tbx, y_pes - tby); // Ajustar la posición del cursor
+          //display.print(pesosStr);
+          //} while (display.nextPage());
+
+
+          /*display.setTextColor(GxEPD_BLACK);
+            display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+            display.fillRect(450, 125, 250, 50, GxEPD_WHITE);
+            display.setCursor(450, 169);
+            display.print(print_litros);
+            display.displayWindow(450, 125, 250, 50);
+
+            //Show price
+            display.setTextColor(GxEPD_BLACK);
+            display.setFont(&CodenameCoderFree4F_Bold40pt7b);
+            display.fillRect(450, 212, 250, 50, GxEPD_WHITE);
+            display.setCursor(450, 256);
+            display.print(print_pesos);
+            display.displayWindow(450, 212, 250, 50);*/
+          Serial.println("Show price");
+          //delay(5000);
+          //Serial.println("goto STATE 3");
+          //STATE = 3;
+          shown = false;
+        }
+        flag_print = true;
+        delay(10);
+        break;
+
+      // ---------------------------------------------------------- Bing Printer
+      case 3:
+
+        //digitalWrite(28, HIGH);
+        Serial.println("STATE 3");
+        digitalWrite(27, LOW);
+        digitalWrite(25, LOW);
+        tiempoActual2 = millis();
+
+        if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
+        {
+          // Ha pasado 1 minuto
+          tiempoAnterior2 = tiempoActual2;
+          digitalWrite(28, !digitalRead(28));
+
+        }
+
+        if (flag_print == true)
+        {
+          flag_print = false;
+          //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
+          //display.firstPage();
+          //do {
+          //  display.fillScreen(GxEPD_WHITE);  // Llena la pantalla de blanco (borra todo)
+          //} while (display.nextPage());
+
+          //display.setFullWindow();  // Establece el área de dibujo para toda la pantalla
+
+          //display.firstPage();
+          //do {
+          //display.setFullWindow();
+          //display.drawImage(BitmapPrinter, 300, 140, 200, 200, false, false, true);
+          //} while (display.nextPage());
+
+          //display.powerOff();
+        }
+
+
+        //STATE = 0;
+        //Serial.println("goto STATE 0");
+        delay(10);
+        break;
+      default:
+        break;
+    }
   }
+  display.refresh();
 
   // ------------------------------------------- take STATE from master
   if (!doc_aux["STATE"].isNull())

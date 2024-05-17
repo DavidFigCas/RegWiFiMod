@@ -37,6 +37,7 @@ bool SD_Init(void)
   if (!sd_ready)
   {
     Serial.println("> It looks like you haven't inserted the SD card..");
+    
     //Serial.println("{\"retry_sd\":true}");
     if (obj["sd_try"].isNull())
       obj["sd_try"] = 0;
