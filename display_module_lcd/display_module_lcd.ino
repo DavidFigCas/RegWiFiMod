@@ -9,6 +9,7 @@
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <cmath> // 
+#include <Keypad.h>
 
 #define SHARP_SCK  2
 #define SHARP_MOSI 3
@@ -16,9 +17,6 @@
 
 #define BLACK 0
 #define WHITE 1
-
-
-
 
 #define BUF_LEN         0x100
 #define I2C_SLAVE_ADDRESS  0x5A
@@ -70,8 +68,43 @@ volatile uint32_t number = 0;
 uint32_t unixtime, client;
 uint32_t prevTime;
 unsigned int desconex_count;
-bool buttonState;
-bool prevButtonState;
+bool enter;
+bool preventer;
+int litrostarget;
+
+// Definir el tamaño del teclado
+const uint8_t FILAS = 4; // Cuatro filas
+const uint8_t COLUMNAS = 4; // Cuatro columnas
+
+// Definir las conexiones de las filas y columnas
+uint8_t pinesFilas[FILAS] = {11, 12, 13, 14}; // Ajustar estos pines según tu conexión
+uint8_t pinesColumnas[COLUMNAS] = {18, 19, 20, 21}; // Ajustar estos pines según tu conexión
+
+// Definir la disposición de caracteres del teclado
+char teclas[FILAS][COLUMNAS] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+
+// Crear la instancia del teclado
+Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
+
+// Variable para almacenar los números ingresados
+String litros_str = "";
+
+// Variable para rastrear si se ha presionado '#'
+bool primero = false;
+// Variable para rastrear el tiempo del primer '#'
+unsigned long tiempoPrimero = 0;
+// Definir el tiempo de espera para el segundo '#'
+const unsigned long tiempoEspera = 500; // 1 segundo
+
+// Contador de veces que se ha presionado '#'
+int contador = 0;
+
+
 
 
 
@@ -93,7 +126,7 @@ void recv(int len)
     //Serial.print(F("deserializeJson() failed: "));
     //Serial.println(error.f_str());
   }
-  if (buttonState == false) // solo para test
+  if (enter == false) // solo para test
     litros = doc_aux["litros"];
   else
     litros = 123;
@@ -110,22 +143,23 @@ void recv(int len)
 // ---------------------------------------------------------------------------- req
 void req()
 {
+  //cambio buttonstate to enter
   doc.clear();
   doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  if (prevButtonState != buttonState)
+  if (preventer != enter)
   {
-    if (buttonState == true) // solo para test
+    if (enter == true) // solo para test
     {
-      doc["valve"] =  buttonState;
-      doc["litros_target"] = 123;
+      doc["valve"] =  enter;
+      doc["litros_target"] = litrostarget;
     }
 
   }
   else
     doc["litros"] = litros;
-  prevButtonState = buttonState;
+  preventer = enter;
   serializeJson(doc, respx);
   Wire.write(respx, 199);
 }
@@ -224,27 +258,8 @@ void loop() {
   }
 
 
+  char tecla = teclado.getKey();
 
-  // Verifica si el botón está presionado
-  if (digitalRead(buttonPin) == LOW)
-  {
-    while (digitalRead(buttonPin) == LOW)
-    {
-      //Serial.println("El botón está presionado");
-      //send_cmd
-      delay(50);
-    }
-    buttonState = !buttonState;
-  }
-  //else
-  //{
-  //Serial.println("El botón no está presionado");
-  //}
-
-  // Espera un momento para evitar el rebote del botón
-  delay(50);
-
-  //delay(1000);
 
 
 }
@@ -481,7 +496,7 @@ void loop1()
 
   // ----------------------------------------------- Contadores
   // --------------------- Error no hay tarjeta principal
-  if (doc_aux.isNull())
+  /*if (doc_aux.isNull())
   {
 
     display.fillRect(0, 22, 340, 180, WHITE);
@@ -495,7 +510,7 @@ void loop1()
   }
 
   // ----------------------- Despliega los contadores
-  else
+  else*/
   {
     switch (STATE)
     {
