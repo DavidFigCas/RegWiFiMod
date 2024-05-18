@@ -31,6 +31,7 @@ StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200
 
 uint8_t STATE = 0;
 volatile int32_t current_value;
+volatile int32_t target_value;
 volatile int32_t new_value, delta, old_value = 0;
 bool flow, buttonx, act_button = false;
 unsigned long previousMillis = 0;  // Almacena la última vez que el LED cambió
@@ -99,6 +100,7 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+  // ------------------------------------- process
   if (newcommand == true )
   {
     deserializeJson(doc_aux, jsonStr);
@@ -113,6 +115,11 @@ void loop()
         open_valve();
       else
         close_valve();
+    }
+
+    if ((!doc_aux["litros_target"].isNull()) && (!doc_aux["pulsos_litro"].isNull()))
+    {
+      target_value = (doc_aux["litros_target"].as<int32_t>()) * (doc_aux["pulsos_litro"].as<int32_t>());
     }
   }
 
@@ -221,6 +228,20 @@ void loop()
 
     case 1: // ------------------------------------------------------process started
       current_value = new_value;
+      if (target_value > 0)
+      {
+        if (current_value >= target_value)
+        {
+          if (digitalRead(SOLENOID) == LOW)
+          {
+            Serial.println("TARGET LITROS");
+            Serial.println("AUTO STOP");
+          }
+          close_valve();
+          //STATE = 2;
+        }
+
+      }
       // ---------------------- open valve button
       /*if (buttonx == 1)
         {
@@ -249,8 +270,17 @@ void loop()
       Serial.println("STATE 2");
       Serial.println("FLOW STOP");
       close_valve();
-      STATE = 3;
-      current_value = new_value;
+
+      if (new_value < MAX_DELTA)
+      {
+        STATE = 0;
+        noDelta_timeCounter = 0;
+      }
+      else
+      {
+        STATE = 3;
+        current_value = new_value;
+      }
       break;
 
     case 3: //wait reset command from MASTER
@@ -331,6 +361,7 @@ void req()
 // ----------------------------------------------------------- open
 void open_valve()
 {
+  STATE = 1;
   //buttonx = true;
   if (digitalRead(SOLENOID) == HIGH)
   {

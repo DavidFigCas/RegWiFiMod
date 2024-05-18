@@ -277,8 +277,17 @@ void loop()
   doc_aux.clear();
   doc_aux["reset"] = encoder_reset;
   doc_aux["litros"] = litros;
+  
   if (!doc_display["valve"].isNull())
     doc_aux["valve"] = doc_display["valve"];
+  
+  if (!doc_display["litros_target"].isNull())
+  {
+    doc_aux["litros_target"] = doc_display["litros_target"];
+    doc_aux["pulsos_litro"] = pulsos_litro;
+  }
+    
+  
   serializeJson(doc_aux, b);
   //Serial.print("Master to encoder: ");
   //serializeJson(doc, Serial);

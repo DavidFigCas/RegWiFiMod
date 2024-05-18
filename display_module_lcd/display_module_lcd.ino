@@ -93,7 +93,10 @@ void recv(int len)
     //Serial.print(F("deserializeJson() failed: "));
     //Serial.println(error.f_str());
   }
-  litros = doc_aux["litros"];
+  if (buttonState == false) // solo para test
+    litros = doc_aux["litros"];
+  else
+    litros = 123;
   //print_litros = doc_aux["litros_check"];
   print_litros = ceil(litros);
   pesos = doc_aux["precio"].as<uint32_t>();
@@ -110,9 +113,18 @@ void req()
   doc.clear();
   doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
-  doc["litros"] = litros;
+
   if (prevButtonState != buttonState)
-    doc["valve"] =  buttonState;
+  {
+    if (buttonState == true) // solo para test
+    {
+      doc["valve"] =  buttonState;
+      doc["litros_target"] = 123;
+    }
+
+  }
+  else
+    doc["litros"] = litros;
   prevButtonState = buttonState;
   serializeJson(doc, respx);
   Wire.write(respx, 199);
@@ -192,10 +204,10 @@ void loop() {
     Serial.println(respx);
 
 
-    desconex_count++;
+    /*desconex_count++;
 
-    if (desconex_count > 15) // More than one minute desconected from main board
-    {
+      if (desconex_count > 15) // More than one minute desconected from main board
+      {
       desconex_count = 0;
 
       if (prevTime > doc_aux["time"])
@@ -203,7 +215,7 @@ void loop() {
         doc_aux.clear();
       }
       prevTime = doc_aux["time"];
-    }
+      }*/
 
 
 
@@ -431,20 +443,37 @@ void loop1()
 
   if (doc_aux["valve"] == true)
   {
-    display.drawBitmap(32*2 + 5, 240 - 32, valve_on_small, 32, 32, WHITE, BLACK);
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 2 + 5, 240 - 32, valve_on_small, 32, 32, WHITE, BLACK);
+    else
+      //display.fillRect(32 * 2 + 5, 240 - 32, 32, 32, BLACK); energy_small
+      display.drawBitmap(32 * 2 + 5, 240 - 32, energy_small, 32, 32, WHITE, BLACK);
+
   }
   else
   {
-    display.drawBitmap(32*2 + 5, 240 - 32, valve_off_small, 32, 32, WHITE, BLACK);
+    display.drawBitmap(32 * 2 + 5, 240 - 32, valve_off_small, 32, 32, WHITE, BLACK);
   }
 
   if (STATE >= 2)
   {
-    display.drawBitmap(32*3 + 5, 240 - 32, printer_on_small, 32, 32, WHITE, BLACK);
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 3 + 5, 240 - 32, printer_on_small, 32, 32, WHITE, BLACK);
+    else
+      display.fillRect(32 * 3 + 5, 240 - 32, 32, 32, BLACK);
   }
   else
   {
-    display.drawBitmap(32*3 + 5, 240 - 32, printer_off_small, 32, 32, WHITE, BLACK);
+    display.drawBitmap(32 * 3 + 5, 240 - 32, printer_off_small, 32, 32, WHITE, BLACK);
+  }
+
+  if (doc_aux["gps"] == true)
+  {
+    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_on_small, 32, 32, WHITE, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_off_small, 32, 32, WHITE, BLACK);
   }
 
 
@@ -601,7 +630,7 @@ void loop1()
           u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
           //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
           u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
-          u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
+          u8g2_for_adafruit_gfx.setCursor(5, 78 + 30);             // start writing at this position
 
           if (litros < 10)
             u8g2_for_adafruit_gfx.print("     ");
@@ -612,10 +641,10 @@ void loop1()
           else if (litros < 10000)
             u8g2_for_adafruit_gfx.print("  ");
           else if (litros < 100000)
-            u8g2_for_adafruit_gfx.print("  ");
+            u8g2_for_adafruit_gfx.print(" ");
           u8g2_for_adafruit_gfx.print(litros);
 
-          u8g2_for_adafruit_gfx.setCursor(10, (78 * 2) + 40);           // start writing at this position
+          u8g2_for_adafruit_gfx.setCursor(5, (78 * 2) + 40);           // start writing at this position
           if (pesos < 10)
             u8g2_for_adafruit_gfx.print("     ");
           else if (pesos < 100)
@@ -625,7 +654,8 @@ void loop1()
           else if (pesos < 10000)
             u8g2_for_adafruit_gfx.print("  ");
           else if (pesos < 100000)
-            u8g2_for_adafruit_gfx.print("  ");
+            u8g2_for_adafruit_gfx.print(" ");
+
           u8g2_for_adafruit_gfx.print(pesos);
 
           //display.print(litros);
