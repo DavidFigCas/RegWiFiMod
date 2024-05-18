@@ -431,12 +431,22 @@ void loop1()
 
   if (doc_aux["valve"] == true)
   {
-    display.drawBitmap(64 + 10, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
+    display.drawBitmap(32*2 + 5, 240 - 32, valve_on_small, 32, 32, WHITE, BLACK);
   }
   else
   {
-    display.drawBitmap(64 + 10, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
+    display.drawBitmap(32*2 + 5, 240 - 32, valve_off_small, 32, 32, WHITE, BLACK);
   }
+
+  if (STATE >= 2)
+  {
+    display.drawBitmap(32*3 + 5, 240 - 32, printer_on_small, 32, 32, WHITE, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(32*3 + 5, 240 - 32, printer_off_small, 32, 32, WHITE, BLACK);
+  }
+
 
   display.refresh();
 
