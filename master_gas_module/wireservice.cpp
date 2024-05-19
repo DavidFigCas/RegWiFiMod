@@ -4,7 +4,10 @@ void I2C_Init()
 {
   //Wire.setSDA(SDA_MAIN);
   //Wire.setSCL(SCL_MAIN);
+  Wire.setClock(100000);
   Wire.begin();
+  
+  
   //delay(5000);
   //Serial.println("Main Logic START");
 }
@@ -32,7 +35,7 @@ void I2C_Get()
   deserializeJson(doc_display, jsonStr);
 
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // --------------------- leer encoder
   // Read from the slave and print out
@@ -63,7 +66,7 @@ void I2C_Get()
   serializeJson(doc_encoder, Serial);
   Serial.println();
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 }
 
 
@@ -102,7 +105,7 @@ void I2C_Put()
   Wire.beginTransmission(DISPLAY_ADD);
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 
   // ---------------------- encoder doc
   doc_aux.clear();
@@ -117,5 +120,5 @@ void I2C_Put()
   Wire.write((const uint8_t*)b, (strlen(b)));
   Wire.endTransmission();
 
-  delay(TIME_SPACE);
+  //delay(TIME_SPACE);
 }

@@ -1,7 +1,7 @@
 {
- "t_update": 500,
+ "t_update": 50,
  "delta": 1,
- "t_encoder": 100,
- "t_delta": 1000,
+ "t_encoder": 0,
+ "t_delta": 1,
  "t_stop": 60
 }

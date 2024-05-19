@@ -42,7 +42,7 @@ unsigned long interval = 500;              // Print and send
 unsigned long MAX_DELTA = 1;                //10 Pulsos detectados en Intervalo2  (DELTA)
 unsigned long intervalo = 100;    //ENCODER Intervalo de tiempo (milisegundos)
 unsigned long intervalo2 = 2000;  //DELTA Intervalo de tiempo (500 milisegundos)
-unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
 
 
 uint8_t STATE = 0;
@@ -68,6 +68,7 @@ unsigned long tiempoActual2;
 
 
 unsigned long noDelta_timeCounter = 0;// Contador tiempo desde que se detecto STOP_FLOW
+unsigned long noDelta_timeCountePrev;
 
 
 
@@ -94,7 +95,7 @@ void setup()
   pinMode(27, OUTPUT);
   digitalWrite(27, 0);
 
-  delay(5000);
+  //delay(5000);
 
   Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
@@ -128,9 +129,10 @@ void loop()
   if (newcommand == true )
   {
     deserializeJson(doc_aux, jsonStr);
-    Serial.print("Master: ");
-    serializeJson(doc_aux, Serial);
-    Serial.println();
+    //Serial.print("Master: ");
+    //serializeJson(doc_aux, Serial);
+    //Serial.println();
+    
     newcommand = false;
 
     if (!doc_aux["valve"].isNull())
@@ -185,7 +187,7 @@ void loop()
   {
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
-    new_value = abs(encoder.getCount());
+    new_value = abs(encoder.getCount()); // Con el absoluto, no importa la dir
     //Serial.print("new_value: ");
     //Serial.println(new_value);
 
@@ -212,7 +214,6 @@ void loop()
   tiempoActual2 = millis();
   if (tiempoActual2 - tiempoAnterior2 >= intervalo2)
   {
-    // Ha pasado 1 minuto
     tiempoAnterior2 = tiempoActual2;
 
     // ------------------------------------- delta is noise?
@@ -226,9 +227,10 @@ void loop()
 
     if (delta < MAX_DELTA)
     {
-      noDelta_timeCounter++;
-      if (noDelta_timeCounter >= noDelta_timeSTOP)
+      noDelta_timeCounter = millis();
+      if (noDelta_timeCounter - noDelta_timeCountePrev >= (noDelta_timeSTOP * 1000))
       {
+        noDelta_timeCountePrev = noDelta_timeCounter;
         flow = false;
         //saveConfig = true;
         digitalWrite(LED_1, LOW);
@@ -248,7 +250,7 @@ void loop()
         saveConfig = true;
       }
       flow = true;
-      noDelta_timeCounter = 0;
+      noDelta_timeCountePrev = millis();
       digitalWrite(LED_1, HIGH);
       if (STATE == 0)
       {
@@ -381,7 +383,7 @@ void loop()
 
     // ------------------------------------- print states
     //doc["pulses"] = new_value;   //Commands
-    doc["STATE"] = STATE;
+   /* doc["STATE"] = STATE;
     doc["delta"] = delta;
     doc["flow"] = flow;
     doc["current"] = current_value;
@@ -390,7 +392,7 @@ void loop()
     //memset(resp, 0, sizeof(resp));
     Serial.print("Encoder State: ");
     serializeJson(doc, resp);
-    Serial.println(resp);
+    Serial.println(resp);*/
     previousMillis = currentMillis;
   }
 
@@ -428,23 +430,33 @@ void recv(int len)
 // --------------------------------------------------------------- Req
 void req()
 {
+  doc.clear();
   //doc["pulses"] = new_value;   //Commands
   doc["STATE"] = STATE;
   //doc["delta"] = delta;
-  doc["flow"] = flow;
+  //doc["flow"] = flow;
   doc["current"] = current_value;
-  doc["valve"] = !(bool (digitalRead(SOLENOID)));
-  doc["dir"] = dir;
+  doc["valve"] = !((digitalRead(SOLENOID)));
+  //doc["dir"] = dir;
 
-  //if(STATE == 3)
+  if(STATE == 3)
   {
     doc["total_encoder"] = total_encoder;
   }
 
   //memset(resp, 0, sizeof(resp));
+
+  char temp[200];
+  size_t len = serializeJson(doc, temp);
+   memset(resp, 0, sizeof(resp));
+
+  // Copiar solo los bytes útiles al buffer 'resp'
+  memcpy(resp, temp, len);
+
+  
   serializeJson(doc, resp);
 
-  Wire.write(resp, 199);
+  Wire.write(resp, len);
 }
 
 // ----------------------------------------------------------- open

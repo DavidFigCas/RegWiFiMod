@@ -94,9 +94,9 @@ void loop()
   //serializeJson(doc_display, Serial);
   //Serial.println();
 
-  Serial.print("Encoder: ");
-  serializeJson(doc_encoder, Serial);
-  Serial.println();
+  //Serial.print("Encoder: ");
+  //serializeJson(doc_encoder, Serial);
+  //Serial.println();
 
   //Serial.print("main_status: ");
   //serializeJson(status_doc, Serial);
