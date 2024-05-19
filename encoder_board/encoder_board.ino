@@ -46,6 +46,7 @@ unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_F
 
 
 uint8_t STATE = 0;
+volatile uint32_t total_encoder;
 volatile int32_t current_value;
 volatile int32_t target_value;
 volatile int32_t new_value, delta, old_value = 0;
@@ -93,7 +94,7 @@ void setup()
   pinMode(27, OUTPUT);
   digitalWrite(27, 0);
 
-  delay(2000);
+  delay(5000);
 
   Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
@@ -113,7 +114,7 @@ void setup()
 
   if (spiffs_init())
   {
-    //loadConfig();       // Load and update behaivor of system
+    loadConfig();       // Load and update behaivor of system
   }
 }
 
@@ -121,6 +122,8 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+
+
   // ------------------------------------- process
   if (newcommand == true )
   {
@@ -142,6 +145,38 @@ void loop()
     {
       target_value = (doc_aux["litros_target"].as<int32_t>()) * (doc_aux["pulsos_litro"].as<int32_t>());
     }
+
+    if (!doc_aux["t_update"].isNull())
+    {
+      doc_conf["t_update"] = doc_aux["t_update"];              // Print and send
+      saveConfig = true;
+    }
+
+
+    if (!doc_aux["delta"].isNull())
+    {
+      doc_conf["delta"] = doc_aux["delta"];                //10 Pulsos detectados en Intervalo2  (DELTA)
+      saveConfig = true;
+    }
+
+    if (!doc_aux["t_encoder"].isNull())
+    {
+      doc_conf["t_encoder"] = doc_aux["t_encoder"];    //ENCODER Intervalo de tiempo (milisegundos)
+      saveConfig = true;
+    }
+
+    if (!doc_aux["t_delta"].isNull())
+    {
+      doc_conf["t_delta"] = doc_aux["t_delta"];  //DELTA Intervalo de tiempo (500 milisegundos)
+      saveConfig = true;
+    }
+
+
+    if (!doc_aux["t_stop"].isNull())
+    {
+      doc_conf["t_stop"] = doc_aux["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+      saveConfig = true;
+    }
   }
 
   // ---------------------------------------------- read encoder
@@ -150,7 +185,7 @@ void loop()
   {
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
-    new_value = encoder.getCount();
+    new_value = abs(encoder.getCount());
     //Serial.print("new_value: ");
     //Serial.println(new_value);
 
@@ -166,7 +201,11 @@ void loop()
       delta = 0;
     }
     else
+    {
       dir = true;
+      //total_encoder = total_encoder + new_value;
+    }
+
   }
 
   // ---------------------------------------------- check_delta
@@ -178,12 +217,20 @@ void loop()
 
     // ------------------------------------- delta is noise?
     delta = new_value - old_value;
+    
+    if (delta > 0)
+    {
+      doc_conf["total_encoder"] = total_encoder + delta;
+      saveConfig = true;
+    }
+
     if (delta < MAX_DELTA)
     {
       noDelta_timeCounter++;
       if (noDelta_timeCounter >= noDelta_timeSTOP)
       {
         flow = false;
+        //saveConfig = true;
         digitalWrite(LED_1, LOW);
         encoder.reset();
         if (STATE == 1)
@@ -198,6 +245,7 @@ void loop()
       if (flow == false)
       {
         Serial.println("Flow detected");
+        saveConfig = true;
       }
       flow = true;
       noDelta_timeCounter = 0;
@@ -302,6 +350,7 @@ void loop()
       {
         STATE = 3;
         current_value = new_value;
+        saveConfig = true;
       }
       break;
 
@@ -333,17 +382,29 @@ void loop()
     // ------------------------------------- print states
     //doc["pulses"] = new_value;   //Commands
     doc["STATE"] = STATE;
-    //doc["delta"] = delta;
+    doc["delta"] = delta;
     doc["flow"] = flow;
     doc["current"] = current_value;
     doc["valve"] = !(bool (digitalRead(SOLENOID)));
+    doc["total_encoder"] = doc_conf["total_encoder"];
     //memset(resp, 0, sizeof(resp));
     Serial.print("Encoder State: ");
     serializeJson(doc, resp);
     Serial.println(resp);
-
     previousMillis = currentMillis;
   }
+
+  // ----------------------------------------- save new data
+  if (saveConfig == true)  // Data change
+  {
+    saveConfig = false;
+
+   // Serial.println("{\"upload_config\":true}");
+    saveConfigData();
+    loadConfig();
+  }
+
+
 }
 
 
@@ -374,6 +435,12 @@ void req()
   doc["current"] = current_value;
   doc["valve"] = !(bool (digitalRead(SOLENOID)));
   doc["dir"] = dir;
+
+  //if(STATE == 3)
+  {
+    doc["total_encoder"] = total_encoder;
+  }
+
   //memset(resp, 0, sizeof(resp));
   serializeJson(doc, resp);
 
@@ -434,6 +501,7 @@ bool spiffs_init()
     Serial.println("{\"spiffs\":true}");
     listFiles();
     Cfg_get(/*NULL*/);  // Load File from spiffs
+    loadConfig();
     return true;
   }
 }
@@ -524,17 +592,17 @@ void listFiles() {
   // Abre el directorio raíz
 
   // open the file for reading:
-  char buff[32];
-  int cnt = 1;
-  File f = LittleFS.open("config.json", "r");
-  if (f) {
+  /*char buff[32];
+    int cnt = 1;
+    File f = LittleFS.open("config.json", "r");
+    if (f) {
     bzero(buff, 32);
     if (f.read((uint8_t *)buff, 31)) {
       sscanf(buff, "%d", &cnt);
       Serial.printf("I have been run %d times\n", cnt);
     }
     f.close();
-  }
+    }*/
 
   Serial.println("Listing Files");
 
@@ -555,5 +623,64 @@ void listFiles() {
 void loadConfig()
 {
   // ----------- Load Counters
-  Serial.println("{\"loadConfig\":true}");
+  //Serial.println("{\"loadConfig\":true}");
+
+  // ------------------------------ Configs
+  if (!doc_conf["total_encoder"].isNull())
+    total_encoder = doc_conf["total_encoder"];// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+
+  if (!doc_conf["t_update"].isNull())
+    interval = doc_conf["t_update"];              // Print and send
+
+  if (!doc_conf["delta"].isNull())
+    MAX_DELTA = doc_conf["delta"];                //10 Pulsos detectados en Intervalo2  (DELTA)
+
+  if (!doc_conf["t_encoder"].isNull())
+    intervalo = doc_conf["t_encoder"];    //ENCODER Intervalo de tiempo (milisegundos)
+
+  if (!doc_conf["t_delta"].isNull())
+    intervalo2 = doc_conf["t_delta"];  //DELTA Intervalo de tiempo (500 milisegundos)
+
+  if (!doc_conf["t_stop"].isNull())
+    noDelta_timeSTOP = doc_conf["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+}
+
+
+// --------------------------------------------------------------------------------------------- saveConfigData
+void saveConfigData()
+{
+  Serial.println(saveJSonToAFile(&obj_conf, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
+  //if (obj_conf["test"].as<bool>())
+  //serializeJson(obj_conf, Serial);
+}
+
+// ----------------------------------------------------------------------------------------- saveJSonToAFile
+bool saveJSonToAFile(JsonObject * doc_conf, String filename) {
+  //SD.remove(filename);
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  //Serial.println(F("Open file in write mode"));
+  file = LittleFS.open(filename, "w");
+  if (file) {
+    //Serial.print(F("Filename --> "));
+    //Serial.println(filename);
+
+    //Serial.print(F("Start write..."));
+
+    serializeJson(*doc_conf, file);
+
+    //Serial.print(F("..."));
+    // close the file:
+    file.close();
+    //Serial.println(F("done."));
+
+    return true;
+  } else {
+    // if the file didn't open, print an error:
+    Serial.print(F("Error opening "));
+    //Serial.println(filename);
+
+    return false;
+  }
 }
