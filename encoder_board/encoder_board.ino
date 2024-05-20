@@ -78,11 +78,15 @@ bool dir = true;
 //---------------------------------------------------- setup
 void setup()
 {
-
+  //if (obj["test"].as<bool>() == true)
+  {
+    delay(2000);
+    //delay(5000);
+  }
   Serial.begin(115200);
   //while (!Serial);
   Serial.println("Encoder Init");
-  //delay(2000);
+  Wire.setClock(400000);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
   Wire.begin(I2C_SLAVE_ADDRESS);
@@ -95,7 +99,7 @@ void setup()
   pinMode(27, OUTPUT);
   digitalWrite(27, 0);
 
-  //delay(5000);
+  
 
   Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
@@ -244,7 +248,7 @@ void loop()
     }
     else
     {
-      if (flow == false)
+      if ((flow == false) || (STATE == 0))
       {
         Serial.println("Flow detected");
         saveConfig = true;
@@ -661,9 +665,13 @@ void loadConfig()
 // --------------------------------------------------------------------------------------------- saveConfigData
 void saveConfigData()
 {
-  Serial.println(saveJSonToAFile(&obj_conf, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
+  saveJSonToAFile(&obj_conf, filename);
+  
+  //Serial.println(saveJSonToAFile(&obj_conf, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
   //if (obj_conf["test"].as<bool>())
   //serializeJson(obj_conf, Serial);
+
+  
 }
 
 // ----------------------------------------------------------------------------------------- saveJSonToAFile
