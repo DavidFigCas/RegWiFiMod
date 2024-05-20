@@ -4,7 +4,7 @@ void I2C_Init()
 {
   //Wire.setSDA(SDA_MAIN);
   //Wire.setSCL(SCL_MAIN);
-  Wire.setClock(100000);
+  Wire.setClock(400000);
   Wire.begin();
   
   

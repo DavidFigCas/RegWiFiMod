@@ -34,6 +34,29 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+  if (Serial.available())
+  {
+    // Suponiendo que los datos del puerto serie terminan con un salto de línea
+    String data = Serial.readStringUntil('\n');
+    Serial.print("Data: ");
+    Serial.println(data);
+
+
+    DynamicJsonDocument doc_patch(FILE_SIZE);
+    deserializeJson(doc_patch, data);
+
+    // Combinar los objetos JSON
+    for (const auto& kv : doc_patch.as<JsonObject>())
+    {
+      obj[kv.key()] = kv.value();
+    }
+
+    serializeJson(obj, Serial);
+    Serial.println();
+    saveConfig = true;
+  }
+  
+  
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
   status_doc["elapsed_time"] = millis() / 1000;
@@ -517,6 +540,7 @@ void loop()
   }
 
   lastButtonState = buttonState;
+
 
   esp_task_wdt_reset();
 }
