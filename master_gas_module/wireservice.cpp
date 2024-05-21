@@ -6,8 +6,8 @@ void I2C_Init()
   //Wire.setSCL(SCL_MAIN);
   Wire.setClock(400000);
   Wire.begin();
-  
-  
+
+
   //delay(5000);
   //Serial.println("Main Logic START");
 }
@@ -121,4 +121,98 @@ void I2C_Put()
   Wire.endTransmission();
 
   //delay(TIME_SPACE);
+}
+
+
+// ----------------------------------------------- i2cRequestWithTimeout
+bool i2cRequestWithTimeout(uint8_t address, uint8_t numBytes)
+{
+  /*
+
+    // --------------------- leer display
+    // Read from the slave and print out
+    Wire.requestFrom(DISPLAY_ADD, 199);
+    memset(buff, 0, sizeof(buff));
+    i = 0;
+    while (Wire.available())
+    {
+    buff[i] = Wire.read();
+    //Serial  .print((char)buff[i]);
+    i++;
+    }
+    //Serial.println();
+
+    jsonStr =  buff;
+    //Serial.println(jsonStr);
+    deserializeJson(doc_display, jsonStr);
+    if (doc_display.isNull())
+    status_doc["display"] = false;
+    else
+    status_doc["display"] = true;
+
+
+
+    //delay(TIME_SPACE);
+
+    // --------------------- leer encoder
+    // Read from the slave and print out
+    Wire.requestFrom(ENCODE_ADD, 199);
+    memset(buff, 0, sizeof(buff));
+    i = 0;
+    while (Wire.available())
+    {
+    buff[i] = Wire.read();
+    //Serial.print((char)buff[i]);
+    i++;
+    }
+    //Serial.println();
+
+    jsonStr =  buff;
+    //Serial.println(jsonStr);
+    deserializeJson(doc_encoder, jsonStr);
+
+    if (doc_encoder.isNull())
+    status_doc["encoder"] = false;
+    else
+    status_doc["encoder"] = true;
+
+  */
+
+
+
+  Serial.print("Request ADD:");
+  Serial.println(address);
+  unsigned long startTime = millis();
+
+
+  memset(buff, 0, sizeof(buff));
+  i = 0;
+
+  Serial.print("-->");
+  Wire.requestFrom(address, numBytes);
+  
+  while (millis() - startTime < TIMEOUT_MS)
+  {
+
+    //if (Wire.available() == numBytes)
+    //if (Wire.available())
+    {
+      Serial.print("<--");
+      // Leer y procesar los datos aquí
+      while (Wire.available())
+      {
+        //uint8_t data = Wire.read();
+        // Procesar el byte de datos aquí si es necesario
+        buff[i] = Wire.read();
+        Serial.print((char)buff[i]);
+        i++;
+
+      }
+      jsonStr =  buff;
+      Serial.println(jsonStr);
+      return true; // Éxito
+    }
+    delay(1); // Pequeña espera para no bloquear el bucle
+  }
+  return false; // Timeout o error
 }

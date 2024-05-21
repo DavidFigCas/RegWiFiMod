@@ -7,6 +7,7 @@
 #define ENCODE_ADD  0x5C
 #define DISPLAY_ADD  0x5A
 #define TIME_SPACE  10
+#define TIMEOUT_MS 1000 // Timeout de 1000 ms
 
 #define SDA_MAIN    16
 #define SCL_MAIN    17
@@ -14,5 +15,6 @@
 void I2C_Init();
 void I2C_Get();
 void I2C_Put();
+bool i2cRequestWithTimeout(uint8_t address, uint8_t numBytes) ;
 
 #endif  // 
