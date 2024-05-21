@@ -26,14 +26,14 @@ bool wifiAP(bool force)
   wifiManager.setConfigPortalBlocking(false);
   // captive portal redirection
   //wifiManager.setCaptivePortalEnable(false);
-  wifiManager.setTimeout(120);
+  //wifiManager.setTimeout(120);
 
   //set config save notify callback
   wifiManager.setSaveParamsCallback(saveConfigCallback);
   wifiManager.setSaveConfigCallback(saveWifiCallback);
   wifiManager.setWebServerCallback(bindServerCallback);
   wifiManager.setBreakAfterConfig(true); // needed to use saveWifiCallback
-  wifiManager.setConfigPortalTimeout(140);
+  //wifiManager.setConfigPortalTimeout(140);
   //wifiManager.setParamsPage(true); // move params to seperate page, not wifi, do not combine with setmenu!
 
   //set static ip
