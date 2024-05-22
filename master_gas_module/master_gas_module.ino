@@ -62,8 +62,8 @@ void loop()
   status_doc["elapsed_time"] = millis() / 1000;
   // ----------------------------------------------- leer
 
-  //I2C_Get();
-  I2C_GetTO();
+  I2C_Get();
+  //I2C_GetTO();
 
 
 
@@ -240,6 +240,7 @@ void loop()
   doc_aux["folio"] = folio;
   doc_aux["sd"] = sd_ready;
   doc_aux["valve"] = doc_encoder["valve"].as<bool>();
+  doc_aux["bt"] = obj["enable_bt"].as<bool>();
   serializeJson(doc_aux, b);
 
   //Serial.print("Master to display: ");
@@ -315,8 +316,9 @@ void loop()
 
   }
 
-
+loopBLE();
   // ---------------------------------------------------------------- MAIN TIME
+  
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
@@ -324,9 +326,7 @@ void loop()
     read_clock();
     gps_update();
     save_gps_log();
-
-
-
+    
 
     // -------------------------------------------solo si no esta en proceso de surtido
 
@@ -381,8 +381,6 @@ void loop()
     }
 
   }
-
-
 
 
   // ----------------------------------------- save new List
@@ -504,6 +502,6 @@ void loop()
 
   lastButtonState = buttonState;
 
-
+ 
   esp_task_wdt_reset();
 }

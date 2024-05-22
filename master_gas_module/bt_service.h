@@ -1,38 +1,34 @@
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef BT_SERVICE_H
+#define BT_SERVICE_H
 
-#include "system.h"
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
 
-//#define SDA1_PIN 10  // Cambia esto al pin que desees usar para SDA
-//#define SCL1_PIN 11  // Cambia esto al pin que desees usar para SCL
+#define SERVICE_UUID "19b10000-e8f2-537e-4f6c-d104768a1214"
+#define OUT_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
+#define IN_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
+#define CONTROL_CHARACTERISTIC_UUID "19b10003-e8f2-537e-4f6c-d104768a1214"
 
-extern char daysOfTheWeek[7][12];
-extern DateTime now;
-extern DateTime last_ac;
-extern RTC_DS1307 rtc;
+extern BLEServer* pServer;
+extern BLECharacteristic* pOUTCharacteristic;
+extern BLECharacteristic* pINCharacteristic;
+extern BLECharacteristic* pControlCharacteristic;
+extern bool deviceConnected;
+extern bool oldDeviceConnected;
 
-extern int dias;
-extern int mes;
-extern int anio;
-extern int dia_hoy;
-extern int hora;
-extern int minuto;
-extern int segundo;
+void setupBLE();
+void loopBLE();
+void disableBLE();
 
-extern const char* ntpServer;
-extern int32_t  gmtOffset_sec;
-extern int32_t   daylightOffset_sec;
-extern bool ntpConnected;
-extern bool rtcUpdated;
-extern bool rtc_ready;
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer);
+    void onDisconnect(BLEServer* pServer);
+};
 
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pCharacteristic);
+};
 
-extern WiFiUDP ntpUDP;
-extern NTPClient timeClient;
-
-void update_clock();
-void read_clock();
-void init_clock();
-String DateTimeToString(const DateTime& now);
-
-#endif
+#endif // BT_SERVICE_H

@@ -134,7 +134,7 @@ bool i2cRequestWithTimeout(uint8_t address, uint8_t numBytes)
   Serial.println("-->");
 
 
-  while (millis() - startTime < TIMEOUT_MS)
+  //while (millis() - startTime < TIMEOUT_MS)
   {
     Wire.requestFrom(address, numBytes);
     if (Wire.available() == numBytes)
@@ -173,8 +173,8 @@ void I2C_GetTO()
 
   //Wire.requestFrom(DISPLAY_ADD, 199);
 
-  i2cRequestWithTimeout(DISPLAY_ADD, 199);
-  deserializeJson(doc_encoder, jsonStr);
+  //i2cRequestWithTimeout(DISPLAY_ADD, 199);
+  //deserializeJson(doc_encoder, jsonStr);
 
   //memset(buff, 0, sizeof(buff));
   //i = 0;
@@ -187,7 +187,7 @@ void I2C_GetTO()
   //Serial.println();
 
   //jsonStr =  buff;
-  Serial.println(jsonStr);
+  //Serial.println(jsonStr);
   //deserializeJson(doc_display, jsonStr);
   if (doc_display.isNull())
     status_doc["display"] = false;

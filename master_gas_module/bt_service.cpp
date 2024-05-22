@@ -1,285 +1,138 @@
-#include "clock.h"
+#include "bt_service.h"
+#include "system.h"
 
+BLEServer* pServer = NULL;
+BLECharacteristic* pOUTCharacteristic = NULL;
+BLECharacteristic* pINCharacteristic = NULL;
+BLECharacteristic* pControlCharacteristic = NULL;
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+uint32_t value = 0;
 
-RTC_DS1307 rtc;
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-DateTime now;
-DateTime last_ac;
+void MyServerCallbacks::onConnect(BLEServer* pServer) {
+  deviceConnected = true;
+}
 
-int dias;
-int mes;
-int anio;
-int hora;
-int minuto;
-int dia_hoy;
-int segundo;
+void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
+  deviceConnected = false;
+}
 
-const char* ntpServer = "pool.ntp.org";
-//int32_t  gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
-//int32_t   daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
-int32_t  gmtOffset_sec;
-int32_t   daylightOffset_sec;
-bool ntpConnected = false;
-bool rtcUpdated = false;
-bool rtc_ready = false;
+void MyCharacteristicCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
+  std::string value = pCharacteristic->getValue();
 
+  if (value.length() > 0) {
+    Serial.print("Valor recibido: ");
+    Serial.println(value.c_str());
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
+    // Deserializar el JSON recibido
+    DynamicJsonDocument doc_patch(FILE_SIZE);
+    DeserializationError error = deserializeJson(doc_patch, value.c_str());
 
-// ---------------------------------- init_clock
-void init_clock()
-{
-  //  Wire1.setSDA(2);
-  //Wire1.setSCL(3);
-  //Wire.begin();
-  ntpConnected = false;
-  delay(100);
-  if (!rtc.begin(&Wire))
-  {
-    Serial.println("{\"rtc_init\":false}");
-    rtc_ready = false;
-    delay(10);
-  }
-  else
-  {
-    Serial.println("{\"rtc_init\":true}");
-    delay(10);
-    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
-    daylightOffset_sec = obj["dayOff"].as<int32_t>();
-    rtc_ready = true;
-
-    // For New devices
-    if (! rtc.isrunning()) //DS13007
-    //if (rtc.lostPower())  //DS3231
-    {
-
-      // When time needs to be set on a new device, or after a power loss, the
-      // following line sets the RTC to the date & time this sketch was compiled
-
-      // Uncomment for new
-      //Serial.println("RTC is NOT running, let's set factory the time!");
-      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-
-      Serial.println("RTC is NOT running, rebooting ...");
-      delay(1000);
-      //ESP.restart();  // Reiniciar el ESP32
-
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      return;
     }
 
-
-    now = rtc.now();
-    status_doc["time"] = now.unixtime();
-    doc["time"] = now.unixtime();
-
-    // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
-    const uint32_t unixTime2050 = 2524608000;
-    if (now.unixtime() >= unixTime2050)
-    {
-      Serial.println("RTC ERROR Reboot...");
-      delay(1000);
-      //ESP.restart();  // Reiniciar el ESP32
+    // Combinar los objetos JSON
+    for (const auto& kv : doc_patch.as<JsonObject>()) {
+      obj[kv.key()] = kv.value();
     }
 
-    Serial.print("{\"time\":\"");
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(' ');
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println("\"}");
-
-    gmtOffset_sec = obj["gmtOff"].as<int32_t>();
-    daylightOffset_sec = obj["dayOff"].as<int32_t>();
-
-    Serial.print("{\"gmtOff\":");
-    Serial.print(gmtOffset_sec);
-    Serial.println("}");
-
-    Serial.print("{\"dayOff\":");
-    Serial.print(daylightOffset_sec);
-    Serial.println("}");
-
+    //serializeJson(obj, Serial);
+    //Serial.println();
+    saveConfig = true;
   }
 }
 
 
-// -------------------------------- update_clock
-void update_clock()
-{
-  if (rtc_ready == true)
-  {
-    // Sincroniza el tiempo del cliente NTP
-    if (rtcUpdated == false)
-    {
-      // New connection to NTP server
-      // ---------------------------- Time NTP
-      WiFiUDP ntpUDP;
-      NTPClient timeClient(ntpUDP, "pool.ntp.org");  // Puedes cambiar "pool.ntp.org" por cualquier servidor NTP de tu elección.
+//---------------------------------------- setupBLE
+void setupBLE() {
+  //Serial.begin(115200);
 
-      if (ntpConnected == false)
-      {
-        //Serial.println("{\"ntp\":\"connecting...\"}");
-        //timeClient.begin();
-        timeClient.end();
-        gmtOffset_sec = obj["gmtOff"].as<int32_t>();               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
-        daylightOffset_sec = obj["dayOff"].as<int32_t>();               // Horario de verano, disabled
-        timeClient = NTPClient(ntpUDP, ntpServer, gmtOffset_sec, daylightOffset_sec);
-        timeClient.begin();
-        Serial.println("{\"ntp\":\"connected\"}");
-        ntpConnected = true;
-      }
+  BLEDevice::init("ESP323010");
+  BLEDevice::setMTU(FILE_SIZE); // Tamaño máximo de MTU
 
-      // Update time only when connected
-      if (timeClient.update())
-      {
-        Serial.print("{\"time_ntp\":\"");
-        Serial.print(timeClient.getFormattedTime());
-        Serial.println("\"}");
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
 
-        //Serial.println(timeClient.getEpochTime(), DEC);
+  BLEService *pService = pServer->createService(SERVICE_UUID);
 
-        if (timeClient.getSeconds() != 0)
-        {
-          Serial.println("{\"rtc\":\"updated from NTP\"}");
-          Serial.println(timeClient.getFormattedTime());
-          // Establece el tiempo del DS1307 utilizando el tiempo del cliente NTP
-          rtc.adjust(DateTime(timeClient.getEpochTime()));
-          rtcUpdated = true;
-        }
-        else
-        {
-          Serial.println("{\"ntp\":\"fail\"}");
-          rtcUpdated = false;
-        }
-      }
-      else
-        Serial.println("{\"rtc\":\"NOT updated, Battery mode\"}");
+  pOUTCharacteristic = pService->createCharacteristic(
+                         OUT_CHARACTERISTIC_UUID,
+                         BLECharacteristic::PROPERTY_READ   |
+                         BLECharacteristic::PROPERTY_WRITE  |
+                         BLECharacteristic::PROPERTY_NOTIFY |
+                         BLECharacteristic::PROPERTY_INDICATE
+                       );
 
-      //if (rtc.isrunning())
-      {
-        now = rtc.now();
-        status_doc["time"] = now.unixtime();
-        doc["time"] = now.unixtime();
+  pINCharacteristic = pService->createCharacteristic(
+                        IN_CHARACTERISTIC_UUID,
+                        BLECharacteristic::PROPERTY_WRITE
+                      );
 
-        Serial.print("{\"time_rtc\":\"");
-        Serial.print(now.year(), DEC);
-        Serial.print('/');
-        Serial.print(now.month(), DEC);
-        Serial.print('/');
-        Serial.print(now.day(), DEC);
-        Serial.print(' ');
-        Serial.print(now.hour(), DEC);
-        Serial.print(':');
-        Serial.print(now.minute(), DEC);
-        Serial.print(':');
-        Serial.print(now.second(), DEC);
-        Serial.println("\"}");
-      }
-      //else
-      //{
-      //Serial.print("{\"time_rtc\":\"fail\"");
-      //delay(1000);
-      //ESP.restart();  // Reiniciar el ESP32
-      //}
-    }
-  }
-  else
-  {
-    init_clock();
-  }
+  pControlCharacteristic = pService->createCharacteristic(
+                             CONTROL_CHARACTERISTIC_UUID,
+                             BLECharacteristic::PROPERTY_WRITE
+                           );
 
+  pOUTCharacteristic->addDescriptor(new BLE2902());
+  pINCharacteristic->addDescriptor(new BLE2902());
+  pControlCharacteristic->addDescriptor(new BLE2902());
+
+  pOUTCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+  pINCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+  pControlCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+
+  pService->start();
+
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x0);
+  BLEDevice::startAdvertising();
+  Serial.println("Esperando cliente...");
 }
 
-// -------------------------------- read_clock
-void read_clock()
-{
-  if (rtc_ready)
-  {
+void loopBLE() {
+  if (deviceConnected) {
+    String SValue;
+    //String SValue = "{\"value\":" + String(value) + "}";
+    
+    
+    serializeJson(status_doc, SValue);
+    std::string valueString = SValue.c_str();
 
-    //if (rtc.isrunning())
-    {
-      now = rtc.now();
-      status_doc["time"] = now.unixtime();
-      doc["time"] = now.unixtime();
+    //if (pOUTCharacteristic != nullptr) {
+      pOUTCharacteristic->setValue(valueString);
+      pOUTCharacteristic->notify();
+      //Serial.println(valueString.c_str());
+    //}
+    //else
+     // Serial.println("nullptr");
+    value++;
 
-      // Tiempo Unix para el 1 de enero de 2050 a las 00:00:00 UTC
-      const uint32_t unixTime2050 = 2524608000;
-      if (now.unixtime() >= unixTime2050)
-      {
-        Serial.println("RTC ERROR Reboot...");
-        delay(1000);
-        //ESP.restart();  // Reiniciar el ESP32
-      }
-
-      //dias = int(round(round(now.unixtime() - last_ac.unixtime()) / 86400L));
-      //dias = (now.unixtime() - last_ac.unixtime()) / 86400;
-      mes = now.month();
-      anio = now.year();
-      dia_hoy = now.day();
-      hora = now.hour();
-      minuto = now.minute();
-      segundo = now.second();
-
-      Serial.print("{\"time\":\"");
-      Serial.print(now.year(), DEC);
-      Serial.print('/');
-      Serial.print(now.month(), DEC);
-      Serial.print('/');
-      Serial.print(now.day(), DEC);
-      Serial.print(' ');
-      Serial.print(now.hour(), DEC);
-      Serial.print(':');
-      Serial.print(now.minute(), DEC);
-      Serial.print(':');
-      Serial.print(now.second(), DEC);
-      Serial.println("\"}");
-
-
-      /*lcd.setCursor(0, 2); //
-      lcd.print(dia_hoy);
-      lcd.print("/");
-      lcd.print(mes);
-      lcd.print("/");
-      lcd.print(anio);
-      lcd.print("  ");
-      lcd.print(hora);
-      lcd.print(":");
-      lcd.print(minuto);
-      lcd.print(":");
-      lcd.print(segundo);*/
-
-    }
+    //Serial.println(value);
+    //delay(3000);
+    //value++;
+    //Serial.print("New value notified: ");
+    //Serial.println(value);
+    //delay(3000);
   }
-  else
-  {
-    init_clock();
+  if (!deviceConnected && oldDeviceConnected) {
+    Serial.println("Device disconnected.");
+    pServer->startAdvertising();
+    Serial.println("Start advertising");
+    oldDeviceConnected = deviceConnected;
+  }
+  if (deviceConnected && !oldDeviceConnected) {
+    oldDeviceConnected = deviceConnected;
+    Serial.println("Device Connected");
   }
 }
 
-String DateTimeToString(const DateTime& now) {
-  char buffer[20];
-  snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d %02d:%02d:%02d",
-           now.year(), now.month(), now.day(),
-           now.hour(), now.minute(), now.second());
-  return String(buffer);
+void disableBLE() {
+  Serial.println("Desactivando Bluetooth...");
+  BLEDevice::deinit();
+  Serial.println("Bluetooth desactivado");
 }
-
-
-//
-//// Local time
-//void printLocalTime()
-//{
-//  struct tm timeinfo;
-//  if (!getLocalTime(&timeinfo)) {
-//    Serial.println("Failed to obtain time");
-//    return;
-//  }
-//  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");   // Comment for ESP8266
-//}

@@ -39,46 +39,74 @@
 #define SHARP_MOSI 23
 #define SHARP_SS   5
 
+//SYSTEM
 #include <Arduino.h>
+#include <esp_task_wdt.h>
+
+//BT
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
+
+//JSON
 #include <ArduinoJson.h>
-#include <PubSubClient.h>
+
+//WIFI
 #include <WiFi.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-#include "FS.h"
-#include "SPIFFS.h"
-#include <Wire.h>
+
+
+//MQTT
+#include <PubSubClient.h>
+
+
+//CLOCK NTP
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "time.h"
+
+
+//CLOCK RTC
 #include "RTClib.h"
-#include <Wire.h>
-#include <TinyGPSPlus.h>
-#include <Firebase_ESP_Client.h>
-#include <esp_task_wdt.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SharpMem.h>
-#include <cmath> // 
+
+
+//FILESYSTEM
+#include "FS.h"
+#include "SPIFFS.h"
+
+
+//SD CARD
 #include "SD.h"
 #include "SPI.h"
 
 
+// I2C COMUNICATION
+#include <Wire.h>
 
+
+//GPS
+#include <TinyGPSPlus.h>
+
+//FIREBASE
+#include <Firebase_ESP_Client.h>
+
+
+
+// ------------------ LOCAL
 #include "version.h"
 #include "wifiservice.h"
-//#include "pins.h"
-#include "filespiffs.h"
+#include "clock.h"
 #include "mqttservice.h"
 #include "wireservice.h"
+#include "filespiffs.h"
+#include "firebasedb.h"
+#include  "printerservice.h"
+#include "sd_card_service.h"
 #include "clock.h"
 #include "gps_service.h"
-#include  "printerservice.h"
-#include "firebasedb.h"
-//#include  "glcd_display.h"
-//#include "oled_display.h"
-#include  "sd_card_service.h"
+#include "bt_service.h"
 
-
-//15 seconds WDT
 
 // sd card
 extern bool sd_ready;

@@ -397,7 +397,7 @@ void system_init()
     mqtt_init();
     //mqtt_check();
     rtcUpdated = false;  // TRUE:Not auto update
-    
+
     init_clock();        // I2C for clock
   }
 
@@ -408,7 +408,7 @@ void system_init()
   //init_glcd();
 
   // WatchDog Timer
-  
+
   pinMode(BT_REPORT, INPUT_PULLUP);
 
   send_log = true;
@@ -641,6 +641,11 @@ void loadConfig()
 
   gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
   daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
+
+  if ((!obj["enable_bt"].isNull()) && (obj["enable_bt"].as<bool>()))
+    setupBLE();
+  else
+    disableBLE();
 
 
   Serial.println("{\"config\":true}");
