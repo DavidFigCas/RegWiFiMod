@@ -318,13 +318,14 @@ void loop()
 
   }
 
-  //loopBLE();
+  
   // ---------------------------------------------------------------- MAIN TIME
 
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
 
+    loopBLE();
     read_clock();
     gps_update();
     save_gps_log();

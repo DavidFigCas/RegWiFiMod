@@ -570,6 +570,7 @@ void reset_config()
 void loadConfig()
 {
   // ----------- Load Counters
+   esp_task_wdt_reset();
   Serial.println("{\"loadConfig\":true}");
 
 

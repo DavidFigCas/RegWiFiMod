@@ -17,6 +17,7 @@ extern BLECharacteristic* pINCharacteristic;
 extern BLECharacteristic* pControlCharacteristic;
 extern bool deviceConnected;
 extern bool oldDeviceConnected;
+extern bool runningBLE;
 
 void setupBLE();
 void loopBLE();

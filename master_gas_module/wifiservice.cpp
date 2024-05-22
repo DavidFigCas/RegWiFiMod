@@ -133,6 +133,7 @@ void wifi_init()
   Serial.println("{\"wifi\":{\"init\":true}}");
   if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
   {
+    WiFi.disconnect(true);
     WiFi.mode(WIFI_STA);
 
     const char * auxssid = obj["ssid"].as<const char *>();
@@ -147,7 +148,7 @@ void wifi_init()
     Serial.println("{\"wifi\":\"init\"}");
 
     // Check wifi connection or make AP
-    wifiAP(false);
+    //wifiAP(false);
 
   }
   else if (obj["enable_wifi"].as<bool>() == false)
@@ -170,6 +171,11 @@ bool wifi_check()
 {
   bool flag;
 
+  if(WiFi.status() != WL_CONNECTED)
+  {
+    wifi_init();
+  }
+
   // -------------------------------------------- server is running
   if (server_running)
   {
@@ -177,7 +183,7 @@ bool wifi_check()
     wifiManager.process();
   }
 
-  //if (obj["enable_wifi"].as<bool>())
+  if (obj["enable_wifi"].as<bool>())
   {
 
     //if ((millis() - s_timestamp) >= connectTimeoutMs) // check to an interval of time
@@ -188,7 +194,7 @@ bool wifi_check()
     if (WiFi.status() == WL_CONNECTED)
     {
       Serial.print("{\"wifi_connected\": ");
-      serializeJson(obj["ssid"],Serial);
+      serializeJson(obj["ssid"], Serial);
       Serial.println("}");
       Serial.print("{\"ip\":\"");
       Serial.print(WiFi.localIP());
@@ -214,19 +220,25 @@ bool wifi_check()
     {
       Serial.println("{\"wifi\":\"disconnected\"}");
       flag = false;
-      //STATE = 0;
+
       STATE &= ~(1 << 6);
-      if (server_running == false)
-        wifiAP(true);         // run force server
-      else
-        Serial.println("{\"server\":\"running\"}");
+      //if (server_running == false)
+      //  wifiAP(true);         // run force server
+      //else
+      //  Serial.println("{\"server\":\"running\"}");
     }
 
 
   }
 
   //}
-  //else
+  else
+  {
+    Serial.println("{\"wifi\":\"disabled\"}");
+    flag = false;
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+  }
 
   return flag;
 }
