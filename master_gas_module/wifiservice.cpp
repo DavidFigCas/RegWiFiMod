@@ -204,7 +204,7 @@ bool wifi_check()
       if (updated == false)
       {
         //oled_display_text("VERSION \n NUEVA");
-        connectFirebase();
+        //connectFirebase();
       }
 
 

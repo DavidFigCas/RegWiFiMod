@@ -89,7 +89,8 @@
 #include <TinyGPSPlus.h>
 
 //FIREBASE
-#include <Firebase_ESP_Client.h>
+//#include <Firebase_ESP_Client.h>
+//#include "firebasedb.h"
 
 
 
@@ -100,7 +101,6 @@
 #include "mqttservice.h"
 #include "wireservice.h"
 #include "filespiffs.h"
-#include "firebasedb.h"
 #include  "printerservice.h"
 #include "sd_card_service.h"
 #include "clock.h"
@@ -128,6 +128,9 @@ extern unsigned long mainTime;
 extern const uint32_t connectTimeoutMs;
 extern unsigned long  s_timestamp;
 extern volatile bool found_client;
+
+extern unsigned long serialRefresh;
+extern unsigned long serialTime;
 
 
 // --------------------------------- printer
@@ -202,8 +205,9 @@ extern volatile bool startFlowing;
 extern volatile bool stopFlowing;
 extern volatile bool readyToPrint;
 
-
 extern volatile uint32_t pesos;
+
+extern volatile bool updated;
 
 //void IRAM_ATTR factory_reset3();
 void reset_config();

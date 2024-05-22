@@ -17,7 +17,6 @@ extern FirebaseJson json;
 extern FirebaseJson conf;
 extern FirebaseJson data_json;
 extern String nodeName;
-extern volatile bool updated;
 extern volatile bool dataChanged;
 extern volatile bool nullData;
 //extern volatile bool saveConfig;

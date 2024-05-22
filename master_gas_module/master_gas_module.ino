@@ -34,6 +34,25 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+  // ----------------------------------- Serial Monitor
+  if ((millis() - serialRefresh > serialTime) && (obj["test"]))
+  {
+    serialRefresh = millis();
+    Serial.print("Display: ");
+    serializeJson(doc_display, Serial);
+    Serial.println();
+
+    Serial.print("Encoder: ");
+    serializeJson(doc_encoder, Serial);
+    Serial.println();
+
+    Serial.print("main_status: ");
+    serializeJson(status_doc, Serial);
+    Serial.println();
+
+    //delay(TIME_SPACE);
+  }
+
   if (Serial.available())
   {
     // Suponiendo que los datos del puerto serie terminan con un salto de línea
@@ -65,23 +84,6 @@ void loop()
   I2C_Get();
   //I2C_GetTO();
 
-
-
-  // ----------------------------------- Serial Monitor
-
-  //Serial.print("Display: ");
-  //serializeJson(doc_display, Serial);
-  //Serial.println();
-
-  //Serial.print("Encoder: ");
-  //serializeJson(doc_encoder, Serial);
-  //Serial.println();
-
-  //Serial.print("main_status: ");
-  //serializeJson(status_doc, Serial);
-  //Serial.println();
-
-  //delay(TIME_SPACE);
 
   // ----------------------------------------------- procesar
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
@@ -255,10 +257,10 @@ void loop()
 
   // ---------------------- encoder doc
   doc_aux.clear();
-  if (encoder_reset == true)
-  {
+  //if (encoder_reset == true)
+  //{
     doc_aux["reset"] = encoder_reset;
-  }
+  //}
 
   //doc_aux["litros"] = litros;
 
@@ -316,9 +318,9 @@ void loop()
 
   }
 
-loopBLE();
+  //loopBLE();
   // ---------------------------------------------------------------- MAIN TIME
-  
+
   if (millis() - mainRefresh > mainTime)
   {
     mainRefresh = millis();
@@ -326,7 +328,7 @@ loopBLE();
     read_clock();
     gps_update();
     save_gps_log();
-    
+
 
     // -------------------------------------------solo si no esta en proceso de surtido
 
@@ -502,6 +504,6 @@ loopBLE();
 
   lastButtonState = buttonState;
 
- 
+
   esp_task_wdt_reset();
 }

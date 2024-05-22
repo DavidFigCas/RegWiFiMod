@@ -9,7 +9,7 @@ FirebaseJson json;
 FirebaseJson conf;
 FirebaseJson data_json;
 String nodeName;
-volatile bool updated = true;
+
 volatile bool dataChanged = false;
 volatile bool nullData = false;
 //volatile bool saveConfig = false;

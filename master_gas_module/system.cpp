@@ -22,6 +22,9 @@ volatile bool found_client = false;
 unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
 unsigned long mainTime = 1000;
 
+unsigned long serialRefresh = 1000;
+unsigned long serialTime = 1000;
+
 // firebase
 const uint32_t connectTimeoutMs = 10000;
 unsigned long  s_timestamp;
@@ -103,8 +106,9 @@ volatile bool startFlowing = false;
 volatile bool stopFlowing = false;
 volatile bool readyToPrint = false;
 
-
 volatile uint32_t pesos;
+
+volatile bool updated = true;
 
 
 // -------------------------------------------------------------- read_logs

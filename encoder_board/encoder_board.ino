@@ -99,7 +99,7 @@ void setup()
   pinMode(27, OUTPUT);
   digitalWrite(27, 0);
 
-  
+
 
   Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
@@ -136,7 +136,7 @@ void loop()
     //Serial.print("Master: ");
     //serializeJson(doc_aux, Serial);
     //Serial.println();
-    
+
     newcommand = false;
 
     if (!doc_aux["valve"].isNull())
@@ -222,7 +222,7 @@ void loop()
 
     // ------------------------------------- delta is noise?
     delta = new_value - old_value;
-    
+
     if (delta > 0)
     {
       doc_conf["total_encoder"] = total_encoder + delta;
@@ -242,6 +242,15 @@ void loop()
         if (STATE == 1)
         {
           STATE = 2;
+        }
+
+        else if (STATE == 3)
+        {
+          old_value = 0;
+          new_value = 0;
+          STATE = 0;
+          current_value = 0;
+          encoder.reset();
         }
       }
 
@@ -368,6 +377,7 @@ void loop()
         STATE = 0;
         current_value = 0;
         encoder.reset();
+        digitalWrite(LED_1, LOW);
       }
       break;
 
@@ -387,16 +397,16 @@ void loop()
 
     // ------------------------------------- print states
     //doc["pulses"] = new_value;   //Commands
-   /* doc["STATE"] = STATE;
-    doc["delta"] = delta;
-    doc["flow"] = flow;
-    doc["current"] = current_value;
-    doc["valve"] = !(bool (digitalRead(SOLENOID)));
-    doc["total_encoder"] = doc_conf["total_encoder"];
-    //memset(resp, 0, sizeof(resp));
-    Serial.print("Encoder State: ");
-    serializeJson(doc, resp);
-    Serial.println(resp);*/
+    /* doc["STATE"] = STATE;
+      doc["delta"] = delta;
+      doc["flow"] = flow;
+      doc["current"] = current_value;
+      doc["valve"] = !(bool (digitalRead(SOLENOID)));
+      doc["total_encoder"] = doc_conf["total_encoder"];
+      //memset(resp, 0, sizeof(resp));
+      Serial.print("Encoder State: ");
+      serializeJson(doc, resp);
+      Serial.println(resp);*/
     previousMillis = currentMillis;
   }
 
@@ -405,7 +415,7 @@ void loop()
   {
     saveConfig = false;
 
-   // Serial.println("{\"upload_config\":true}");
+    // Serial.println("{\"upload_config\":true}");
     saveConfigData();
     loadConfig();
   }
@@ -443,7 +453,7 @@ void req()
   doc["valve"] = !((digitalRead(SOLENOID)));
   //doc["dir"] = dir;
 
-  if(STATE == 3)
+  if (STATE == 3)
   {
     doc["total_encoder"] = total_encoder;
   }
@@ -452,12 +462,12 @@ void req()
 
   char temp[200];
   size_t len = serializeJson(doc, temp);
-   memset(resp, 0, sizeof(resp));
+  memset(resp, 0, sizeof(resp));
 
   // Copiar solo los bytes útiles al buffer 'resp'
   memcpy(resp, temp, len);
 
-  
+
   serializeJson(doc, resp);
 
   Wire.write(resp, len);
@@ -666,12 +676,12 @@ void loadConfig()
 void saveConfigData()
 {
   saveJSonToAFile(&obj_conf, filename);
-  
+
   //Serial.println(saveJSonToAFile(&obj_conf, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
   //if (obj_conf["test"].as<bool>())
   //serializeJson(obj_conf, Serial);
 
-  
+
 }
 
 // ----------------------------------------------------------------------------------------- saveJSonToAFile

@@ -51,7 +51,7 @@ void setupBLE() {
   //Serial.begin(115200);
 
   BLEDevice::init("ESP323010");
-  BLEDevice::setMTU(FILE_SIZE); // Tamaño máximo de MTU
+  BLEDevice::setMTU(517); // Tamaño máximo de MTU
 
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -94,6 +94,8 @@ void setupBLE() {
   Serial.println("Esperando cliente...");
 }
 
+
+//-----------------------------------------loopBLE
 void loopBLE() {
   if (deviceConnected) {
     String SValue;
