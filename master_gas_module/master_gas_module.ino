@@ -55,59 +55,15 @@ void loop()
     Serial.println();
     saveConfig = true;
   }
-  
-  
+
+
   // PRead button for report
   buttonState = digitalRead(BT_REPORT);
   status_doc["elapsed_time"] = millis() / 1000;
   // ----------------------------------------------- leer
 
-  // --------------------- leer display
-  // Read from the slave and print out
-  Wire.requestFrom(DISPLAY_ADD, 199);
-  memset(buff, 0, sizeof(buff));
-  i = 0;
-  while (Wire.available())
-  {
-    buff[i] = Wire.read();
-    //Serial  .print((char)buff[i]);
-    i++;
-  }
-  //Serial.println();
-
-  jsonStr =  buff;
-  //Serial.println(jsonStr);
-  deserializeJson(doc_display, jsonStr);
-  if (doc_display.isNull())
-    status_doc["display"] = false;
-  else
-    status_doc["display"] = true;
-
-
-
-  //delay(TIME_SPACE);
-
-  // --------------------- leer encoder
-  // Read from the slave and print out
-  Wire.requestFrom(ENCODE_ADD, 199);
-  memset(buff, 0, sizeof(buff));
-  i = 0;
-  while (Wire.available())
-  {
-    buff[i] = Wire.read();
-    //Serial.print((char)buff[i]);
-    i++;
-  }
-  //Serial.println();
-
-  jsonStr =  buff;
-  //Serial.println(jsonStr);
-  deserializeJson(doc_encoder, jsonStr);
-
-  if (doc_encoder.isNull())
-    status_doc["encoder"] = false;
-  else
-    status_doc["encoder"] = true;
+  //I2C_Get();
+  I2C_GetTO();
 
 
 
@@ -298,27 +254,34 @@ void loop()
 
   // ---------------------- encoder doc
   doc_aux.clear();
-  doc_aux["reset"] = encoder_reset;
-  doc_aux["litros"] = litros;
-  
+  if (encoder_reset == true)
+  {
+    doc_aux["reset"] = encoder_reset;
+  }
+
+  //doc_aux["litros"] = litros;
+
   if (!doc_display["valve"].isNull())
     doc_aux["valve"] = doc_display["valve"];
-  
+
   if (!doc_display["litros_target"].isNull())
   {
     doc_aux["litros_target"] = doc_display["litros_target"];
     doc_aux["pulsos_litro"] = pulsos_litro;
   }
-    
-  
-  serializeJson(doc_aux, b);
-  //Serial.print("Master to encoder: ");
-  //serializeJson(doc, Serial);
-  //Serial.println();
 
-  Wire.beginTransmission(ENCODE_ADD);
-  Wire.write((const uint8_t*)b, (strlen(b)));
-  Wire.endTransmission();
+  // Solo envia si hay que actualizar
+  if (!doc_aux.isNull())
+  {
+    serializeJson(doc_aux, b);
+    //Serial.print("Master to encoder: ");
+    //serializeJson(doc, Serial);
+    //Serial.println();
+
+    Wire.beginTransmission(ENCODE_ADD);
+    Wire.write((const uint8_t*)b, (strlen(b)));
+    Wire.endTransmission();
+  }
 
   //delay(TIME_SPACE);
 
