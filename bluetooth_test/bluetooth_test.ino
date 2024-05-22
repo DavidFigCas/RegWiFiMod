@@ -35,28 +35,28 @@ class MyServerCallbacks: public BLEServerCallbacks
     }
 };
 
-class MyCharacteristicCallbacks : public BLECharacteristicCallbacks 
-{
-    void onWrite(BLECharacteristic *pLedCharacteristic) 
-    {
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pLedCharacteristic) {
         std::string value = pLedCharacteristic->getValue();
         int len = value.length();
 
-        if (value.length() > 0) 
-        {
+        if (len > 0) {
           Serial.println("*********");
           Serial.print("Valor: ");
-          for (int i = 0; i < value.length(); i++) 
-          {
-            //Serial.print(String(value[i]));
-            valor = valor + value[i];
-          }
-          if(valor=="enable_mqtt"){
+          
+          // Usar un buffer estático para concatenar eficientemente
+          static char buffer[3000];
+          snprintf(buffer, sizeof(buffer), "%s", value.c_str());
+
+          // Imprimir el valor recibido
+          Serial.print(buffer);
+
+          // Acción basada en el valor recibido
+          if (value == "enable_mqtt") {
             pSensorCharacteristic->setValue("{'enable_mqtt': 'true'}");
             pSensorCharacteristic->notify();
           }
-          Serial.print(valor);
-          valor="";
+
           Serial.println();
           Serial.println("*********");
         }
@@ -129,12 +129,17 @@ void loop()
     }
     if (deviceConnected) 
     {
-        pSensorCharacteristic->setValue(String(value).c_str());
+        // Crear el valor JSON y convertirlo a std::string
+        String SValue = "{\"value\":" + String(value) + "}";
+        std::string valueString = SValue.c_str();
+
+        // Configurar el valor de la característica
+        pSensorCharacteristic->setValue(valueString);
         pSensorCharacteristic->notify();
         value++;
         Serial.print("New value notified: ");
         Serial.println(value);
-        delay(3000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+        delay(3000); // La pila Bluetooth se congestiona si se envían demasiados paquetes, en una prueba de 6 horas pude reducir el delay hasta 3ms
     }
     // disconnecting
     if (!deviceConnected && oldDeviceConnected) 
