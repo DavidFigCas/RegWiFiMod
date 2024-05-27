@@ -18,8 +18,8 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  60; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  30;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  10; //  3600 TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  1;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
@@ -28,6 +28,8 @@ int x, y;
 int angulo, angulo_anterior;
 double a, rad;
 byte tipo_cambio;
+bool sleep_radio = false;
+bool response = false;
 
 // Define los pines para SoftwareSerial
 const int txPin = PIN_A1; // El pin que actuará como TX
@@ -44,7 +46,7 @@ void setup()
   initRadio();
   initSensor();
   configMLX();
-  delay(100);
+  delay(10);
   analogReference(INTERNAL1V024);
   readSupplyVoltage();
   bat = readSupplyVoltage() - 60;
@@ -52,6 +54,8 @@ void setup()
   resetRadio();
   SendHEXdata();
   sleepRadio();
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 }
 
 void loop()
@@ -60,27 +64,42 @@ void loop()
   {
     case INICIO:
       tipo_cambio = 0;
+      sleep_radio = false;
       initSensor();
       bat = readSupplyVoltage() - 60;
       leerSensor();
-      
-      printData(); //Consume eenergía?
-      
+
+
+      mySerial.print("{\"x\":");
+      mySerial.print(x);
+      mySerial.print(",\"y\":");
+      mySerial.print(y);
+      mySerial.print(",\"z\":");
+      mySerial.print(z);
+      mySerial.print(",\"a\":");
+      mySerial.print(angulo);
+      mySerial.println("}");
+      //mySerial.println(" ");
+
       STATE = PROCESO;
       break;
 
     case PROCESO:
-      if ((angulo_anterior - angulo) > delta)
+
+      if ((angulo > (delta + 1)) && (angulo < (360 - (delta + 1))) )
       {
-        tipo_cambio = 1;
-        resetRadio();
-        SendHEXdata();
-      }
-      else if (((angulo - angulo_anterior) > delta))
-      {
-        tipo_cambio = 2;
-        resetRadio();
-        SendHEXdata();
+        if ((angulo_anterior - angulo) > delta)
+        {
+          tipo_cambio = 1;
+          resetRadio();
+          SendHEXdata();
+        }
+        else if (((angulo - angulo_anterior) > delta))
+        {
+          tipo_cambio = 2;
+          resetRadio();
+          SendHEXdata();
+        }
       }
 
       if (countRTC_CLK == 0)
@@ -94,7 +113,8 @@ void loop()
 
     case ESPERA:
       angulo_anterior = angulo;
-      sleepRadio();
+      if (sleep_radio == true)
+        sleepRadio();
       espera_larga();
       STATE = INICIO;
       break;
@@ -103,6 +123,12 @@ void loop()
 
 void SendHEXdata()
 {
+  Serial1.print("AT$RC\r");
+  delay(50);
+  sleep_radio = true;
+  reset_radio_counter();
+
+
   uint8_t txData[8];
   int aux_angulo = angulo + (tipo_cambio * 4096);
 
@@ -116,7 +142,7 @@ void SendHEXdata()
   txData[7] = y  & 0xFF;
 
   mySerial.print("AT$SF=");
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 4; i++) {
     if (txData[i] < 0x10) mySerial.print("0");
     mySerial.print(txData[i], HEX);
   }
@@ -147,20 +173,34 @@ void espera_larga()
 
 void resetRadio()
 {
-  bool response = false;
+   response = false;
+  mySerial.begin(9600);
+
   pinMode(RESET_RADIO, OUTPUT);
   digitalWrite(RESET_RADIO, HIGH);
-  delay(50);
+  delay(5);
   digitalWrite(RESET_RADIO, LOW);
   pinMode(RESET_RADIO, INPUT);
-  delay(50);
+  delay(5);
 
-  mySerial.print("AT\r");
+  mySerial.print("AT\r\n");
+  delay(50);
+  //while(!mySerial.available());
+  while (mySerial.available()) {
+    char data = mySerial.read();
+    response = true;
+  }
+}
+
+void reset_radio_counter()
+{
+  Serial1.print("AT$RC\n");
   delay(50);
   while (mySerial.available()) {
     char data = mySerial.read();
     response = true;
   }
+  //return 0;
 }
 
 void sleepRadio()
@@ -174,43 +214,23 @@ void initRadio()
   mySerial.print("AT$I=11\r");
 }
 
-void parpadeo(uint16_t cantidad, uint32_t ms)
-{
-  for (uint16_t i = 0; i < cantidad; i++)
-  {
-    mySerial.print("AT:P4=0\r");
-    delay(ms);
-    mySerial.print("AT:P4=1\r");
-    delay(ms);
-  }
-  mySerial.print("AT:P4=0\r");
-  delay(50);
-}
+
 
 void RTC_init(void) {
-  cli(); // Deshabilita las interrupciones globales para evitar conflictos durante la configuración
+  cli();
+  while (RTC.STATUS > 0) ; // Espera a que los registros del RTC estén listos
 
-  while (RTC.STATUS > 0) {
-    ; // Espera a que todos los registros del RTC se sincronicen
-  }
+  RTC.CLKSEL = RTC_CLKSEL_INT32K_gc; // Reloj interno de 32.768 kHz
+  RTC.CTRLA = RTC_PRESCALER_DIV1024_gc | RTC_RTCEN_bm | RTC_RUNSTDBY_bm; // Configura prescaler y habilita RTC
 
-  // Selecciona el reloj de 32.768 kHz interno de ultra bajo consumo (OSCULP32K) para el RTC
-  RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;
+  //RTC.CTRLA = RTC_PRESCALER_DIV1024_gc | RTC_RTCEN_bm; // Configura prescaler y habilita RTC
 
-  // Configura el RTC:
-  RTC.CTRLA = RTC_PRESCALER_DIV1024_gc  // Establece el prescaler en 1024 para reducir la frecuencia del reloj
-              | RTC_RTCEN_bm            // Habilita el RTC
-              | RTC_RUNSTDBY_bm;        // Permite que el RTC funcione en modo de espera (standby)
+  RTC.PITINTCTRL = RTC_PI_bm; // Habilita interrupción periódica
+  RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc | RTC_PITEN_bm; // Configura el periodo de la interrupción
 
-  // Habilita la interrupción del temporizador del RTC
-  RTC.PITINTCTRL = RTC_PI_bm;
-
-  // Configura el temporizador del RTC para generar una interrupción cada 32768 ciclos de reloj
-  RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc // Establece el período del temporizador en 32768 ciclos (1 segundo si el reloj es de 32.768 kHz)
-                 | RTC_PITEN_bm;        // Habilita el temporizador del RTC
-
-  sei(); // Vuelve a habilitar las interrupciones globales
+  sei();
 }
+
 
 ISR(RTC_PIT_vect) {
   RTC.PITINTFLAGS = RTC_PI_bm; // Limpia la bandera de interrupción escribiendo un '1' en ella
@@ -220,10 +240,15 @@ ISR(RTC_PIT_vect) {
 
 void initSensor()
 {
-  pinMode(PIN_PB1, INPUT_PULLUP);
-  pinMode(PIN_PB0, INPUT_PULLUP);
+  //pinMode(PIN_PB1, INPUT_PULLUP);
+  //pinMode(PIN_PB0, INPUT_PULLUP);
+
+  //  pinMode(PIN_PB1, INPUT);
+  //pinMode(PIN_PB0, INPUT);
+
+
   Wire.begin();
-  delay(50);
+  delay(10);
 }
 
 void configMLX()
@@ -253,8 +278,9 @@ void leerSensor()
 {
   int a_aux = 0;
   int32_t prom = 0;
+  int num_red = 3;
 
-  for (int j = 0; j <= 9; j++)
+  for (int j = 0; j < num_red; j++)
   {
     uint8_t posture[30];
     int posture_length = 0;
@@ -265,7 +291,7 @@ void leerSensor()
     while (Wire.available()) {
       Wire.read();
     }
-    delay(50);
+    delay(5);
 
     Wire.beginTransmission(MLX90393_ADDRESS);
     Wire.write(0x4E);
@@ -291,58 +317,66 @@ void leerSensor()
     prom = prom + a_aux;
   }
 
-  angulo = prom / 10;
+  angulo = prom / num_red;
 }
 
 void enterSleep()
 {
   power_all_disable();
 
-  pinMode(PIN_PA3, INPUT);
-  pinMode(PIN_PA4, INPUT);
-  pinMode(PIN_PA5, INPUT);
-  pinMode(PIN_PA6, INPUT);
-  pinMode(PIN_PA7, INPUT);
+  Wire.end();
 
-  pinMode(PIN_PB0, INPUT);
-  pinMode(PIN_PB1, INPUT);
-  pinMode(PIN_PB2, INPUT);
-  pinMode(PIN_PB3, INPUT);
-  pinMode(PIN_PB4, INPUT);
-  pinMode(PIN_PB5, INPUT);
+  //pinMode(PIN_PA1, INPUT_PULLUP);
+  //pinMode(PIN_PA2, INPUT_PULLUP);
+  pinMode(PIN_PA3, INPUT_PULLUP);
+  pinMode(PIN_PA4, INPUT_PULLUP);
+  pinMode(PIN_PA5, INPUT_PULLUP);
+  pinMode(PIN_PA6, INPUT_PULLUP);
+  pinMode(PIN_PA7, INPUT_PULLUP);
 
-  pinMode(PIN_PC0, INPUT);
-  pinMode(PIN_PC1, INPUT);
-  pinMode(PIN_PC2, INPUT);
-  pinMode(PIN_PC3, INPUT);
+  pinMode(PIN_PB0, INPUT_PULLUP);
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB2, INPUT_PULLUP);
+  pinMode(PIN_PB3, INPUT_PULLUP);
+  pinMode(PIN_PB4, INPUT_PULLUP);
+  pinMode(PIN_PB5, INPUT_PULLUP);
 
-  digitalWrite(PIN_PA3, HIGH);
-  digitalWrite(PIN_PA4, HIGH);
-  digitalWrite(PIN_PA5, HIGH);
+  pinMode(PIN_PC0, INPUT_PULLUP);
+  pinMode(PIN_PC1, INPUT_PULLUP);
+  pinMode(PIN_PC2, INPUT_PULLUP);
+  pinMode(PIN_PC3, INPUT_PULLUP);
+
+  //digitalWrite(PIN_PA1, LOW);
+  //digitalWrite(PIN_PA2, LOW);
+  digitalWrite(PIN_PA3, LOW);
+  digitalWrite(PIN_PA4, LOW);
+  digitalWrite(PIN_PA5, LOW);
   digitalWrite(PIN_PA6, LOW);
-  digitalWrite(PIN_PA7, HIGH);
+  digitalWrite(PIN_PA7, LOW);
 
   digitalWrite(PIN_PB0, HIGH);
   digitalWrite(PIN_PB1, HIGH);
-  digitalWrite(PIN_PB2, HIGH);
-  digitalWrite(PIN_PB3, HIGH);
-  digitalWrite(PIN_PB4, HIGH);
-  digitalWrite(PIN_PB5, HIGH);
+  digitalWrite(PIN_PB2, LOW);
+  digitalWrite(PIN_PB3, LOW);
+  digitalWrite(PIN_PB4, LOW);
+  digitalWrite(PIN_PB5, LOW);
 
-  digitalWrite(PIN_PC0, HIGH);
-  digitalWrite(PIN_PC1, HIGH);
-  digitalWrite(PIN_PC2, HIGH);
-  digitalWrite(PIN_PC3, HIGH);
+  digitalWrite(PIN_PC0, LOW);
+  digitalWrite(PIN_PC1, LOW);
+  digitalWrite(PIN_PC2, LOW);
+  digitalWrite(PIN_PC3, LOW);
 
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
 
+
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
   sleep_cpu();
+  sleep_enable();
+
 }
 
-void printData()
-{
+/*void printSensor()
+  {
   mySerial.print("{\"x\":");
   mySerial.print(x);
   mySerial.print(",\"y\":");
@@ -356,5 +390,15 @@ void printData()
   mySerial.print(",\"v\":");
   mySerial.print(bat);
   mySerial.print("}");
-  mySerial.println();
+  mySerial.println(" ");
+  }*/
+
+int calcularDiferenciaAngular(int angulo_anterior, int angulo_actual) {
+  int diferencia = angulo_actual - angulo_anterior;
+  if (diferencia > 180) {
+    diferencia -= 360;
+  } else if (diferencia < -180) {
+    diferencia += 360;
+  }
+  return diferencia;
 }
