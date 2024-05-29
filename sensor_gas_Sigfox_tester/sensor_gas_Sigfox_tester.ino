@@ -1,9 +1,15 @@
-#include <SoftwareSerial.h>
+/*
+  Sensor Gas 826 SigFox MLX
+*/
+
+#include "Inventoteca_MLX90393.h"
 #include "Wire.h"
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/power.h>
 #include <megaTinyCore.h>     // Librería megaTinyCore para leer Vdd fácilmente (ver ejemplo "readTempVcc")
+
+
 
 #define RESET_RADIO   PIN_PA6
 
@@ -18,137 +24,184 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  10; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  1;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  360; //  3600 TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  60;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-double z, phaseShift = 0;     // phaseSift = 105
-int x, y;
+//float x, y, z;
+//phaseShift = 0;     // phaseSift = 105
 int angulo, angulo_anterior;
-double a, rad;
+//double a, rad;
 byte tipo_cambio;
-bool sleep_radio = false;
-bool response = false;
 
-// Define los pines para SoftwareSerial
-const int txPin = PIN_A1; // El pin que actuará como TX
-const int rxPin = PIN_A2; // El pin que actuará como RX
+Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 
-// Crea el objeto SoftwareSerial con los pines invertidos
-SoftwareSerial mySerial(rxPin, txPin); // RX, TX
 
+// --------------------------------------------------------------------- setup
 void setup()
 {
-  mySerial.begin(9600);
+  Serial1.begin(9600);
+  //pinMode(PIN_PA0, INPUT_PULLUP);
   RTC_init();
   resetRadio();
   initRadio();
   initSensor();
-  configMLX();
-  delay(10);
-  analogReference(INTERNAL1V024);
+  //configMLX();
+  delay(100);
+  analogReference(INTERNAL1V024); //INTERNAL2V048
+  // descartar primera lectura para mejor medición
   readSupplyVoltage();
-  bat = readSupplyVoltage() - 60;
-  leerSensor();
-  resetRadio();
-  SendHEXdata();
-  sleepRadio();
-
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  //parpadeo(3,100);
+  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+  //leerSensor();
+  //resetRadio();
+  //SendHEXdata();
 }
 
+// --------------------------------------------------------------------- loop
 void loop()
 {
-  switch (STATE)
-  {
-    case INICIO:
-      tipo_cambio = 0;
-      sleep_radio = false;
-      initSensor();
-      bat = readSupplyVoltage() - 60;
-      leerSensor();
+
+  //leerSensor();
+  //delay(1000);
+  
+    switch (STATE)
+    {
+      //----------------------------------------------------------- Leer sensores
+      case INICIO:
+        tipo_cambio = 0;
+        initSensor();
+        bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 
 
-      mySerial.print("{\"x\":");
-      mySerial.print(x);
-      mySerial.print(",\"y\":");
-      mySerial.print(y);
-      mySerial.print(",\"z\":");
-      mySerial.print(z);
-      mySerial.print(",\"a\":");
-      mySerial.print(angulo);
-      mySerial.println("}");
-      //mySerial.println(" ");
+        leerSensor();
 
-      STATE = PROCESO;
-      break;
 
-    case PROCESO:
+        STATE = PROCESO;
+        break;
 
-      if ((angulo > (delta + 1)) && (angulo < (360 - (delta + 1))) )
-      {
+
+      //----------------------------------------------------------- Procesa y envia los datos
+      case PROCESO:
+
+
         if ((angulo_anterior - angulo) > delta)
         {
           tipo_cambio = 1;
           resetRadio();
           SendHEXdata();
+          //sleepRadio();
         }
         else if (((angulo - angulo_anterior) > delta))
         {
           tipo_cambio = 2;
           resetRadio();
           SendHEXdata();
+          //sleepRadio();
         }
-      }
 
-      if (countRTC_CLK == 0)
-      {
-        resetRadio();
-        SendHEXdata();
-      }
+        if (countRTC_CLK == 0)
+        {
 
-      STATE = ESPERA;
-      break;
+          //tipo_cambio = 0;
+          resetRadio();
+          SendHEXdata();
+          //sleepRadio();
+        }
 
-    case ESPERA:
-      angulo_anterior = angulo;
-      if (sleep_radio == true)
+        STATE = ESPERA;
+        break;
+
+      case ESPERA:
+        angulo_anterior = angulo;
         sleepRadio();
-      espera_larga();
-      STATE = INICIO;
-      break;
-  }
+        espera_larga();
+        //analogReference(INTERNAL1V024); //INTERNAL2V048
+        // descartar primera lectura para mejor medición
+        //readSupplyVoltage();
+        STATE = INICIO;
+        break;
+    }
+  
 }
 
+
+// ----------------------------------------------------------- sendHexData
 void SendHEXdata()
 {
-  Serial1.print("AT$RC\r");
+
+  //mySerial.println("SendHEX");
+
+  //mySerial.print("RESET:");
+  Serial1.print("AT$RC\n");
   delay(50);
-  sleep_radio = true;
-  reset_radio_counter();
-
-
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+  char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //response = true;
+  }
   uint8_t txData[8];
+
   int aux_angulo = angulo + (tipo_cambio * 4096);
+
+  // x = (int16_t)posture[1] << 8 | posture[2];
+  // y = (int16_t)posture[3] << 8 | posture[4];
 
   txData[0] = (aux_angulo >> 8) & 0xFF;
   txData[1] = aux_angulo & 0xFF;
   txData[2] = (bat >> 8) & 0xFF;
   txData[3] = bat  & 0xFF;
-  txData[4] = (x >> 8) & 0xFF;
-  txData[5] = x  & 0xFF;
-  txData[6] = (y >> 8) & 0xFF;
-  txData[7] = y  & 0xFF;
 
-  mySerial.print("AT$SF=");
-  for (int i = 0; i < 4; i++) {
-    if (txData[i] < 0x10) mySerial.print("0");
-    mySerial.print(txData[i], HEX);
+  /*int x_int = static_cast<int>(x);
+    int y_int = static_cast<int>(y);
+
+    txData[0] = (x_int >> 8) & 0xFF;
+    txData[1] = x_int & 0xFF;
+    txData[2] = (y_int >> 8) & 0xFF;
+    txData[3] = y_int & 0xFF;
+    txData[5] = (aux_angulo >> 8) & 0xFF;
+    txData[5] = aux_angulo & 0xFF;
+    txData[6] = (bat >> 8) & 0xFF;
+    txData[7] = bat  & 0xFF;*/
+
+
+
+  Serial1.print ("AT$SF=");
+  if (txData[0] < 0x10) Serial1.print("0");
+  Serial1.print(txData[0], HEX);
+  if (txData[1] < 0x10) Serial1.print("0");
+  Serial1.print(txData[1], HEX);
+  if (txData[2] < 0x10) Serial1.print("0");
+  Serial1.print(txData[2], HEX);
+  if (txData[3] < 0x10) Serial1.print("0");
+  Serial1.print(txData[3], HEX);
+  //if (txData[4] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[4], HEX);
+  //if (txData[5] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[5], HEX);
+  //if (txData[6] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[6], HEX);
+  //if (txData[7] < 0x10) Serial1.print("0");
+  //Serial1.print(txData[7], HEX);
+  Serial1.print("\r");
+
+  delay(50);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+  char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //response = true;
   }
-  mySerial.print("\r");
+  //mySerial.println();
+
 }
 
+
+//---------------------------------------------- espera_larga
 void espera_larga()
 {
   while ((countRTC_CLK < sleepTime) && (count_DELTA < deltaTime))
@@ -166,239 +219,368 @@ void espera_larga()
     countRTC_CLK = 0;
   }
 
-  sleep_disable();
+  sleep_disable(); // Deshabilitar modo de sueño después de despertar
   power_all_enable();
   ADC0.CTRLA |= ADC_ENABLE_bm;
+
 }
 
+
+// ----------------------------------------------- resetRadio
 void resetRadio()
 {
-   response = false;
-  mySerial.begin(9600);
-
+  Serial1.begin(9600 );
+  bool response = false;
   pinMode(RESET_RADIO, OUTPUT);
-  digitalWrite(RESET_RADIO, HIGH);
-  delay(5);
-  digitalWrite(RESET_RADIO, LOW);
+  digitalWrite(RESET_RADIO, HIGH);    // Reset Radio;
+  delay(50);
+  digitalWrite(RESET_RADIO, LOW);    // Radio OK;
   pinMode(RESET_RADIO, INPUT);
-  delay(5);
-
-  mySerial.print("AT\r\n");
   delay(50);
-  //while(!mySerial.available());
-  while (mySerial.available()) {
-    char data = mySerial.read();
-    response = true;
-  }
+
+  Serial1.print("AT\r");
+  delay(50);
+  //while (!Serial1.available());
+  //while (Serial1.available())
+  //{ // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //response = true;
+  //}
+  //mySerial.println();
+
+  //if (response == true)
+  //{
+  //mySerial.println("Radio Ready");
+  //}
+
+  //return response;
+  delay(50);
+  //initRadio();
 }
 
-void reset_radio_counter()
-{
-  Serial1.print("AT$RC\n");
-  delay(50);
-  while (mySerial.available()) {
-    char data = mySerial.read();
-    response = true;
-  }
-  //return 0;
-}
 
+//-------------------------------------- sleepRadio
 void sleepRadio()
 {
-  mySerial.print("AT$P=2\r");
+  //delay(120000);
+  //mySerial.println("Radio Deep Sleep");
+
+  // Radio a bajo consumo
+  Serial1.print ("AT$P=2");
+  Serial1.print("\r");
+
+  delay(50);
+  //while(!Serial1.available())
+  //while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //}
+
+  //espera_larga();
+  //sleep_enable();
 }
 
+//------------------------------------------ initRadio
 void initRadio()
 {
-  mySerial.print("AT$I=10\r");
-  mySerial.print("AT$I=11\r");
+  //Serial1.begin(9600 ); // para depurar
+  //mySerial.print("ID:");
+  Serial1.print("AT$I=10\r");
+  delay(50);
+  //while (Serial1.available())
+  //{ // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //}
+  //mySerial.println();NJ
+
+
+  //mySerial.print("PAC:");
+  Serial1.print("AT$I=11\r");
+  delay(50);
+
+  //while (Serial1.available()) { // Verificar si hay datos disponibles en Serial1
+  //char data = Serial1.read(); // Leer un byte desde Serial1
+  //mySerial.write(data); // Enviar ese byte a mySerial
+  //}
+  //mySerial.println();
 }
 
 
+//------------------------------------------ parpadeo()
+void parpadeo(uint16_t cantidad, uint32_t ms)
+{
+  // Parpadeo del LED
+  //pinMode(LED_1, OUTPUT);
+  for (uint16_t i = 0; i < cantidad; i++)
+  {
+    //digitalWrite(LED_1, HIGH);
+    //mySerial.print("OFF:");
+    Serial1.print("AT:P4=0\r");
+    delay(50);
+    //mySerial.print("OFF:");
+    Serial1.print("AT:P4=0\r");
+    delay(ms); // LED encendido durante 500 ms
+    //mySerial.print("ON:");
+    Serial1.print("AT:P4=1\r");
+    //digitalWrite(LED_1, LOW);
+    delay(ms); // LED apagado durante 500 ms
+  }
+  //pinMode(LED_1, INPUT);
+  //mySerial.print("OFF:");
+  Serial1.print("AT:P4=0\r");
+  delay(50);
 
-void RTC_init(void) {
-  cli();
-  while (RTC.STATUS > 0) ; // Espera a que los registros del RTC estén listos
+  //mySerial.println();
 
-  RTC.CLKSEL = RTC_CLKSEL_INT32K_gc; // Reloj interno de 32.768 kHz
-  RTC.CTRLA = RTC_PRESCALER_DIV1024_gc | RTC_RTCEN_bm | RTC_RUNSTDBY_bm; // Configura prescaler y habilita RTC
+}
 
-  //RTC.CTRLA = RTC_PRESCALER_DIV1024_gc | RTC_RTCEN_bm; // Configura prescaler y habilita RTC
+// --------------------------------------------------------------------- RTC_init
+void RTC_init(void)
+{
+  /* Initialize RTC: */
 
-  RTC.PITINTCTRL = RTC_PI_bm; // Habilita interrupción periódica
-  RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc | RTC_PITEN_bm; // Configura el periodo de la interrupción
+  //CCP = 0xD8;
+  //CLKCTRL.MCLKCTRLA = 1;
+  //CLKCTRL.OSC32KCTRLA = 1;
 
-  sei();
+  cli(); // Desactivar interrupciones globales
+  while (RTC.STATUS > 0)
+  {
+    ;                                   /* Wait for all register to be synchronized */
+  }
+
+
+  RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
+
+  RTC.CTRLA = RTC_PRESCALER_DIV1024_gc   // Configurar el prescaler del RTC
+              | RTC_RTCEN_bm               // Habilitar el RTC
+              | RTC_RUNSTDBY_bm;           // RTC activo en modo standby
+  RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
+  RTC.PITCTRLA = RTC_PERIOD_CYC32768_gc /* RTC Clock Cycles 32768, resulting in 32.768kHz/32768 = 1Hz */
+                 | RTC_PITEN_bm;                       /* Enable PIT counter: enabled */
+
+
+
+  //RTC.PER = 1023;  // Establecer el período del RTC (1023 + 1 ciclos)
+  //RTC.INTCTRL = RTC_OVF_bm;  // Habilitar la interrupción por desbordamiento del RTC
+
+  sei(); // Activar interrupciones globales
+}
+
+// --------------------------------------------------------------------- ISR
+ISR(RTC_PIT_vect)
+{
+  RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
+  countRTC_CLK++;
+  count_DELTA++;
+
 }
 
 
-ISR(RTC_PIT_vect) {
-  RTC.PITINTFLAGS = RTC_PI_bm; // Limpia la bandera de interrupción escribiendo un '1' en ella
-  countRTC_CLK++;              // Incrementa el contador de tiempo de sueño
-  count_DELTA++;               // Incrementa el contador de tiempo para el delta
-}
-
+// ----------------------------------------------------------- initSensor
 void initSensor()
 {
   //pinMode(PIN_PB1, INPUT_PULLUP);
   //pinMode(PIN_PB0, INPUT_PULLUP);
+  //Wire.begin();
+  //delay(50);
 
-  //  pinMode(PIN_PB1, INPUT);
-  //pinMode(PIN_PB0, INPUT);
-
-
-  Wire.begin();
-  delay(10);
+   if (!sensor.begin_I2C(0x0F)) {
+    Serial1.println("Error");
+    while (1) {
+      delay(10);
+    }
+  }
+  //writeProgmemString(sensorFoundMsg);
 }
 
 void configMLX()
 {
-  Wire.beginTransmission(MLX90393_ADDRESS);
-  Wire.write(0x60);
-  Wire.write(0x00);
-  Wire.write(0x70);
-  Wire.write(0x00);
-  Wire.endTransmission();
+  // Configura el MLX90393
+
+  /* Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x6E); // Comando para escribir en el registro
+    Wire.write(0x00); // Comando para configurar el sensor
+    //Wire.write(0x70); // Comando para configurar el sensor
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();*/
+
+  // Configuración del eje X
+  /* Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x60); // Comando para escribir en el registro
+    Wire.write(0x02); // Parte baja del registro de control (selecciona el eje X)
+    Wire.write(0xF8); // Parte alta del registro de control (máxima ganancia y resolución para el eje X)
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();
+    delay(50);
+
+    // Configuración del eje Y
+    Wire.beginTransmission(MLX90393_ADDRESS);
+    Wire.write(0x60); // Comando para escribir en el registro
+    Wire.write(0x04); // Parte baja del registro de control (selecciona el eje Y)
+    Wire.write(0xF8); // Parte alta del registro de control (máxima ganancia y resolución para el eje Y)
+    Wire.write(0x00); // Comando para configurar el sensor
+    Wire.endTransmission();
+    delay(50);*/
+
+  //Wire.beginTransmission(MLX90393_ADDRESS);
+  //Wire.write(0x60); // Comando para configurar el sensor
+  //Wire.write(0x00); // Comando para configurar el sensor
+  //Wire.write(0xF0); // Parte alta del registro de control (configuración de ganancia máxima y resolución)
+  //Wire.write(0x70); // Comando para configurar el sensor
+
+  //Wire.endTransmission();
+  //delay(50);
 }
 
-double calcularAngulo(double x, double y)
-{
-  rad = atan2(y, x);
-  a = rad * (180.0 / M_PI);
+// ----------------------------------------------------------- calcularAngulo
+//float calcularAngulo(float x, float y)
+//{
+  //x = x * (-1);  // Invertir direccion eje x
+  //rad = atan2(y, x); // Calcula el ángulo en radianes
 
-  if (a < 0) {
-    a += 360;
-  } else if (a >= 360) {
-    a -= 360;
-  }
-  return a;
-}
+  //a = rad * (180.0 / M_PI); // Convierte de radianes a grados
+  //a += phaseShift; // Agrega o resta el defase en grados
 
+  // Normaliza el ángulo para que esté en el rango 0-360
+  //if (a < 0)
+  //{
+    //a += 360;
+  //}
+  //else if (a >= 360)
+  //{
+    //a -= 360;
+  //}
+  //return a;
+//}
+
+// ----------------------------------------------------------- leerSensor
 void leerSensor()
 {
-  int a_aux = 0;
-  int32_t prom = 0;
-  int num_red = 3;
+  float x, y, z;
 
-  for (int j = 0; j < num_red; j++)
+  if (sensor.readData(&x, &y, &z)) 
   {
-    uint8_t posture[30];
-    int posture_length = 0;
-    Wire.beginTransmission(MLX90393_ADDRESS);
-    Wire.write(0x3E);
-    Wire.endTransmission();
-    Wire.requestFrom(MLX90393_ADDRESS, 4);
-    while (Wire.available()) {
-      Wire.read();
-    }
-    delay(5);
-
-    Wire.beginTransmission(MLX90393_ADDRESS);
-    Wire.write(0x4E);
-    Wire.endTransmission();
-    Wire.requestFrom(MLX90393_ADDRESS, 10);
-    int i = -1;
-    posture_length = 0;
-    while (Wire.available()) {
-      byte data = Wire.read();
-      posture[posture_length] = data;
-      posture_length++;
-    }
-    x = (int16_t)posture[1] << 8 | posture[2];
-    y = (int16_t)posture[3] << 8 | posture[4];
-    z = (int16_t)posture[5] << 8 | posture[6];
-
-    a_aux = static_cast<int>(calcularAngulo(x, y));
-
-    if ((abs(x) + abs(y)) < MIN_TESLA) {
-      a_aux = 0;
-    }
-
-    prom = prom + a_aux;
+    //writeProgmemString(axisX); writeFloatToSerial(x);
+    //writeProgmemString(axisY); writeFloatToSerial(y);
+    //writeProgmemString(axisZ); writeFloatToSerial(z);
+    //Serial.write("\n");
+  } else {
+    //writeProgmemString(unableToReadMsg);
   }
 
-  angulo = prom / num_red;
+  delay(500);
+
+  float rad = atan2(y, x);
+  //float aux_an = rad * (180.0 / M_PI);
+  angulo = rad * (180.0 / M_PI);
+
+  if (angulo < 0) {
+    angulo += 360;
+  } else if (angulo >= 360) {
+    angulo -= 360;
+  }
+  //angulo  = aux_an;
+
+  //Serial1.println(aux_an);
+  
+  char buffer[10];
+
+  
+  //buffer[0] = 32 + byte (angulo);
+  //buffer[1] = '2';
+  //buffer[2] = '3';
+  //buffer[3] = 0;
+  
+  //Serial.print(F("Unique ID:    "));
+  //sprintf(buffer, "%d", aux_an); 
+  itoa(angulo, buffer, 10);
+  Serial1.write("\n");
+  
+  Serial1.write(buffer);
+  
+  Serial1.write("\n");
+
+  //angulo = prom / 10;
+  /*Serial1.print("{\"x\":");
+  Serial1.print(x, 4);
+  Serial1.print(",\"y\":");
+  Serial1.print(y, 4);
+  Serial1.print(",\"z\":");
+  Serial1.print(z, 4);
+  //Serial1.print(",\"r\":");
+  //Serial1.print(rad, 4);
+  Serial1.print(",\"a\":");
+  Serial1.print(angulo);
+  //Serial1.print(",\"v\":");
+  //Serial1.print(bat);
+  Serial1.print("}");
+  Serial1.println();*/
+  delay(100); // Espera un segundo para la próxima lectura
+
 }
 
+
+// --------------------------------- enterSleep
 void enterSleep()
 {
+
   power_all_disable();
 
-  Wire.end();
+  //Serial1.end();
+  //Wire.end();
+  //pinMode(PIN_PA0, INPUT);
+  //pinMode(PIN_PA1, INPUT);
+  //pinMode(PIN_PA2, INPUT);
+  pinMode(PIN_PA3, INPUT);
+  pinMode(PIN_PA4, INPUT);
+  pinMode(PIN_PA5, INPUT);
+  pinMode(PIN_PA6, INPUT);
+  pinMode(PIN_PA7, INPUT);
 
-  //pinMode(PIN_PA1, INPUT_PULLUP);
-  //pinMode(PIN_PA2, INPUT_PULLUP);
-  pinMode(PIN_PA3, INPUT_PULLUP);
-  pinMode(PIN_PA4, INPUT_PULLUP);
-  pinMode(PIN_PA5, INPUT_PULLUP);
-  pinMode(PIN_PA6, INPUT_PULLUP);
-  pinMode(PIN_PA7, INPUT_PULLUP);
 
-  pinMode(PIN_PB0, INPUT_PULLUP);
-  pinMode(PIN_PB1, INPUT_PULLUP);
-  pinMode(PIN_PB2, INPUT_PULLUP);
-  pinMode(PIN_PB3, INPUT_PULLUP);
-  pinMode(PIN_PB4, INPUT_PULLUP);
-  pinMode(PIN_PB5, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT);
+  pinMode(PIN_PB1, INPUT);
+  pinMode(PIN_PB2, INPUT);
+  pinMode(PIN_PB3, INPUT);
+  pinMode(PIN_PB4, INPUT);
+  pinMode(PIN_PB5, INPUT);
 
-  pinMode(PIN_PC0, INPUT_PULLUP);
-  pinMode(PIN_PC1, INPUT_PULLUP);
-  pinMode(PIN_PC2, INPUT_PULLUP);
-  pinMode(PIN_PC3, INPUT_PULLUP);
+  pinMode(PIN_PC0, INPUT);
+  pinMode(PIN_PC1, INPUT);
+  pinMode(PIN_PC2, INPUT);
+  pinMode(PIN_PC3, INPUT);
 
-  //digitalWrite(PIN_PA1, LOW);
-  //digitalWrite(PIN_PA2, LOW);
-  digitalWrite(PIN_PA3, LOW);
-  digitalWrite(PIN_PA4, LOW);
-  digitalWrite(PIN_PA5, LOW);
+  //digitalWrite(PIN_PA0, HIGH);
+  //digitalWrite(PIN_PA1, HIGH);
+  //digitalWrite(PIN_PA2, HIGH);
+  digitalWrite(PIN_PA3, HIGH);
+  digitalWrite(PIN_PA4, HIGH);
+  digitalWrite(PIN_PA5, HIGH);
   digitalWrite(PIN_PA6, LOW);
-  digitalWrite(PIN_PA7, LOW);
+  digitalWrite(PIN_PA7, HIGH);
 
   digitalWrite(PIN_PB0, HIGH);
   digitalWrite(PIN_PB1, HIGH);
-  digitalWrite(PIN_PB2, LOW);
-  digitalWrite(PIN_PB3, LOW);
-  digitalWrite(PIN_PB4, LOW);
-  digitalWrite(PIN_PB5, LOW);
+  digitalWrite(PIN_PB2, HIGH);
+  digitalWrite(PIN_PB3, HIGH);
+  digitalWrite(PIN_PB4, HIGH);
+  digitalWrite(PIN_PB5, HIGH);
 
-  digitalWrite(PIN_PC0, LOW);
-  digitalWrite(PIN_PC1, LOW);
-  digitalWrite(PIN_PC2, LOW);
-  digitalWrite(PIN_PC3, LOW);
+  digitalWrite(PIN_PC0, HIGH);
+  digitalWrite(PIN_PC1, HIGH);
+  digitalWrite(PIN_PC2, HIGH);
+  digitalWrite(PIN_PC3, HIGH);
+  //Serial1.end();
 
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
 
 
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_cpu();
-  sleep_enable();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Modo de sueño más bajo
+  sleep_enable(); // Habilitar el modo de sueño
+  sleep_cpu();    // Poner al MCU en modo de sueño
 
-}
 
-/*void printSensor()
-  {
-  mySerial.print("{\"x\":");
-  mySerial.print(x);
-  mySerial.print(",\"y\":");
-  mySerial.print(y);
-  mySerial.print(",\"z\":");
-  mySerial.print(z);
-  mySerial.print(",\"r\":");
-  mySerial.print(rad);
-  mySerial.print(",\"a\":");
-  mySerial.print(angulo);
-  mySerial.print(",\"v\":");
-  mySerial.print(bat);
-  mySerial.print("}");
-  mySerial.println(" ");
-  }*/
-
-int calcularDiferenciaAngular(int angulo_anterior, int angulo_actual) {
-  int diferencia = angulo_actual - angulo_anterior;
-  if (diferencia > 180) {
-    diferencia -= 360;
-  } else if (diferencia < -180) {
-    diferencia += 360;
-  }
-  return diferencia;
 }

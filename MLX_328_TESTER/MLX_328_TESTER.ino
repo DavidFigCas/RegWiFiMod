@@ -91,7 +91,7 @@ void loop(void) {
   
   //Serial.print(F("Unique ID:    "));
   //sprintf(buffer, "%d", aux_an); 
-  //itoa(aux_an, buffer, 10);
+  itoa(aux_an, buffer, 10);
   
   Serial1.write(buffer);
   
