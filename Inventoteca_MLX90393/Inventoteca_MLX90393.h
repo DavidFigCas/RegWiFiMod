@@ -15,16 +15,13 @@
 
   MIT license, all text above must be included in any redistribution
  *****************************************************************************/
-#ifndef ADAFRUIT_MLX90393_H
-#define ADAFRUIT_MLX90393_H
+#ifndef INVENTOTECA_MLX90393_H
+#define INVENTOTECA_MLX90393_H
 
 #include "Arduino.h"
-#include <Adafruit_I2CDevice.h>
-//#include <Adafruit_SPIDevice.h>
-//#include <Adafruit_Sensor.h>
+#include <Wire.h>
 
 #define MLX90393_DEFAULT_ADDR (0x0C) /* Can also be 0x18, depending on IC */
-
 #define MLX90393_AXIS_ALL (0x0E)      /**< X+Y+Z axis bits for commands. */
 #define MLX90393_CONF1 (0x00)         /**< Gain */
 #define MLX90393_CONF2 (0x01)         /**< Burst, comm mode */
@@ -46,7 +43,7 @@ enum {
   MLX90393_REG_RM = (0x40),  /**> Read measurement. */
   MLX90393_REG_RR = (0x50),  /**< Read register. */
   MLX90393_REG_WR = (0x60),  /**< Write register. */
-  MLX90393_REG_EX = (0x80),  /**> Exit moode. */
+  MLX90393_REG_EX = (0x80),  /**> Exit mode. */
   MLX90393_REG_HR = (0xD0),  /**< Memory recall. */
   MLX90393_REG_HS = (0x70),  /**< Memory store. */
   MLX90393_REG_RT = (0xF0),  /**< Reset. */
@@ -165,7 +162,6 @@ const float mlx90393_tconv[8][4] = {
     {25.65, 50.61, 100.53, 200.37},
 };
 
-
 /**
  * Driver for the Adafruit MLX90393 magnetometer breakout board.
  */
@@ -190,7 +186,8 @@ public:
   bool readData(float *x, float *y, float *z);
 
 private:
-  Adafruit_I2CDevice *i2c_dev = NULL;
+  uint8_t i2c_addr;
+  TwoWire *i2c;
 
   bool readRegister(uint8_t reg, uint16_t *data);
   bool writeRegister(uint8_t reg, uint16_t data);
@@ -205,4 +202,4 @@ private:
   int32_t _sensorID = 90393;
 };
 
-#endif /* ADAFRUIT_MLX90393_H */
+#endif /* INVENTOTECA_MLX90393_H */

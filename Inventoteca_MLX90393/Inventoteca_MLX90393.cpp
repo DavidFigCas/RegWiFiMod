@@ -31,19 +31,9 @@ Adafruit_MLX90393::Adafruit_MLX90393(void) {}
  *    @return True if initialization was successful, otherwise false.
  */
 bool Adafruit_MLX90393::begin_I2C(uint8_t i2c_addr, TwoWire *wire) {
-  if (i2c_dev) {
-    delete i2c_dev;
-  }
-
-  if (!i2c_dev) {
-    i2c_dev = new Adafruit_I2CDevice(i2c_addr, wire);
-  }
-  //spi_dev = NULL;
-
-  if (!i2c_dev->begin()) {
-    return false;
-  }
-
+  this->i2c_addr = i2c_addr;
+  this->i2c = wire;
+  i2c->begin();
   return _init();
 }
 
@@ -70,7 +60,6 @@ bool Adafruit_MLX90393::begin_I2C(uint8_t i2c_addr, TwoWire *wire) {
 }*/
 
 bool Adafruit_MLX90393::_init(void) {
-
   if (!exitMode())
     return false;
 
@@ -173,7 +162,6 @@ mlx90393_gain_t Adafruit_MLX90393::getGain(void) {
  */
 bool Adafruit_MLX90393::setResolution(enum mlx90393_axis axis,
                                       enum mlx90393_resolution resolution) {
-
   uint16_t data;
   readRegister(MLX90393_CONF3, &data);
 
@@ -435,35 +423,31 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
                                       uint8_t interdelay) {
   uint8_t status = 0;
   uint8_t i;
-  uint8_t rxbuf2[rxlen + 2];
+  uint8_t rxbuf2[rxlen + 1];
 
-  if (i2c_dev) {
-    /* Write stage */
-    if (!i2c_dev->write(txbuf, txlen)) {
-      return MLX90393_STATUS_ERROR;
-    }
-    delay(interdelay);
-
-    /* Read status byte plus any others */
-    if (!i2c_dev->read(rxbuf2, rxlen + 1)) {
-      return MLX90393_STATUS_ERROR;
-    }
-    status = rxbuf2[0];
-    for (i = 0; i < rxlen; i++) {
-      rxbuf[i] = rxbuf2[i + 1];
-    }
+  /* Write stage */
+  i2c->beginTransmission(i2c_addr);
+  i2c->write(txbuf, txlen);
+  if (i2c->endTransmission() != 0) {
+    return MLX90393_STATUS_ERROR;
   }
 
-  /*if (spi_dev) {
-    spi_dev->write_then_read(txbuf, txlen, rxbuf2, rxlen + 1, 0x00);
-    status = rxbuf2[0];
-    for (i = 0; i < rxlen; i++) {
-      rxbuf[i] = rxbuf2[i + 1];
-    }
-    delay(interdelay);
-  }*/
+  delay(interdelay);
 
-  // Mask out bytes available in the status response. 
+  /* Read status byte plus any others */
+  if (i2c->requestFrom(i2c_addr, (uint8_t)(rxlen + 1)) != (rxlen + 1)) {
+    return MLX90393_STATUS_ERROR;
+  }
+  for (i = 0; i < (rxlen + 1); i++) {
+    rxbuf2[i] = i2c->read();
+  }
+
+  status = rxbuf2[0];
+  for (i = 0; i < rxlen; i++) {
+    rxbuf[i] = rxbuf2[i + 1];
+  }
+
+  /* Mask out bytes available in the status response. */
   return (status >> 2);
 }
 

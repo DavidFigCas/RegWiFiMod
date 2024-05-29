@@ -1,73 +1,99 @@
-#include <Wire.h>
-#include "Adafruit_MLX90393.h"
-#include <avr/io.h>
+#include "Inventoteca_MLX90393.h"
 
 Adafruit_MLX90393 sensor = Adafruit_MLX90393();
-uint8_t angulo;
-float x, y, z;
+#define MLX90393_CS 10
 
-void setup() {
-  // put your setup code here, to run once:
-  Wire.begin(21, 22); // SDA en GPIO21, SCL en GPIO22
+// Optimizar el almacenamiento de cadenas
+/*const char startMsg[] PROGMEM = "Starting";
+const char sensorNotFoundMsg[] PROGMEM = "No sensor?";
+const char sensorFoundMsg[] PROGMEM = "Found";
+const char gainSetMsg[] PROGMEM = "Gain";
+const char unableToReadMsg[] PROGMEM = "Unable\n";
+const char axisX[] PROGMEM = "X: ";
+const char axisY[] PROGMEM = "Y: ";
+const char axisZ[] PROGMEM = "Z: ";
+const char angleMsg[] PROGMEM = "A: ";*/
+
+void setup(void) {
+  delay(5000);
   Serial1.begin(9600);
+  
+  while (!Serial1) {
+    delay(10);
+  }
 
-  if (!sensor.begin_I2C(0x0F)) 
-  { // hardware I2C mode, can pass in address & alt Wire
-    //Serial1.println("No");
+  // Utiliza Serial.write para enviar cadenas desde PROGMEM
+  //writeProgmemString(startMsg);
+
+  if (!sensor.begin_I2C(0x0F)) {
+    //writeProgmemString(sensorNotFoundMsg);
     while (1) {
       delay(10);
     }
   }
-  //Serial.println("Found");
+  //writeProgmemString(sensorFoundMsg);
 
-}
-
-void loop() {
-
-  // get X Y and Z data at once
-  if (sensor.readData(&x, &y, &z))
-  {
-    //Serial.print("X: "); Serial.print(x, 4); Serial.print("\t");
-    //Serial.print("Y: "); Serial.print(y, 4); Serial.print("\t");
-    //Serial.print("Z: "); Serial.print(z, 4); Serial.print("\t\t");
-    //calcularAngulo();
-    angulo = atan2(y, x); // Calcula el ángulo en radianes
-    angulo = angulo * (180.0 / M_PI); // Convierte de radianes a grados
-    if (angulo < 0) {
-      angulo += 360;
-    } else if (angulo >= 360) {
-      angulo -= 360;
-    }
-    
-    convertirYEnviarAngulo(angulo);
+  //sensor.setGain(MLX90393_GAIN_5X);
+  //writeProgmemString(gainSetMsg);
+  /*switch (sensor.getGain()) {
+    case MLX90393_GAIN_1X: Serial.write("1 x\n"); break;
+    case MLX90393_GAIN_1_33X: Serial.write("1.33 x\n"); break;
+    case MLX90393_GAIN_1_67X: Serial.write("1.67 x\n"); break;
+    case MLX90393_GAIN_2X: Serial.write("2 x\n"); break;
+    case MLX90393_GAIN_2_5X: Serial.write("2.5 x\n"); break;
+    case MLX90393_GAIN_3X: Serial.write("3 x\n"); break;
+    case MLX90393_GAIN_4X: Serial.write("4 x\n"); break;
+    case MLX90393_GAIN_5X: Serial.write("5 x\n"); break;
   }
 
+  sensor.setResolution(MLX90393_X, MLX90393_RES_17);
+  sensor.setResolution(MLX90393_Y, MLX90393_RES_17);
+  sensor.setResolution(MLX90393_Z, MLX90393_RES_16);
+
+  sensor.setOversampling(MLX90393_OSR_3);
+  sensor.setFilter(MLX90393_FILTER_5);*/
 }
 
+void loop(void) {
+  float x, y, z;
 
-void convertirYEnviarAngulo(uint8_t angulo) {
-    char buffer[4]; // Un número máximo de 255 más el carácter nulo final
-    int i = 0;
+  if (sensor.readData(&x, &y, &z)) 
+  {
+    //writeProgmemString(axisX); writeFloatToSerial(x);
+    //writeProgmemString(axisY); writeFloatToSerial(y);
+    //writeProgmemString(axisZ); writeFloatToSerial(z);
+    //Serial.write("\n");
+  } else {
+    //writeProgmemString(unableToReadMsg);
+  }
 
-    if (angulo == 0) {
-        buffer[i++] = '0'; // Manejar explícitamente el caso de 0
-    } else {
-        // Extraer cada dígito empezando por el más significativo
-        int hundreds = (angulo / 100) % 10; // Centenas
-        int tens = (angulo / 10) % 10;      // Decenas
-        int ones = angulo % 10;             // Unidades
+  delay(500);
 
-        if (hundreds > 0) { // Solo agregar centenas si es necesario
-            buffer[i++] = hundreds + '0';
-        }
-        if (tens > 0 || hundreds > 0) { // Solo agregar decenas si es necesario
-            buffer[i++] = tens + '0';
-        }
-        buffer[i++] = ones + '0'; // Siempre agregamos el dígito de las unidades
-    }
+  float rad = atan2(y, x);
+  float angulo = rad * (180.0 / M_PI);
 
-    buffer[i] = '\0'; // Terminar la cadena
+  if (angulo < 0) {
+    angulo += 360;
+  } else if (angulo >= 360) {
+    angulo -= 360;
+  }
+  int aux_an = angulo;
 
-    // Enviar la cadena por el puerto serial
-    //Serial1.println(buffer);
+  //Serial1.println(aux_an);
+  
+  char buffer[10];
+
+  
+  //buffer[0] = 32 + byte (angulo);
+  //buffer[1] = '2';
+  //buffer[2] = '3';
+  //buffer[3] = 0;
+  
+  //Serial.print(F("Unique ID:    "));
+  //sprintf(buffer, "%d", aux_an); 
+  //itoa(aux_an, buffer, 10);
+  
+  Serial1.write(buffer);
+  
+  Serial1.write("\n");
 }

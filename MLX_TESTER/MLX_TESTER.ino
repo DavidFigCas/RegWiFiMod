@@ -16,9 +16,9 @@ const char angleMsg[] PROGMEM = "A: ";*/
 
 void setup(void) {
   delay(5000);
-  Serial1.begin(9600);
+  Serial.begin(9600);
   
-  while (!Serial1) {
+  while (!Serial) {
     delay(10);
   }
 
@@ -62,9 +62,9 @@ void loop(void) {
     //writeProgmemString(axisX); writeFloatToSerial(x);
     //writeProgmemString(axisY); writeFloatToSerial(y);
     //writeProgmemString(axisZ); writeFloatToSerial(z);
-    //Serial.write("\n");
+    //Serial.println(x);
   } else {
-    //writeProgmemString(unableToReadMsg);
+    Serial.println("Error");
   }
 
   delay(500);
@@ -94,5 +94,5 @@ void loop(void) {
   
   Serial.write(buffer);
   
-  //Serial.write("\n");
+  Serial.write("\n");
 }
