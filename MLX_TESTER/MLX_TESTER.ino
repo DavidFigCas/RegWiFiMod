@@ -3,73 +3,96 @@
 Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 #define MLX90393_CS 10
 
-void setup(void)
-{
-  Serial.begin(115200);
-  //Wire.begin(21,22);
+// Optimizar el almacenamiento de cadenas
+/*const char startMsg[] PROGMEM = "Starting";
+const char sensorNotFoundMsg[] PROGMEM = "No sensor?";
+const char sensorFoundMsg[] PROGMEM = "Found";
+const char gainSetMsg[] PROGMEM = "Gain";
+const char unableToReadMsg[] PROGMEM = "Unable\n";
+const char axisX[] PROGMEM = "X: ";
+const char axisY[] PROGMEM = "Y: ";
+const char axisZ[] PROGMEM = "Z: ";
+const char angleMsg[] PROGMEM = "A: ";*/
 
-  /* Wait for serial on USB platforms. */
-  while (!Serial) {
+void setup(void) {
+  delay(5000);
+  Serial1.begin(9600);
+  
+  while (!Serial1) {
+    delay(10);
+  }
+
+  // Utiliza Serial.write para enviar cadenas desde PROGMEM
+  //writeProgmemString(startMsg);
+
+  if (!sensor.begin_I2C(0x0F)) {
+    //writeProgmemString(sensorNotFoundMsg);
+    while (1) {
       delay(10);
+    }
+  }
+  //writeProgmemString(sensorFoundMsg);
+
+  //sensor.setGain(MLX90393_GAIN_5X);
+  //writeProgmemString(gainSetMsg);
+  /*switch (sensor.getGain()) {
+    case MLX90393_GAIN_1X: Serial.write("1 x\n"); break;
+    case MLX90393_GAIN_1_33X: Serial.write("1.33 x\n"); break;
+    case MLX90393_GAIN_1_67X: Serial.write("1.67 x\n"); break;
+    case MLX90393_GAIN_2X: Serial.write("2 x\n"); break;
+    case MLX90393_GAIN_2_5X: Serial.write("2.5 x\n"); break;
+    case MLX90393_GAIN_3X: Serial.write("3 x\n"); break;
+    case MLX90393_GAIN_4X: Serial.write("4 x\n"); break;
+    case MLX90393_GAIN_5X: Serial.write("5 x\n"); break;
   }
 
-  Serial.println("Starting Adafruit MLX90393 Demo");
-
-  if (! sensor.begin_I2C(0x0F)) {          // hardware I2C mode, can pass in address & alt Wire
-  //if (! sensor.begin_SPI(MLX90393_CS)) {  // hardware SPI mode
-    Serial.println("No sensor found ... check your wiring?");
-    while (1) { delay(10); }
-  }
-  Serial.println("Found a MLX90393 sensor");
-
-  sensor.setGain(MLX90393_GAIN_1X);
-  // You can check the gain too
-  Serial.print("Gain set to: ");
-  switch (sensor.getGain()) {
-    case MLX90393_GAIN_1X: Serial.println("1 x"); break;
-    case MLX90393_GAIN_1_33X: Serial.println("1.33 x"); break;
-    case MLX90393_GAIN_1_67X: Serial.println("1.67 x"); break;
-    case MLX90393_GAIN_2X: Serial.println("2 x"); break;
-    case MLX90393_GAIN_2_5X: Serial.println("2.5 x"); break;
-    case MLX90393_GAIN_3X: Serial.println("3 x"); break;
-    case MLX90393_GAIN_4X: Serial.println("4 x"); break;
-    case MLX90393_GAIN_5X: Serial.println("5 x"); break;
-  }
-
-  // Set resolution, per axis. Aim for sensitivity of ~0.3 for all axes.
   sensor.setResolution(MLX90393_X, MLX90393_RES_17);
   sensor.setResolution(MLX90393_Y, MLX90393_RES_17);
   sensor.setResolution(MLX90393_Z, MLX90393_RES_16);
 
-  // Set oversampling
   sensor.setOversampling(MLX90393_OSR_3);
-
-  // Set digital filtering
-  sensor.setFilter(MLX90393_FILTER_5);
+  sensor.setFilter(MLX90393_FILTER_5);*/
 }
 
 void loop(void) {
   float x, y, z;
 
-  // get X Y and Z data at once
-  if (sensor.readData(&x, &y, &z)) {
-      Serial.print("X: "); Serial.print(x, 4); Serial.println(" uT");
-      Serial.print("Y: "); Serial.print(y, 4); Serial.println(" uT");
-      Serial.print("Z: "); Serial.print(z, 4); Serial.println(" uT");
+  if (sensor.readData(&x, &y, &z)) 
+  {
+    //writeProgmemString(axisX); writeFloatToSerial(x);
+    //writeProgmemString(axisY); writeFloatToSerial(y);
+    //writeProgmemString(axisZ); writeFloatToSerial(z);
+    //Serial.write("\n");
   } else {
-      Serial.println("Unable to read XYZ data from the sensor.");
+    //writeProgmemString(unableToReadMsg);
   }
 
   delay(500);
 
-  /* Or....get a new sensor event, normalized to uTesla */
-  sensors_event_t event;
-  sensor.getEvent(&event);
-  /* Display the results (magnetic field is measured in uTesla) */
-  Serial.print("X: "); Serial.print(event.magnetic.x);
-  Serial.print(" \tY: "); Serial.print(event.magnetic.y);
-  Serial.print(" \tZ: "); Serial.print(event.magnetic.z);
-  Serial.println(" uTesla ");
+  float rad = atan2(y, x);
+  float angulo = rad * (180.0 / M_PI);
 
-  delay(500);
+  if (angulo < 0) {
+    angulo += 360;
+  } else if (angulo >= 360) {
+    angulo -= 360;
+  }
+  int aux_an = angulo;
+
+  //Serial1.println(aux_an);
+  
+  char buffer[10];
+
+  
+  //buffer[0] = 32 + byte (angulo);
+  //buffer[1] = '2';
+  //buffer[2] = '3';
+  //buffer[3] = 0;
+  
+  //Serial.print(F("Unique ID:    "));
+  sprintf(buffer, "%d", aux_an); 
+  
+  Serial.write(buffer);
+  
+  //Serial.write("\n");
 }
