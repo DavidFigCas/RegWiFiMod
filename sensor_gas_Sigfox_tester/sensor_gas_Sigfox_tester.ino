@@ -15,7 +15,8 @@
 
 #define INICIO    0
 #define PROCESO   1
-#define ESPERA    2
+#define ENVIAR    2
+#define ESPERA    3
 
 #define MIN_TESLA   200     //abajo de ese valor de la suma de x y, se considera que no hay iman
 
@@ -29,11 +30,9 @@ volatile uint32_t deltaTime  =  10;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY 
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
-//float x, y, z;
-//phaseShift = 0;     // phaseSift = 105
 int angulo, angulo_anterior;
-//double a, rad;
 byte tipo_cambio;
+bool on_send = false;
 
 Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 
@@ -41,25 +40,25 @@ Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 // --------------------------------------------------------------------- setup
 void setup()
 {
-  initExtras();
+  //initExtras();
   RTC_init();
   resetRadio();
   initRadio();
   initSensor();
-  delay(100);
-  analogReference(INTERNAL1V024); //INTERNAL2V048
+  //delay(100);
+
+
   // descartar primera lectura para mejor medición
-  readSupplyVoltage();
+  //readSupplyVoltage();
   //parpadeo(3,100);
-  bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
-  //leerSensor();
-  //resetRadio();
-  //SendHEXdata();
+  //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
 }
 
 // --------------------------------------------------------------------- loop
 void loop()
 {
+
+  //espera_larga();
 
   switch (STATE)
   {
@@ -67,7 +66,9 @@ void loop()
     case INICIO:
       tipo_cambio = 0;
       initSensor();
-      bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+
+      //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
+      bat = analogRead(PIN_PB4);
 
       configMLX();
       leerSensor();
@@ -77,44 +78,38 @@ void loop()
       break;
 
 
-    //----------------------------------------------------------- Procesa y envia los datos
+    //----------------------------------------------------------- Procesa
     case PROCESO:
-
-
-      if ((angulo_anterior - angulo) > delta)
-      {
-        tipo_cambio = 1;
-        resetRadio();
-        SendHEXdata();
-        //sleepRadio();
-      }
-      else if (((angulo - angulo_anterior) > delta))
+      if (((angulo - angulo_anterior) > delta))
       {
         tipo_cambio = 2;
-        resetRadio();
-        SendHEXdata();
-        //sleepRadio();
+        STATE = ENVIAR;
       }
-
-      if (countRTC_CLK == 0)
+      else if ((angulo_anterior - angulo) > delta)
       {
-
-        //tipo_cambio = 0;
-        resetRadio();
-        SendHEXdata();
-        //sleepRadio();
+        tipo_cambio = 1;
+        STATE = ENVIAR;
       }
+      else if ((countRTC_CLK == 0) || (on_send == false))
+        STATE = ENVIAR;
+      else
+        STATE = ESPERA;
 
+      angulo_anterior = angulo;
+      break;
+
+    //----------------------------------------------------------- Envia los datos
+    case ENVIAR:
+      resetRadio();
+      SendHEXdata();
+      sleepRadio();
       STATE = ESPERA;
       break;
 
+    //----------------------------------------------------------- Espera
     case ESPERA:
-      angulo_anterior = angulo;
-      sleepRadio();
       espera_larga();
-      //analogReference(INTERNAL1V024); //INTERNAL2V048
-      // descartar primera lectura para mejor medición
-      //readSupplyVoltage();
+      initExtras();
       STATE = INICIO;
       break;
   }
@@ -129,6 +124,11 @@ void SendHEXdata()
   //mySerial.println("SendHEX");
 
   //mySerial.print("RESET:");
+  if (!on_send)
+  {
+    on_send = true;
+    tipo_cambio = 3;
+  }
   Serial1.print("AT$RC\n");
   delay(50);
   //while (!Serial1.available());
@@ -199,6 +199,9 @@ void SendHEXdata()
 //---------------------------------------------- espera_larga
 void espera_larga()
 {
+  //enterSleep();
+
+
   while ((countRTC_CLK < sleepTime) && (count_DELTA < deltaTime))
   {
     enterSleep();
@@ -214,8 +217,9 @@ void espera_larga()
     countRTC_CLK = 0;
   }
 
+
   sleep_disable(); // Deshabilitar modo de sueño después de despertar
-  power_all_enable();
+  //power_all_enable();
   ADC0.CTRLA |= ADC_ENABLE_bm;
 
 }
@@ -350,9 +354,9 @@ ISR(RTC_PIT_vect)
 // ----------------------------------------------------------- initSensor
 void initSensor()
 {
-  //pinMode(PIN_PB1, INPUT_PULLUP);
-  //pinMode(PIN_PB0, INPUT_PULLUP);
-  //Wire.begin();
+  pinMode(PIN_PB1, INPUT_PULLUP);
+  pinMode(PIN_PB0, INPUT_PULLUP);
+  Wire.begin();
   //delay(50);
 
   if (!sensor.begin_I2C(0x0F)) {
@@ -414,19 +418,19 @@ void leerSensor()
   }
 
   /*char buffer[10];
-  
-  itoa(x, buffer, 10);
-  Serial1.write("\n");
-  Serial1.write(buffer);
-  Serial1.write("\t");
-  itoa(y, buffer, 10);
-  Serial1.write("\t");
-  Serial1.write(buffer);
-  Serial1.write("\t");
-  itoa(angulo, buffer, 10);
-  Serial1.write("\t");
-  Serial1.write(buffer);
-  Serial1.write("\n");*/
+
+    itoa(x, buffer, 10);
+    Serial1.write("\n");
+    Serial1.write(buffer);
+    Serial1.write("\t");
+    itoa(y, buffer, 10);
+    Serial1.write("\t");
+    Serial1.write(buffer);
+    Serial1.write("\t");
+    itoa(angulo, buffer, 10);
+    Serial1.write("\t");
+    Serial1.write(buffer);
+    Serial1.write("\n");*/
 
   //angulo = prom / 10;
   /*Serial1.print("{\"x\":");
@@ -451,14 +455,17 @@ void leerSensor()
 // --------------------------------- enterSleep
 void enterSleep()
 {
+  // Configurar el microcontrolador para dormir en modo de bajo consumo
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
 
-  power_all_disable();
+  // Deshabilitar el ADC para ahorrar más energía
+  ADC0.CTRLA &= ~ADC_ENABLE_bm; // Deshabilitar el ADC
+  //analogReference(DEFAULT);
 
-  //Serial1.end();
-  //Wire.end();
-  //pinMode(PIN_PA0, INPUT);
-  //pinMode(PIN_PA1, INPUT);
-  //pinMode(PIN_PA2, INPUT);
+  //power_all_disable();
+
+
   pinMode(PIN_PA3, INPUT);
   pinMode(PIN_PA4, INPUT);
   pinMode(PIN_PA5, INPUT);
@@ -466,7 +473,7 @@ void enterSleep()
   pinMode(PIN_PA7, INPUT);
 
 
-  pinMode(PIN_PB0, INPUT);
+  //pinMode(PIN_PB0, INPUT);
   pinMode(PIN_PB1, INPUT);
   pinMode(PIN_PB2, INPUT);
   pinMode(PIN_PB3, INPUT);
@@ -487,39 +494,22 @@ void enterSleep()
   digitalWrite(PIN_PA6, LOW);
   digitalWrite(PIN_PA7, HIGH);
 
-  digitalWrite(PIN_PB0, HIGH);
+  //digitalWrite(PIN_PB0, HIGH);
   digitalWrite(PIN_PB1, HIGH);
   digitalWrite(PIN_PB2, HIGH);
   digitalWrite(PIN_PB3, HIGH);
   digitalWrite(PIN_PB4, HIGH);
-  digitalWrite(PIN_PB5, HIGH);
+  //digitalWrite(PIN_PB5, HIGH);
 
   digitalWrite(PIN_PC0, HIGH);
   digitalWrite(PIN_PC1, HIGH);
   digitalWrite(PIN_PC2, HIGH);
   digitalWrite(PIN_PC3, HIGH);
-  //Serial1.end();
 
-  ADC0.CTRLA &= ~ADC_ENABLE_bm;
+  // Dormir hasta que ocurra una interrupción
+  sleep_mode();
 
-  //TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm; // Desactivar TCA
-
-  //TCB0.CTRLA &= ~TCB_ENABLE_bm; // Desactivar TCB0
-  //TCB1.CTRLA &= ~TCB_ENABLE_bm; // Desactivar TCB1 si estás utilizando más de un TCB
-
-
-  // Desactivar BOD en modo de sueño
-  //  BOD.CTRLA = BOD.CTRLA | BOD_SLEEP_ENABLED_gc; // Activa BOD en modo de sueño
-  // BOD.CTRLA = BOD.CTRLA & ~BOD_SLEEP_DISABLED_gc; // Desactiva BOD en modo de sueño
-
-  Serial1.end();
-  //USART0.CTRLB &= ~(USART_RXEN_bm | USART_TXEN_bm); // Desactiva transmisor y receptor
-
-
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Modo de sueño más bajo
-  sleep_enable(); // Habilitar el modo de sueño
-  sleep_cpu();    // Poner al MCU en modo de sueño
-
+  // El microcontrolador se despierta aquí después de una interrupción
 
 }
 
@@ -527,18 +517,29 @@ void enterSleep()
 // --------------------------------------- initExtras
 void initExtras()
 {
-  Serial1.begin(9600);
+  // Configurar el ADC para leer la referencia de voltaje interna
+  //VREF.CTRLA = VREF_ADC0REFSEL_1V1_gc; // Selecciona 1.1V como referencia para ADC0
+  //ADC0.CTRLC = ADC_PRESC_DIV4_gc;      // Preescalador del ADC a 4
+  //ADC0.MUXPOS = ADC_MUXPOS_INTREF_gc;  // Seleccionar referencia interna
+  //ADC0.CTRLA = ADC_ENABLE_bm;          // Habilitar ADC
+
+  //USART0.CTRLB |= (USART_RXEN_bm | USART_TXEN_bm); // Activa transmisor y receptor
+  //Serial1.begin(9600);
   //pinMode(PIN_PA0, INPUT_PULLUP);
-  
-  sleep_disable(); // Deshabilitar modo de sueño después de despertar
-  power_all_enable();
-  ADC0.CTRLA |= ADC_ENABLE_bm;
+
+  //sleep_disable(); // Deshabilitar modo de sueño después de despertar
+  //power_all_enable();
+  //ADC0.CTRLA |= ADC_ENABLE_bm;
   //pinMode(PIN_PA0, INPUT_PULLUP);
 
   //TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm; // Habilitar TCA0
   //TCB0.CTRLA |= TCB_ENABLE_bm; // Habilitar TCB0
   //TCB1.CTRLA |= TCB_ENABLE_bm; // Habilitar TCB1 si estás utilizando más de un TCB
-  //USART0.CTRLB |= (USART_RXEN_bm | USART_TXEN_bm); // Activa transmisor y receptor
 
+
+  //analogReference(INTERNAL1V024); //INTERNAL2V048
+  // descartar primera lectura para mejor medición
+  //readSupplyVoltage();
+  //analogReference(INTERNAL1V024);
 
 }

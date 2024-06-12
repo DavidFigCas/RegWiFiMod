@@ -36,6 +36,24 @@ uint16_t h;
 uint16_t w2; // Un poco de margen
 uint16_t h2;
 
+const uint8_t FILAS = 4; // Cuatro filas
+const uint8_t COLUMNAS = 4; // Cuatro columnas
+
+// Definir las conexiones de las filas y columnas
+uint8_t pinesFilas[FILAS] = {11, 12, 13, 14}; // Ajustar estos pines según tu conexión
+uint8_t pinesColumnas[COLUMNAS] = {18, 19, 20, 21}; // Ajustar estos pines según tu conexión
+
+// Definir la disposición de caracteres del teclado
+char teclas[FILAS][COLUMNAS] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+
+// Crear la instancia del teclado
+Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
+
 
 Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
 U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
@@ -68,43 +86,9 @@ volatile uint32_t number = 0;
 uint32_t unixtime, client;
 uint32_t prevTime;
 unsigned int desconex_count;
-bool enter;
-bool preventer;
-int litrostarget;
-
-// Definir el tamaño del teclado
-const uint8_t FILAS = 4; // Cuatro filas
-const uint8_t COLUMNAS = 4; // Cuatro columnas
-
-// Definir las conexiones de las filas y columnas
-uint8_t pinesFilas[FILAS] = {11, 12, 13, 14}; // Ajustar estos pines según tu conexión
-uint8_t pinesColumnas[COLUMNAS] = {18, 19, 20, 21}; // Ajustar estos pines según tu conexión
-
-// Definir la disposición de caracteres del teclado
-char teclas[FILAS][COLUMNAS] = {
-  {'1', '2', '3', 'A'},
-  {'4', '5', '6', 'B'},
-  {'7', '8', '9', 'C'},
-  {'*', '0', '#', 'D'}
-};
-
-// Crear la instancia del teclado
-Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
-
-// Variable para almacenar los números ingresados
-String litros_str = "";
-
-// Variable para rastrear si se ha presionado '#'
-bool primero = false;
-// Variable para rastrear el tiempo del primer '#'
-unsigned long tiempoPrimero = 0;
-// Definir el tiempo de espera para el segundo '#'
-const unsigned long tiempoEspera = 500; // 1 segundo
-
-// Contador de veces que se ha presionado '#'
-int contador = 0;
-
-
+bool buttonState;
+bool prevButtonState;
+String cadenaTeclas = "";
 
 
 
@@ -126,15 +110,20 @@ void recv(int len)
     //Serial.print(F("deserializeJson() failed: "));
     //Serial.println(error.f_str());
   }
-  if (enter == false) // solo para test
-    litros = doc_aux["litros"];
-  else
-    litros = 123;
+
+  //if (buttonState == false) // solo para test
+  //litros = doc_aux["litros"];
+  //else
+  //litros = 123;
+
   //print_litros = doc_aux["litros_check"];
   print_litros = ceil(litros);
   pesos = doc_aux["precio"].as<uint32_t>();
   //print_pesos = doc_aux["precio_check"];
   print_pesos = pesos;
+
+  if (!doc_aux["key"].isNull())
+    cadenaTeclas = "";
 
 
 }
@@ -143,25 +132,40 @@ void recv(int len)
 // ---------------------------------------------------------------------------- req
 void req()
 {
-  //cambio buttonstate to enter
   doc.clear();
-  doc["precio"] = doc_aux["precio"];     //Commands
+  //doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  if (preventer != enter)
-  {
-    if (enter == true) // solo para test
-    {
-      doc["valve"] =  enter;
-      doc["litros_target"] = litrostarget;
-    }
+  if (cadenaTeclas.length() > 0)
+    doc["k"] = cadenaTeclas;
 
-  }
-  else
-    doc["litros"] = litros;
-  preventer = enter;
+  //if (prevButtonState != buttonState)
+  //{
+  //if (buttonState == true) // solo para test
+  //{
+  //doc["valve"] =  buttonState;
+  //doc["litros_target"] = 123;
+  //}
+
+  //}
+  //else
+  //  doc["litros"] = litros;
+  //prevButtonState = buttonState;
+
+  //serializeJson(doc, respx);
+
+  char temp[200];
+  size_t len = serializeJson(doc, temp);
+  memset(respx, 0, sizeof(respx));
+
+  // Copiar solo los bytes útiles al buffer 'resp'
+  memcpy(respx, temp, len);
+
+
   serializeJson(doc, respx);
-  Wire.write(respx, 199);
+
+  Wire.write(respx, len);
+  //cadenaTeclas = "";
 }
 
 
@@ -180,7 +184,7 @@ void setup()
   pinMode(27, OUTPUT);
   digitalWrite(27, 0);
 
-
+  Wire.setClock(400000);
   Wire.setSDA(SDA_MAIN);
   Wire.setSCL(SCL_MAIN);
   Wire.begin(I2C_SLAVE_ADDRESS);
@@ -208,6 +212,7 @@ void setup()
 
 
   pinMode(buttonPin, INPUT_PULLUP);
+  teclado.setDebounceTime(10);  // setDebounceTime(mS)
 
 }
 
@@ -231,11 +236,14 @@ void loop() {
 
     //Serial.println(jsonStr);
 
-    Serial.print("Master: ");
-    serializeJson(doc_aux, Serial);
-    Serial.println();
-    Serial.print("Display: ");
-    Serial.println(respx);
+    //if (doc_conf["test"] == true)
+    {
+      Serial.print("Master: ");
+      serializeJson(doc_aux, Serial);
+      Serial.println();
+      Serial.print("Display: ");
+      Serial.println(respx);
+    }
 
 
     /*desconex_count++;
@@ -258,8 +266,37 @@ void loop() {
   }
 
 
-  char tecla = teclado.getKey();
 
+  // Verifica si el botón está presionado
+  // if (digitalRead(buttonPin) == LOW)
+  // {
+  //   while (digitalRead(buttonPin) == LOW)
+  //   {
+  //Serial.println("El botón está presionado");
+  //send_cmd
+  //   delay(50);
+  //}
+  //buttonState = !buttonState;
+  //}
+
+  char tecla = teclado.getKey();
+  if (tecla > 0)
+  {
+    if (cadenaTeclas.length() <= 6)
+      cadenaTeclas += tecla;
+    Serial.print("Cadena acumulada: ");
+    Serial.println(cadenaTeclas);
+  }
+
+  //else
+  //{
+  //Serial.println("El botón no está presionado");
+  //}
+
+  // Espera un momento para evitar el rebote del botón
+  //delay(50);
+
+  //delay(1000);
 
 
 }
@@ -491,12 +528,24 @@ void loop1()
     display.drawBitmap(32 * 4 + 5, 240 - 32, gps_off_small, 32, 32, WHITE, BLACK);
   }
 
+  if (doc_aux["bt"] == true)
+  {
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 5 + 5, 240 - 32, I2, 32, 32, WHITE, BLACK);
+    else
+      display.fillRect(32 * 5 + 5, 240 - 32, 32, 32, BLACK);
+  }
+  else
+  {
+    display.drawBitmap(32 * 5 + 5, 240 - 32, I1, 32, 32, WHITE, BLACK);
+  }
 
-  display.refresh();
+
+  //display.refresh();
 
   // ----------------------------------------------- Contadores
   // --------------------- Error no hay tarjeta principal
-  /*if (doc_aux.isNull())
+  if (doc_aux.isNull())
   {
 
     display.fillRect(0, 22, 340, 180, WHITE);
@@ -510,7 +559,7 @@ void loop1()
   }
 
   // ----------------------- Despliega los contadores
-  else*/
+  else
   {
     switch (STATE)
     {
@@ -528,8 +577,8 @@ void loop1()
           // Screen must be refreshed at least once per second
           //for (int j = 0; j < 4; j++)
           {
-            display.refresh();
-            delay(500); // 1/2 sec delay
+            //display.refresh();
+            //delay(500); // 1/2 sec delay
           } // x4 = 2 second pause between rotations
         }
 
@@ -788,7 +837,7 @@ void loop1()
           shown = false;
         }
         flag_print = true;
-        delay(10);
+        //delay(10);
         break;
 
       // ---------------------------------------------------------- Bing Printer
@@ -831,7 +880,7 @@ void loop1()
 
         //STATE = 0;
         //Serial.println("goto STATE 0");
-        delay(10);
+        //delay(10);
         break;
       default:
         break;
@@ -844,6 +893,7 @@ void loop1()
   {
     STATE = doc_aux["STATE"];
   }
+
 }
 
 // ---------------------------------------------------------------- print icons
