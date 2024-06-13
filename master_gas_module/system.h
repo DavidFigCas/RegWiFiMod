@@ -209,6 +209,9 @@ extern volatile uint32_t pesos;
 
 extern volatile bool updated;
 
+extern String cadenaTeclas;
+extern bool clear_key;
+
 //void IRAM_ATTR factory_reset3();
 void reset_config();
 //void check_reset();

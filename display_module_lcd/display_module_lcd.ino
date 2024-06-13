@@ -38,6 +38,7 @@ uint16_t h2;
 
 const uint8_t FILAS = 4; // Cuatro filas
 const uint8_t COLUMNAS = 4; // Cuatro columnas
+char tecla;
 
 // Definir las conexiones de las filas y columnas
 uint8_t pinesFilas[FILAS] = {11, 12, 13, 14}; // Ajustar estos pines según tu conexión
@@ -76,7 +77,7 @@ const unsigned long intervalo2 = 250;  // Intervalo de tiempo (1 minuto en milis
 unsigned long tiempoAnterior2 = 0;
 unsigned long tiempoActual2;
 
-volatile uint32_t litros, print_litros, print_pesos, pesos;
+volatile uint32_t litros, print_litros, print_pesos, pesos, litros_target;
 //volatile float litros;
 
 uint8_t STATE = 0;
@@ -88,7 +89,9 @@ uint32_t prevTime;
 unsigned int desconex_count;
 bool buttonState;
 bool prevButtonState;
-String cadenaTeclas = "";
+String cadenaNumeros = "";
+String cadenaLetras = "";
+bool open_valve = false;
 
 
 
@@ -112,7 +115,7 @@ void recv(int len)
   }
 
   //if (buttonState == false) // solo para test
-  //litros = doc_aux["litros"];
+  litros = doc_aux["litros"];
   //else
   //litros = 123;
 
@@ -122,8 +125,11 @@ void recv(int len)
   //print_pesos = doc_aux["precio_check"];
   print_pesos = pesos;
 
-  if (!doc_aux["key"].isNull())
-    cadenaTeclas = "";
+  if (!doc_aux["k"].isNull())
+  {
+    cadenaNumeros = "";
+    litros_target = 0;
+  }
 
 
 }
@@ -136,8 +142,11 @@ void req()
   //doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  if (cadenaTeclas.length() > 0)
-    doc["k"] = cadenaTeclas;
+  if (doc_aux["valve"] != open_valve)
+    doc["valve"] = open_valve;
+
+  if ((open_valve == true) && (litros_target > 0))
+    doc["litros_target"] = litros_target;
 
   //if (prevButtonState != buttonState)
   //{
@@ -194,23 +203,6 @@ void setup()
   //delay(2000);
   Serial.println("I2C Ready");
 
-  //Serial.println("setup done");
-
-  //STATE = 1;
-  //error_status = true;
-
-  //doc["name"] = "David";
-  //doc["client"] = 30;
-  //doc["city"] = "Puebla";
-
-  // Serializar el objeto JSON en la variable resp
-  //serializeJson(doc, respx);
-
-  //multicore_launch_core1(core1_blink);
-  //Serial.begin(115200);
-  //pinMode(27, OUTPUT);
-
-
   pinMode(buttonPin, INPUT_PULLUP);
   teclado.setDebounceTime(10);  // setDebounceTime(mS)
 
@@ -259,44 +251,50 @@ void loop() {
       prevTime = doc_aux["time"];
       }*/
 
-
-
-    // Ahora resp contiene el objeto JSON como una cadena
-    // Salida: {"name":"John","age":30,"city":"New York"}
   }
 
 
 
-  // Verifica si el botón está presionado
-  // if (digitalRead(buttonPin) == LOW)
-  // {
-  //   while (digitalRead(buttonPin) == LOW)
-  //   {
-  //Serial.println("El botón está presionado");
-  //send_cmd
-  //   delay(50);
-  //}
-  //buttonState = !buttonState;
-  //}
-
-  char tecla = teclado.getKey();
-  if (tecla > 0)
+  tecla = teclado.getKey();
+  if (tecla)
   {
-    if (cadenaTeclas.length() <= 6)
-      cadenaTeclas += tecla;
-    Serial.print("Cadena acumulada: ");
-    Serial.println(cadenaTeclas);
+    // Verifica si es un número
+    if (isDigit(tecla) && cadenaNumeros.length() <= 10)
+    {
+      cadenaNumeros += tecla;
+      //Serial.print("Cadena de Números acumulada: ");
+      Serial.println(cadenaNumeros);
+    }
+    // Verifica si es una letra (A, B, C, D, *, #)
+    else if (isLetter(tecla) && cadenaLetras.length() <= 10)
+    {
+      cadenaLetras += tecla;
+      //Serial.print("Cadena de Letras acumulada: ");
+      Serial.println(cadenaLetras);
+      if (tecla == '*')
+      {
+        cadenaLetras = "";
+        cadenaNumeros = "";
+        litros_target = 0;
+        open_valve = false;
+      }
+
+      if (tecla == '#')
+      {
+        cadenaLetras = "";
+        litros_target = cadenaNumeros.toInt();;
+        open_valve = true;
+      }
+    }
+
+    // Si es un número, actualizar litros_target
+    if (cadenaNumeros.toInt() > 0) {
+      litros_target = cadenaNumeros.toInt();
+      //Serial.print("Litros: ");
+      Serial.println(litros_target);
+    }
   }
 
-  //else
-  //{
-  //Serial.println("El botón no está presionado");
-  //}
-
-  // Espera un momento para evitar el rebote del botón
-  //delay(50);
-
-  //delay(1000);
 
 
 }
@@ -356,192 +354,8 @@ void loop1()
 
   //Serial.println();
 
-  // ------------------------------------------------------ menu bar
+  print_icons();
 
-  //display.fillScreen(WHITE);
-
-
-
-  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
-  //display.drawLine(65, 20, 65, 0, BLACK);  // Dibuja la línea horizontal
-  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
-  //display.drawLine(195, 20, 195, 0, BLACK);  // Dibuja la línea horizontal
-
-  unixtime = doc_aux["time"].as<uint32_t>();
-  //serializeJson(doc_aux["time"],Serial);
-  stamp.getDateTime(unixtime);
-
-
-  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
-  u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
-  //u8g2_for_adafruit_gfx.setFont(u8g2_font_ncenB12_tr);  // extended font
-  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
-
-
-
-
-  // -------------------------------------------------- NOT CLOCK
-  if (stamp.year < 2000)
-  {
-
-    /*
-
-        // ----------- hora
-        u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print(" 0");
-
-        if ((millis() / 1000) % 2 == 0)
-          u8g2_for_adafruit_gfx.print(":");
-        else
-          u8g2_for_adafruit_gfx.print(" ");
-        u8g2_for_adafruit_gfx.print("00");
-
-        // ------------ fecha
-        u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print("00");
-        u8g2_for_adafruit_gfx.print("/");
-        u8g2_for_adafruit_gfx.print("00");
-        u8g2_for_adafruit_gfx.print("/");
-        u8g2_for_adafruit_gfx.print("0000");
-
-        u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print("0000000");*/
-  }
-
-  // --------------------------------------------- Display time/date
-  else
-  {
-
-    display.fillRect(0, 0, 320, 20, WHITE);
-    u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-
-    if (stamp.hour < 10)
-      u8g2_for_adafruit_gfx.print(" ");
-    u8g2_for_adafruit_gfx.print(stamp.hour);
-
-    if ((millis() / 1000) % 2 == 0)
-      u8g2_for_adafruit_gfx.print(":");
-    else
-      u8g2_for_adafruit_gfx.print(" ");
-
-    if (stamp.minute < 10)
-      u8g2_for_adafruit_gfx.print("0");
-    u8g2_for_adafruit_gfx.print(stamp.minute);
-
-
-    u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this positiont
-    if (stamp.day < 10)
-      u8g2_for_adafruit_gfx.print(" ");
-    u8g2_for_adafruit_gfx.print(stamp.day);
-    u8g2_for_adafruit_gfx.print("/");
-
-    if (stamp.month < 10)
-      u8g2_for_adafruit_gfx.print("0");
-    u8g2_for_adafruit_gfx.print(stamp.month);
-    u8g2_for_adafruit_gfx.print("/");
-    u8g2_for_adafruit_gfx.print(stamp.year);
-
-
-    u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
-    if (doc_aux["folio"] < 10)
-    {
-      u8g2_for_adafruit_gfx.print("      ");
-    }
-    else if (doc_aux["folio"] < 100)
-    {
-      u8g2_for_adafruit_gfx.print("     ");
-    }
-    else if (doc_aux["folio"] < 1000)
-    {
-      u8g2_for_adafruit_gfx.print("    ");
-    }
-    else if (doc_aux["folio"] < 10000)
-    {
-      u8g2_for_adafruit_gfx.print("   ");
-    }
-    else if (doc_aux["folio"] < 100000)
-    {
-      u8g2_for_adafruit_gfx.print("  ");
-    }
-    else if (doc_aux["folio"] < 1000000)
-    {
-      u8g2_for_adafruit_gfx.print(" ");
-    }
-    u8g2_for_adafruit_gfx.print(doc_aux["folio"].as<String>());
-
-
-
-  }
-
-  // ------------------------------------------ Barra de iconos
-
-  if (doc_aux["wifi"] == true)
-  {
-    display.drawBitmap(0, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
-  }
-  else
-  {
-    display.drawBitmap(0, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
-  }
-
-  if (doc_aux["sd"] == true)
-  {
-    display.drawBitmap(32 + 5, 240 - 32, sd_on_small, 32, 32, WHITE, BLACK);
-  }
-  else
-  {
-    display.drawBitmap(32 + 5, 240 - 32, sd_off_small, 32, 32, WHITE, BLACK);
-  }
-
-  if (doc_aux["valve"] == true)
-  {
-    if ((millis() / 1000) % 2 == 0)
-      display.drawBitmap(32 * 2 + 5, 240 - 32, valve_on_small, 32, 32, WHITE, BLACK);
-    else
-      //display.fillRect(32 * 2 + 5, 240 - 32, 32, 32, BLACK); energy_small
-      display.drawBitmap(32 * 2 + 5, 240 - 32, energy_small, 32, 32, WHITE, BLACK);
-
-  }
-  else
-  {
-    display.drawBitmap(32 * 2 + 5, 240 - 32, valve_off_small, 32, 32, WHITE, BLACK);
-  }
-
-  if (STATE >= 2)
-  {
-    if ((millis() / 1000) % 2 == 0)
-      display.drawBitmap(32 * 3 + 5, 240 - 32, printer_on_small, 32, 32, WHITE, BLACK);
-    else
-      display.fillRect(32 * 3 + 5, 240 - 32, 32, 32, BLACK);
-  }
-  else
-  {
-    display.drawBitmap(32 * 3 + 5, 240 - 32, printer_off_small, 32, 32, WHITE, BLACK);
-  }
-
-  if (doc_aux["gps"] == true)
-  {
-    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_on_small, 32, 32, WHITE, BLACK);
-  }
-  else
-  {
-    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_off_small, 32, 32, WHITE, BLACK);
-  }
-
-  if (doc_aux["bt"] == true)
-  {
-    if ((millis() / 1000) % 2 == 0)
-      display.drawBitmap(32 * 5 + 5, 240 - 32, I2, 32, 32, WHITE, BLACK);
-    else
-      display.fillRect(32 * 5 + 5, 240 - 32, 32, 32, BLACK);
-  }
-  else
-  {
-    display.drawBitmap(32 * 5 + 5, 240 - 32, I1, 32, 32, WHITE, BLACK);
-  }
-
-
-  //display.refresh();
 
   // ----------------------------------------------- Contadores
   // --------------------- Error no hay tarjeta principal
@@ -566,48 +380,42 @@ void loop1()
       // -------------------------------------------------------- display icons
       case 0:
         digitalWrite(25, HIGH);
-        //if (flag_print == true)
-        //{
-        Serial.println("Display Main Screen");
-        //for (int i = 0; i < 4; i++)
-        {
-          //display.setRotation(1);
+
+        display.fillRect(0, 22, 340, 180, WHITE);
+
+        u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+        u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+        //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
+        u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+        u8g2_for_adafruit_gfx.setCursor(5, 78 + 30);             // start writing at this position
+
+        if (litros_target < 10)
+          u8g2_for_adafruit_gfx.print("     ");
+        else if (litros_target < 100)
+          u8g2_for_adafruit_gfx.print("    ");
+        else if (litros_target < 1000)
+          u8g2_for_adafruit_gfx.print("   ");
+        else if (litros_target < 10000)
+          u8g2_for_adafruit_gfx.print("  ");
+        else if (litros_target < 100000)
+          u8g2_for_adafruit_gfx.print(" ");
+        u8g2_for_adafruit_gfx.print(litros_target);
+
+        u8g2_for_adafruit_gfx.setCursor(5, (78 * 2) + 40);           // start writing at this position
+        if (pesos < 10)
+          u8g2_for_adafruit_gfx.print("     ");
+        else if (pesos < 100)
+          u8g2_for_adafruit_gfx.print("    ");
+        else if (pesos < 1000)
+          u8g2_for_adafruit_gfx.print("   ");
+        else if (pesos < 10000)
+          u8g2_for_adafruit_gfx.print("  ");
+        else if (pesos < 100000)
+          u8g2_for_adafruit_gfx.print(" ");
+
+        u8g2_for_adafruit_gfx.print(pesos);
 
 
-          // Screen must be refreshed at least once per second
-          //for (int j = 0; j < 4; j++)
-          {
-            //display.refresh();
-            //delay(500); // 1/2 sec delay
-          } // x4 = 2 second pause between rotations
-        }
-
-        //display.init(0);
-
-        //display.setFullWindow();
-        //display.firstPage();
-        //do
-        //{
-        //display.drawImage(Bitmap800x480_1, 0, 0, 800, 480, false, false, true);
-        //}
-        //while (display.nextPage());
-
-        //print_icons();
-
-
-        //unixtime = ((uint32_t)time_num[0] << 24) | ((uint32_t)time_num[1] << 16) | ((uint32_t)time_num[2] << 8) | time_num[3];
-
-
-
-        Serial.println("goto STATE 1");
-
-        //delay(10000);
-        //flag_print = false;
-        //}
-        //touch_data=0;
-        STATE = 1;
-        //display.clearDisplay();
-        //display.setFont(&FreeMonoBold24pt7b);
         break;
 
       // -------------------------------------------------------- display litros
@@ -622,6 +430,7 @@ void loop1()
 
         print_litros = ceil(litros);
         print_pesos = pesos;
+        litros_target = 0;
 
         /* Serial.print("Litros: ");
           Serial.print(litros);
@@ -899,76 +708,196 @@ void loop1()
 // ---------------------------------------------------------------- print icons
 void print_icons()
 {
-  //if ((error_byte >> 7) & 0x01)
-  if (doc_aux["wifi"].as<bool>() == true) // ------------------ Wifi
+  // ------------------------------------------------------ menu bar
+
+  //display.fillScreen(WHITE);
+
+
+
+  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
+  //display.drawLine(65, 20, 65, 0, BLACK);  // Dibuja la línea horizontal
+  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
+  //display.drawLine(195, 20, 195, 0, BLACK);  // Dibuja la línea horizontal
+
+  unixtime = doc_aux["time"].as<uint32_t>();
+  //serializeJson(doc_aux["time"],Serial);
+  stamp.getDateTime(unixtime);
+
+
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+  //u8g2_for_adafruit_gfx.setFont(u8g2_font_ncenB12_tr);  // extended font
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
+
+
+
+
+  // -------------------------------------------------- NOT CLOCK
+  if (stamp.year < 2000)
   {
-    Serial.println("Wifi On");
-    //display.drawImage(wifi_on, 30, 285, 64, 64, false, false, true);
+
+    /*
+
+        // ----------- hora
+        u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print(" 0");
+
+        if ((millis() / 1000) % 2 == 0)
+          u8g2_for_adafruit_gfx.print(":");
+        else
+          u8g2_for_adafruit_gfx.print(" ");
+        u8g2_for_adafruit_gfx.print("00");
+
+        // ------------ fecha
+        u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print("00");
+        u8g2_for_adafruit_gfx.print("/");
+        u8g2_for_adafruit_gfx.print("00");
+        u8g2_for_adafruit_gfx.print("/");
+        u8g2_for_adafruit_gfx.print("0000");
+
+        u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
+        u8g2_for_adafruit_gfx.print("0000000");*/
+  }
+
+  // --------------------------------------------- Display time/date
+  else
+  {
+
+    display.fillRect(0, 0, 320, 20, WHITE);
+    u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
+
+    if (stamp.hour < 10)
+      u8g2_for_adafruit_gfx.print(" ");
+    u8g2_for_adafruit_gfx.print(stamp.hour);
+
+    if ((millis() / 1000) % 2 == 0)
+      u8g2_for_adafruit_gfx.print(":");
+    else
+      u8g2_for_adafruit_gfx.print(" ");
+
+    if (stamp.minute < 10)
+      u8g2_for_adafruit_gfx.print("0");
+    u8g2_for_adafruit_gfx.print(stamp.minute);
+
+
+    u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this positiont
+    if (stamp.day < 10)
+      u8g2_for_adafruit_gfx.print(" ");
+    u8g2_for_adafruit_gfx.print(stamp.day);
+    u8g2_for_adafruit_gfx.print("/");
+
+    if (stamp.month < 10)
+      u8g2_for_adafruit_gfx.print("0");
+    u8g2_for_adafruit_gfx.print(stamp.month);
+    u8g2_for_adafruit_gfx.print("/");
+    u8g2_for_adafruit_gfx.print(stamp.year);
+
+
+    u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
+    if (doc_aux["folio"] < 10)
+    {
+      u8g2_for_adafruit_gfx.print("      ");
+    }
+    else if (doc_aux["folio"] < 100)
+    {
+      u8g2_for_adafruit_gfx.print("     ");
+    }
+    else if (doc_aux["folio"] < 1000)
+    {
+      u8g2_for_adafruit_gfx.print("    ");
+    }
+    else if (doc_aux["folio"] < 10000)
+    {
+      u8g2_for_adafruit_gfx.print("   ");
+    }
+    else if (doc_aux["folio"] < 100000)
+    {
+      u8g2_for_adafruit_gfx.print("  ");
+    }
+    else if (doc_aux["folio"] < 1000000)
+    {
+      u8g2_for_adafruit_gfx.print(" ");
+    }
+    u8g2_for_adafruit_gfx.print(doc_aux["folio"].as<String>());
+
+
+
+  }
+
+  // ------------------------------------------ Barra de iconos
+
+  if (doc_aux["wifi"] == true)
+  {
+    display.drawBitmap(0, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
   }
   else
   {
-    Serial.println("Wifi OFF");
-    //display.drawImage(wifi_off, 30, 285, 64, 64, false, false, true);
+    display.drawBitmap(0, 240 - 32, wifi_off_small, 32, 32, WHITE, BLACK);
   }
 
-  //if ((error_byte >> 6) & 0x01)       // ------------------ valve
-  if (doc_aux["valve"].as<bool>() == true)
+  if (doc_aux["sd"] == true)
   {
-    Serial.println("Valve On");
-    //display.drawImage(valve_on, 100, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 + 5, 240 - 32, sd_on_small, 32, 32, WHITE, BLACK);
   }
   else
   {
-    Serial.println("Valve OFF");
-    //display.drawImage(valve_off, 100, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 + 5, 240 - 32, sd_off_small, 32, 32, WHITE, BLACK);
   }
 
-
-  if (doc_aux["gps"].as<bool>() == true)    // ------------------ gps
-    //if ((error_byte >> 3) & 0x01)
+  if (doc_aux["valve"] == true)
   {
-    Serial.println("GPS On");
-    //display.drawImage(gps_on, 170, 285, 64, 64, false, false, true);
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 2 + 5, 240 - 32, valve_on_small, 32, 32, WHITE, BLACK);
+    else
+      //display.fillRect(32 * 2 + 5, 240 - 32, 32, 32, BLACK); energy_small
+      display.drawBitmap(32 * 2 + 5, 240 - 32, energy_small, 32, 32, WHITE, BLACK);
+
   }
   else
   {
-    Serial.println("GPS OFF");
-    //display.drawImage(gps_off, 170, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 * 2 + 5, 240 - 32, valve_off_small, 32, 32, WHITE, BLACK);
   }
 
-  if (doc_aux["clock"].as<bool>() == true)    // ------------------ clock
-    // if ((error_byte >> 2) & 0x01)
+  if (STATE >= 2)
   {
-    Serial.println("Clock On");
-    //display.drawImage(acc_on, 240, 285, 64, 64, false, false, true);
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 3 + 5, 240 - 32, printer_on_small, 32, 32, WHITE, BLACK);
+    else
+      display.fillRect(32 * 3 + 5, 240 - 32, 32, 32, BLACK);
   }
   else
   {
-    Serial.println("Clock OFF");
-    //display.drawImage(acc_off, 240, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 * 3 + 5, 240 - 32, printer_off_small, 32, 32, WHITE, BLACK);
   }
 
-  if (doc_aux["printer"].as<bool>() == true)    // ------------------ printer
-    //if ((error_byte >> 5) & 0x01)
+  if (doc_aux["gps"] == true)
   {
-    Serial.println("Printer OK");
-    //display.drawImage(printer_on, 320, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_on_small, 32, 32, WHITE, BLACK);
   }
   else
   {
-    Serial.println("Printer Offline");
-    //display.drawImage(printer_off, 320, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 * 4 + 5, 240 - 32, gps_off_small, 32, 32, WHITE, BLACK);
   }
 
-  if (doc_aux["paper"].as<bool>() == false)    // ------------------ paper
-    //if ((error_byte >> 4) & 0x01)
+  if (doc_aux["bt"] == true)
   {
-    Serial.println("NO PAPER");
-    //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+    if ((millis() / 1000) % 2 == 0)
+      display.drawBitmap(32 * 5 + 5, 240 - 32, I2, 32, 32, WHITE, BLACK);
+    else
+      display.fillRect(32 * 5 + 5, 240 - 32, 32, 32, BLACK);
   }
   else
   {
-    Serial.println("Paper READY");
-    //display.drawImage(nopaper, 390, 285, 64, 64, false, false, true);
+    display.drawBitmap(32 * 5 + 5, 240 - 32, I1, 32, 32, WHITE, BLACK);
   }
+
+
+  //display.refresh();
+}
+
+
+// Función para verificar si el carácter es una letra específica (A, B, C, D, *, #)
+bool isLetter(char c) {
+  return c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == '*' || c == '#';
 }

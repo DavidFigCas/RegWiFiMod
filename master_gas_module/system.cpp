@@ -95,7 +95,7 @@ char b[200];
 char buff[200];
 int i;
 String jsonStr;
-unsigned int STATE_DISPLAY = 1;
+unsigned int STATE_DISPLAY = 0;
 
 
 volatile bool display_reset = false;
@@ -109,6 +109,9 @@ volatile bool readyToPrint = false;
 volatile uint32_t pesos;
 
 volatile bool updated = true;
+
+String cadenaTeclas = "";
+bool clear_key = true;
 
 
 // -------------------------------------------------------------- read_logs

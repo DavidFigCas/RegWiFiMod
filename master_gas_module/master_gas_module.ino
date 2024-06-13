@@ -18,14 +18,14 @@ void setup()
 
 
   // Reset Display state
-  doc_aux["STATE"] = 0;
-  doc_aux["time"] = now.unixtime();
-  serializeJson(doc_aux, b);
+  //doc_aux["STATE"] = 0;
+  //doc_aux["time"] = now.unixtime();
+  //serializeJson(doc_aux, b);
 
-  Wire.beginTransmission(DISPLAY_ADD);
-  Wire.write((const uint8_t*)b, (strlen(b)));
-  Wire.endTransmission();
-  delay(TIME_SPACE);
+  //Wire.beginTransmission(DISPLAY_ADD);
+  //Wire.write((const uint8_t*)b, (strlen(b)));
+  //Wire.endTransmission();
+  //delay(TIME_SPACE);
 
   //oled_display_number(0);    // Draw 'stylized' characters
 }
@@ -98,7 +98,45 @@ void loop()
 
 
 
+  if ((!doc_display["k"].isNull()) && (doc_encoder["STATE"] == 0))
+  {
 
+    //if (tecla > 0)
+    //{
+    //if (cadenaTeclas.length() <= 10)
+    //  += doc_display["k"].as<char>();
+    //Serial.print("Cadena acumulada: ");
+    //Serial.println(cadenaTeclas);
+    //}
+
+
+    if (doc_display["k"].as<int>() == 0)
+      //  litros = doc_display["k"].as<int>();
+      //else
+    {
+      cadenaTeclas = "";
+      serializeJson(doc_display["k"], cadenaTeclas);
+      Serial.println(cadenaTeclas);
+      clear_key = true;
+    }
+
+    /*const char* cadenaTeclasRecibida = doc_display["k"];
+
+      // Procesar la cadena recibida
+      for (size_t i = 0; i < strlen(cadenaTeclasRecibida); i++) {
+      char c = cadenaTeclasRecibida[i];
+      if (c >= '0' && c <= '9') {
+       int litros = c - '0'; // Convertir el carácter a número
+       Serial.print("Litros: ");
+       Serial.println(litros);
+       // Aquí puedes realizar la acción con los litros
+      } else if (c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == '*' || c == '#') {
+       Serial.print("Acción: ");
+       Serial.println(c);
+       // Aquí puedes realizar la acción específica para las letras y símbolos
+      }
+      }*/
+  }
 
 
 
@@ -114,7 +152,7 @@ void loop()
         start_process_time = now.unixtime();
         startFlowing = true;
         stopFlowing = false;
-        //lcd.backlight();
+        STATE_DISPLAY = 1;
       }
       encoder_reset = false;
 
@@ -123,6 +161,7 @@ void loop()
       //lcd.setCursor(0, 0); // Establecer cursor en la primera línea
       //lcd.print("LITROS:  "); // Escribir en la primera línea
       //lcd.print(litros); // Escribir en la primera línea
+      
 
     }
     else if (doc_encoder["STATE"] == 3)
@@ -199,6 +238,7 @@ void loop()
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio - 1, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       readyToPrint = false;
       STATE_DISPLAY = 0;
+      clear_key = true;
       //saveConfig = true;
       //new_log = true;
       Serial.println("###################      Done reset    #########################");
@@ -215,27 +255,27 @@ void loop()
   // ---------------------- display doc
   doc_aux.clear();
 
-  if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
-  {
+  //if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
+  //{
 
-    STATE_DISPLAY = 1;
+  //STATE_DISPLAY = 1;
 
-  }
-  else
-  {
-    //doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
-    doc_aux["wifi"] = true;
-    //doc_aux["gps"] = false;
-    //doc_aux["clock"] = true;
-    //doc_aux["printer"] = true;
-    //doc_aux["paper"] = true;
-    //doc_aux["flow"] = doc_encoder["flow"].as<bool>();
-    doc_aux["litros"] = ceil(litros);
-    //doc_aux["litros_check"] = litros_check;
-    doc_aux["precio"] = int(precio);
-    //doc_aux["precio_check"] = precio_check;
-    //doc_aux["uprice"] = uprice;
-  }
+  //}
+  //else
+  //{
+  //doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
+  doc_aux["wifi"] = true;
+  //doc_aux["gps"] = false;
+  //doc_aux["clock"] = true;
+  //doc_aux["printer"] = true;
+  //doc_aux["paper"] = true;
+  //doc_aux["flow"] = doc_encoder["flow"].as<bool>();
+  doc_aux["litros"] = ceil(litros);
+  //doc_aux["litros_check"] = litros_check;
+  doc_aux["precio"] = int(precio);
+  //doc_aux["precio_check"] = precio_check;
+  //doc_aux["uprice"] = uprice;
+  //}
 
   doc_aux["STATE"] = STATE_DISPLAY;
   doc_aux["time"] = now.unixtime();
@@ -243,6 +283,11 @@ void loop()
   doc_aux["sd"] = sd_ready;
   doc_aux["valve"] = doc_encoder["valve"].as<bool>();
   doc_aux["bt"] = obj["enable_bt"].as<bool>();
+  if (clear_key)
+  {
+    doc_aux["k"] = 0;
+    clear_key = false;
+  }
   serializeJson(doc_aux, b);
 
   //Serial.print("Master to display: ");
@@ -259,7 +304,7 @@ void loop()
   doc_aux.clear();
   //if (encoder_reset == true)
   //{
-    doc_aux["reset"] = encoder_reset;
+  doc_aux["reset"] = encoder_reset;
   //}
 
   //doc_aux["litros"] = litros;
@@ -318,7 +363,7 @@ void loop()
 
   }
 
-  
+
   // ---------------------------------------------------------------- MAIN TIME
 
   if (millis() - mainRefresh > mainTime)
@@ -333,7 +378,7 @@ void loop()
 
     // -------------------------------------------solo si no esta en proceso de surtido
 
-    if (((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull()))
+    if ((((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())) && (doc_display["k"].isNull()))
     {
 
       // ----------------------------------------- check internet
