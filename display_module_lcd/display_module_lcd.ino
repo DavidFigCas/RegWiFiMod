@@ -125,11 +125,11 @@ void recv(int len)
   //print_pesos = doc_aux["precio_check"];
   print_pesos = pesos;
 
-  if (!doc_aux["k"].isNull())
-  {
-    cadenaNumeros = "";
-    litros_target = 0;
-  }
+  //if (!doc_aux["k"].isNull())
+  //{
+    //cadenaNumeros = "";
+    //litros_target = 0;
+  //}
 
 
 }
@@ -142,10 +142,10 @@ void req()
   //doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  if (doc_aux["valve"] != open_valve)
-    doc["valve"] = open_valve;
+  //if ((doc_aux["valve"] != open_valve)) ////AQUIE ESYOY TRABAJANDO
+  //  doc["valve"] = open_valve;
 
-  if ((open_valve == true) && (litros_target > 0))
+   if ((open_valve == true) && (litros_target > 0))
     doc["litros_target"] = litros_target;
 
   //if (prevButtonState != buttonState)
@@ -431,6 +431,7 @@ void loop1()
         print_litros = ceil(litros);
         print_pesos = pesos;
         litros_target = 0;
+        //open_valve = false;
 
         /* Serial.print("Litros: ");
           Serial.print(litros);

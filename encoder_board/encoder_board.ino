@@ -33,6 +33,7 @@ StaticJsonDocument<200> doc;  // Asegúrate de que el tamaño sea suficiente par
 StaticJsonDocument<200> doc_aux;  // Crea un documento JSON con espacio para 200 bytes
 JsonObject obj_conf;
 StaticJsonDocument<FILE_SIZE> doc_conf;
+StaticJsonDocument<FILE_SIZE> doc_status;
 const char* filename = "/config.json";
 volatile bool saveConfig = false;
 File file;
@@ -78,7 +79,7 @@ bool dir = true;
 //---------------------------------------------------- setup
 void setup()
 {
-  //if (obj["test"].as<bool>() == true)
+  if (obj_conf["test"].as<bool>() == true)
   {
     delay(2000);
     //delay(5000);
@@ -127,17 +128,41 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
+  //---------------------------- Serial CMD
+  if (Serial.available())
+  {
+    // Suponiendo que los datos del puerto serie terminan con un salto de línea
+    String data = Serial.readStringUntil('\n');
+    Serial.print("Data: ");
+    Serial.println(data);
 
+
+    DynamicJsonDocument doc_patch(FILE_SIZE);
+    deserializeJson(doc_patch, data);
+
+    // Combinar los objetos JSON
+    for (const auto& kv : doc_patch.as<JsonObject>())
+    {
+      obj_conf[kv.key()] = kv.value();
+    }
+
+    //serializeJson(obj_conf, Serial);
+    //Serial.println();
+    saveConfig = true;
+  }
 
   // ------------------------------------- process
   if (newcommand == true )
   {
     deserializeJson(doc_aux, jsonStr);
-    //Serial.print("Master: ");
-    //serializeJson(doc_aux, Serial);
-    //Serial.println();
-
     newcommand = false;
+
+    if (doc_conf["test"] == true)
+    {
+      Serial.print("Master: ");
+      serializeJson(doc_aux, Serial);
+      Serial.println();
+    }
 
     if (!doc_aux["valve"].isNull())
     {
@@ -191,7 +216,8 @@ void loop()
   {
     // Ha pasado 1 minuto
     tiempoAnterior = tiempoActual;
-    new_value = abs(encoder.getCount()); // Con el absoluto, no importa la dir
+    //new_value = abs(encoder.getCount()); // Con el absoluto, no importa la dir
+    new_value = encoder.getCount(); // Con el absoluto, no importa la dir
     //Serial.print("new_value: ");
     //Serial.println(new_value);
 
@@ -424,6 +450,18 @@ void loop()
 }
 
 
+// ---------------------------- Enoder e I2C
+void setup1()
+{
+  
+}
+
+void loop1()
+{
+  
+}
+
+
 
 // Called when the I2C slave gets written to
 // ------------------------------------------------------------ Recv
@@ -476,13 +514,13 @@ void req()
 // ----------------------------------------------------------- open
 void open_valve()
 {
-  STATE = 1;
+  //STATE = 1;
   //buttonx = true;
   if (digitalRead(SOLENOID) == HIGH)
   {
     //gpio_put(SOLENOID, 0);
     //gpio_put(LED_1, 0);
-    Serial.println("Valve OPEN");
+    Serial.println("{\"valve_open\":true}");
     digitalWrite(SOLENOID, LOW);
     //doc["valve"] = true;
   }
@@ -494,7 +532,7 @@ void close_valve()
   //buttonx = false;
   if (digitalRead(SOLENOID) == LOW)
   {
-    Serial.println("Valve CLOSED");
+    Serial.println("{\"valve_open\":false}");
     digitalWrite(SOLENOID, HIGH);
     //doc["valve"] = false;
     //delay(100);
@@ -550,7 +588,7 @@ void Cfg_get()
     //Serial.println(saveJSonToAFile(&obj, filename) ? "{\"file_default_restore\":true}" : "{\"file_default_restore\":false}");
   }
 
-  //if (obj["test"].as<bool>() == true)
+  if (obj_conf["test"].as<bool>() == true)
   {
     // Comment for production
     serializeJson(doc_conf, Serial);
@@ -678,8 +716,11 @@ void saveConfigData()
   saveJSonToAFile(&obj_conf, filename);
 
   //Serial.println(saveJSonToAFile(&obj_conf, filename) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
-  //if (obj_conf["test"].as<bool>())
-  //serializeJson(obj_conf, Serial);
+  if (obj_conf["test"].as<bool>())
+  {
+    serializeJson(obj_conf, Serial);
+    Serial.println();
+  }
 
 
 }
