@@ -76,7 +76,7 @@ unsigned long noDelta_timeCountePrev;
 bool newcommand = false;
 bool dir = true;
 
-//---------------------------------------------------- setup
+//---------------------------------------------------- setup comunication
 void setup()
 {
   if (obj_conf["test"].as<bool>() == true)
@@ -86,13 +86,11 @@ void setup()
   }
   Serial.begin(115200);
   //while (!Serial);
-  Serial.println("Encoder Init");
-  Wire.setClock(400000);
-  Wire.setSDA(SDA_MAIN);
-  Wire.setSCL(SCL_MAIN);
-  Wire.begin(I2C_SLAVE_ADDRESS);
-  Wire.onReceive(recv);
-  Wire.onRequest(req);
+
+
+
+
+
   pinMode(LED_1, OUTPUT);
   digitalWrite(LED_1, 0);
   pinMode(28, OUTPUT);
@@ -105,15 +103,14 @@ void setup()
   Serial.println("I2C Ready");
   //gpio_set_irq_enabled_with_callback(BTN_START, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
   pinMode(SOLENOID, OUTPUT);
-  pinMode(BTN_START, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
+  //pinMode(BTN_START, INPUT_PULLUP);
+  //attachInterrupt(digitalPinToInterrupt(BTN_START), open_valve, FALLING);  // configura la interrupción
+  //pinMode(2, INPUT);
+  //pinMode(3, INPUT);
 
   //pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
+  //pinMode(3, INPUT_PULLUP);
 
-  encoder.begin();
   // add_repeating_alarm_us(1e6, alarm_callback, NULL, NULL);
   // doc["valve_open"] = false;
   close_valve();
@@ -122,10 +119,24 @@ void setup()
   {
     loadConfig();       // Load and update behaivor of system
   }
+  setup1();
+}
+
+// ------------------------------------------------------------------------------------------------- Encoder e I2C
+void setup1()
+{
+  Wire.setClock(400000);
+  Wire.setSDA(SDA_MAIN);
+  Wire.setSCL(SCL_MAIN);
+  Wire.begin(I2C_SLAVE_ADDRESS);
+  Wire.onReceive(recv);
+  Wire.onRequest(req);
+  Serial.println("Encoder Init");
+  encoder.begin();
 }
 
 
-// ------------------------------------------------------ loop
+// ------------------------------------------------------ loop comunication and procces
 void loop()
 {
   //---------------------------- Serial CMD
@@ -151,7 +162,7 @@ void loop()
     saveConfig = true;
   }
 
-  // ------------------------------------- process
+
   if (newcommand == true )
   {
     deserializeJson(doc_aux, jsonStr);
@@ -210,6 +221,44 @@ void loop()
     }
   }
 
+
+  // --------------------------------------------------- print_and_send
+  currentMillis = millis();
+  if (currentMillis - previousMillis >= interval)
+  {
+
+    // ---------------------------------------- Blink LED
+    digitalWrite(28, !(digitalRead(28)));
+    //Serial.printf("Slave: '%s'\r\n", buff);
+
+
+    // ------------------------------------- print states
+
+
+    if (obj_conf["test"])
+    {
+      doc_status["valve"] = !((digitalRead(SOLENOID)));
+      doc_status["STATE"] = STATE;
+      doc_status["current"] = current_value;
+      doc_status["pulses"] = new_value;   //Commands
+      doc_status["delta"] = delta;
+      doc_status["flow"] = flow;
+
+      Serial.print("Encoder State: ");
+      serializeJson(doc_status, Serial);
+      Serial.println();
+    }
+    previousMillis = currentMillis;
+  }
+
+}
+
+
+
+
+//----------------------------------------------------------------------------------------------------- Encoder e I2C
+void loop1()
+{
   // ---------------------------------------------- read encoder
   tiempoActual = millis();
   if (tiempoActual - tiempoAnterior >= intervalo)
@@ -302,6 +351,7 @@ void loop()
     //Serial.println(delta);
   }
 
+  // ------------------------------------- proccess
 
 
   switch (STATE)
@@ -411,30 +461,8 @@ void loop()
       break;
   }
 
-  // --------------------------------------------------- print_and_send
-  currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
-  {
-
-    // ---------------------------------------- Blink LED
-    digitalWrite(28, !(digitalRead(28)));
-    //Serial.printf("Slave: '%s'\r\n", buff);
-
-
-    // ------------------------------------- print states
-    //doc["pulses"] = new_value;   //Commands
-    /* doc["STATE"] = STATE;
-      doc["delta"] = delta;
-      doc["flow"] = flow;
-      doc["current"] = current_value;
-      doc["valve"] = !(bool (digitalRead(SOLENOID)));
-      doc["total_encoder"] = doc_conf["total_encoder"];
-      //memset(resp, 0, sizeof(resp));
-      Serial.print("Encoder State: ");
-      serializeJson(doc, resp);
-      Serial.println(resp);*/
-    previousMillis = currentMillis;
-  }
+  doc_conf["STATE"] = STATE;
+  doc_conf["current"] = current_value;
 
   // ----------------------------------------- save new data
   if (saveConfig == true)  // Data change
@@ -445,20 +473,6 @@ void loop()
     saveConfigData();
     loadConfig();
   }
-
-
-}
-
-
-// ---------------------------- Enoder e I2C
-void setup1()
-{
-  
-}
-
-void loop1()
-{
-  
 }
 
 
@@ -707,6 +721,9 @@ void loadConfig()
 
   if (!doc_conf["t_stop"].isNull())
     noDelta_timeSTOP = doc_conf["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW 60=30seg
+
+  STATE = doc_conf["STATE"];
+  current_value = doc_conf["current"];
 }
 
 
