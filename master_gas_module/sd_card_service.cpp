@@ -103,7 +103,7 @@ bool SD_Init(void)
 
 
 
-    listDir(SD, "/", 2);
+    listDir(SD, "/", 0);
     Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
     Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 
