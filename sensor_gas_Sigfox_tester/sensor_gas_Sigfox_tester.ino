@@ -455,17 +455,13 @@ void leerSensor()
 // --------------------------------- enterSleep
 void enterSleep()
 {
-  // Configurar el microcontrolador para dormir en modo de bajo consumo
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
+power_all_disable();
 
-  // Deshabilitar el ADC para ahorrar más energía
-  ADC0.CTRLA &= ~ADC_ENABLE_bm; // Deshabilitar el ADC
-  //analogReference(DEFAULT);
-
-  //power_all_disable();
-
-
+  //Serial1.end();
+  //Wire.end();
+  //pinMode(PIN_PA0, INPUT);
+  //pinMode(PIN_PA1, INPUT);
+  //pinMode(PIN_PA2, INPUT);
   pinMode(PIN_PA3, INPUT);
   pinMode(PIN_PA4, INPUT);
   pinMode(PIN_PA5, INPUT);
@@ -473,7 +469,7 @@ void enterSleep()
   pinMode(PIN_PA7, INPUT);
 
 
-  //pinMode(PIN_PB0, INPUT);
+  pinMode(PIN_PB0, INPUT);
   pinMode(PIN_PB1, INPUT);
   pinMode(PIN_PB2, INPUT);
   pinMode(PIN_PB3, INPUT);
@@ -494,22 +490,25 @@ void enterSleep()
   digitalWrite(PIN_PA6, LOW);
   digitalWrite(PIN_PA7, HIGH);
 
-  //digitalWrite(PIN_PB0, HIGH);
+  digitalWrite(PIN_PB0, HIGH);
   digitalWrite(PIN_PB1, HIGH);
   digitalWrite(PIN_PB2, HIGH);
   digitalWrite(PIN_PB3, HIGH);
   digitalWrite(PIN_PB4, HIGH);
-  //digitalWrite(PIN_PB5, HIGH);
+  digitalWrite(PIN_PB5, HIGH);
 
   digitalWrite(PIN_PC0, HIGH);
   digitalWrite(PIN_PC1, HIGH);
   digitalWrite(PIN_PC2, HIGH);
   digitalWrite(PIN_PC3, HIGH);
+  //Serial1.end();
 
-  // Dormir hasta que ocurra una interrupción
-  sleep_mode();
+  ADC0.CTRLA &= ~ADC_ENABLE_bm;
 
-  // El microcontrolador se despierta aquí después de una interrupción
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Modo de sueño más bajo
+  sleep_enable(); // Habilitar el modo de sueño
+  sleep_cpu();    // Poner al MCU en modo de sueño
 
 }
 

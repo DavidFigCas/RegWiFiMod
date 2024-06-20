@@ -1,0 +1,16 @@
+[
+    {
+        "nombre": "Público en General",
+        "cliente": 0,
+        "litros": 100,
+        "precio": 9.5,
+        "factor": 0.95
+    },
+    {
+        "nombre": "Calibración",
+        "cliente": 1,
+        "litros": 100,
+        "precio": 9,
+        "factor": 1
+    }
+]

@@ -24,7 +24,8 @@
 #include <Encoder.h>
 #include <ArduinoJson.h>
 #include <Wire.h>
-#include <LittleFS.h>
+#include "FS.h"
+#include <LITTLEFS.h>
 //#include "RP2040_TimerInterrupt.h"
 
 static char buff[200];
@@ -61,7 +62,7 @@ unsigned long currentMillis;
 //PioEncoder encoder(2); // encoder is connected to GPIO2 and GPIO3
 //uint64_t alarm_callback(alarm_id_t id, void *user_data);
 
-Encoder encoder(21,22)
+Encoder encoder(21,22);
 
 
 unsigned long tiempoAnterior = 0;
@@ -573,7 +574,7 @@ void close_valve()
 // ------------------------------------------------------------------------------------- spiffs_init
 bool spiffs_init()
 {
-  if (!LittleFS.begin())
+  if (!LITTLEFS.begin())
   {
     Serial.println("{\"spiffs\":false}");
     return false;
@@ -624,7 +625,7 @@ JsonObject getJSonFromFile(StaticJsonDocument<FILE_SIZE> *doc_conf, String filen
 {
 
 
-  file = LittleFS.open(filename, "r");
+  file = LITTLEFS.open(filename);
   if (file)
   {
     Serial.println("Opening File");
@@ -755,7 +756,7 @@ bool saveJSonToAFile(JsonObject * doc_conf, String filename) {
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   //Serial.println(F("Open file in write mode"));
-  file = LittleFS.open(filename, "w");
+  file = LITTLEFS.open(filename, FILE_WRITE);
   if (file) {
     //Serial.print(F("Filename --> "));
     //Serial.println(filename);
