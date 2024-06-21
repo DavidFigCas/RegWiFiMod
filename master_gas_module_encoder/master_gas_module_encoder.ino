@@ -371,7 +371,7 @@ void loop()
   {
     mainRefresh = millis();
 
-    loopBLE();
+    //loopBLE();
     read_clock();
     gps_update();
     save_gps_log();

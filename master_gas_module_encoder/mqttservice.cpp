@@ -1,4 +1,5 @@
 #include "mqttservice.h"
+#include "system.h"
 
 WiFiClient espClient;
 PubSubClient Mclient(espClient);
@@ -83,10 +84,19 @@ void mqtt_send_file(String file_to_send)
   send_file = false;
   File file = SD.open(file_to_send);
   if (!file) {
-    Serial.print("Error al abrir el archivo: ");
+    Serial.print("Error al abrir el archivo SD: ");
     Serial.println(file_to_send);
-    return;
+
+    file = SPIFFS.open(file_to_send);
+    if (!file) {
+      Serial.print("Error al abrir el archivo en SPIFFS: ");
+      Serial.println(file_to_send);
+      return;
+    }
   }
+
+
+
 
   strcpy(buffer_union_publish, obj["id"].as<const char*>());
   strcat(buffer_union_publish, publish_topic);
@@ -119,24 +129,54 @@ void mqtt_send_file(String file_to_send)
 
 
 //---------------------------------------------------- mqtt_send_list
-void mqtt_send_list()
-{
+void mqtt_send_list() {
   strcpy(buffer_union_publish, obj["id"].as<const char*>());
   strcat(buffer_union_publish, publish_topic);
   strcat(buffer_union_publish, list_topic);
 
-  JsonArray logObject = obj_list;
-  size_t serializedLength = measureJson(logObject) + 1;
-  char tempBuffer[serializedLength];
-  serializeJson(logObject, tempBuffer, serializedLength);
-  strcpy(buffer_msg_list, tempBuffer);
+  // Crear un objeto JSON para la lista de archivos
+  StaticJsonDocument<1024> doc;
+  JsonArray fileList = doc.createNestedArray("files");
 
-  Mclient.publish(buffer_union_publish, buffer_msg_list);
+  // Ruta de la consulta
+  const char* file_path = consult_filelog.c_str();
+
+  // Abrir la tarjeta SD
+  if (!SD.begin()) {
+    Serial.println("SD card initialization failed!");
+    return;
+  }
+
+  File root = SD.open(file_path);
+  if (!root) {
+    Serial.println("Failed to open directory");
+    return;
+  }
+
+  if (!root.isDirectory()) {
+    Serial.println("Not a directory");
+    return;
+  }
+
+  File file = root.openNextFile();
+  while (file) {
+    if (!file.isDirectory()) {
+      String fileName = file.name();
+      fileList.add(fileName);
+    }
+    file.close();
+    file = root.openNextFile();
+  }
+
+  char tempBuffer[1024];
+  size_t n = serializeJson(doc, tempBuffer, sizeof(tempBuffer));
+
+  strcpy(buffer_msg_list, tempBuffer);
+  Mclient.publish(buffer_union_publish, buffer_msg_list, n);
 
   Serial.println("{\"mqtt_list\":\"sending\"}");
-
-
 }
+
 
 //----------------------------------------------------- mqtt_send_log
 void mqtt_send_log()
@@ -242,7 +282,7 @@ void callback(char* topic, byte* payload, unsigned int length)
   jsonPayload[length] = '\0'; // Agrega el carácter nulo al final
   Serial.print("Message arrived: ");
 
-  //if (obj["test"].as<bool>())
+  if (obj["test"].as<bool>())
   {
     Serial.print(topic);
     Serial.print("<-- ");
@@ -409,12 +449,11 @@ void callback(char* topic, byte* payload, unsigned int length)
     //}
 
   }
-  else  if (strcmp(topic, (strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic ), print_topic))) == 0)
+  else  if (strcmp(topic, (strcat( strcat(strcat(strcpy(buffer_union_subcribe, obj["id"].as<const char*>()), subcribe_topic), log_topic ), list_topic))) == 0)
   {
-    print_log = true;
-    Serial.print("Print Logs: ");
-    consult_filelog = "/logs/";
-    consult_filelog += jsonPayload;
+    send_list = true;
+    Serial.print("List Files: ");
+    consult_filelog = jsonPayload;
     Serial.println(consult_filelog);
     return;
   }

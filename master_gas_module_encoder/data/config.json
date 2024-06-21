@@ -1,6 +1,6 @@
 {
   "enable_mqtt": true,
-  "mqtt_server": "inventoteca.com",
+  "mqtt_server": "broker.hivemq.com",
   "mqtt_port": 1883,
   "test": true,
   "id": "0",

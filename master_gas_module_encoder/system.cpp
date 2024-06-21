@@ -650,10 +650,10 @@ void loadConfig()
   gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
   daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
 
-  if ((!obj["enable_bt"].isNull()) && (obj["enable_bt"].as<bool>()))
-    setupBLE();
-  else
-    disableBLE();
+//  if ((!obj["enable_bt"].isNull()) && (obj["enable_bt"].as<bool>()))
+//    setupBLE();
+  //else
+    //disableBLE();
 
 
   Serial.println("{\"config\":true}");
