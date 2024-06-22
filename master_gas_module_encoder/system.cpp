@@ -105,7 +105,7 @@ volatile bool startCounting = false;
 volatile bool startFlowing = false;
 volatile bool stopFlowing = true;
 volatile bool readyToPrint = false;
-volatile bool on_service = false; 
+volatile bool on_service = false;
 
 volatile uint32_t pesos;
 
@@ -674,6 +674,9 @@ void loadConfig()
 
   if (!obj["t_delta"].isNull())
     t_delta = obj["t_delta"];  //DELTA Intervalo de tiempo (500 milisegundos)
+
+  if ((!obj["t_stop"].isNull()) && (obj["t_stop"] > 0))
+    noDelta_timeSTOP = obj["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW
 
 
   Serial.println("{\"config\":true}");

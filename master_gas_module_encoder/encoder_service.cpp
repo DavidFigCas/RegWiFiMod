@@ -67,7 +67,10 @@ void print_encoder()
 
 // -------------------------------------------------- checkEncoderPulses
 void checkEncoderPulses(void * parameter) {
-  for (;;) {
+
+  static unsigned long lastFlowCheck = 0;
+  for (;;)
+  {
     // Leer el valor del encoder
     read_encoder();
 
@@ -76,22 +79,24 @@ void checkEncoderPulses(void * parameter) {
     {
       Serial.println((current - previous_pulses));
       startFlowing = true;
+      lastFlowCheck = millis();
     }
-    else{
-       startFlowing = false;
+    else
+    {
+      startFlowing = false;
     }
 
     // Si el flujo ha comenzado, monitorear si se detiene
-    if (on_service) 
+    if ((on_service) && (startFlowing == false))
     {
-      static unsigned long lastFlowCheck = millis();
-      if (millis() - lastFlowCheck >= 10000) 
+      if (millis() - lastFlowCheck >= noDelta_timeSTOP * 1000) // Argumento noDelta en Segundos
       { // Revisar cada segundo
         lastFlowCheck = millis();
         if (abs((int32_t)(current - previous_pulses)) <= MAX_DELTA)
         {
           //startFlowing = false;
           stopFlowing = true;
+          //on_service = false;
           //Serial.println("Flow stopped");
         }
       }
