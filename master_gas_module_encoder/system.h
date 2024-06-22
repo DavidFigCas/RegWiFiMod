@@ -180,7 +180,7 @@ extern float precio;
 extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;
-extern uint32_t current;
+
 
 extern uint32_t folio;
 extern uint32_t reporte;

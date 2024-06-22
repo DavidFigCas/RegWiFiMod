@@ -79,7 +79,6 @@ float uprice = 9.8; //price of 1 litre
 float factor;
 uint32_t litros_check;
 uint32_t precio_check;
-uint32_t current;
 
 uint32_t folio;
 uint32_t reporte;
@@ -386,9 +385,11 @@ void system_init()
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
 
-  delay(100);
-  I2C_Init();
-  Serial.println("i2c_Init");
+
+
+  //delay(100);
+  //I2C_Init();
+  //Serial.println("i2c_Init");
 
 
   status_doc["ver"] = VERSION;
@@ -401,24 +402,34 @@ void system_init()
   {
     Cfg_get(/*NULL*/);  // Load File from spiffs
     loadConfig();       // Load and update behaivor of system
-    wifi_init();
-    mqtt_init();
+    //wifi_init();
+    //mqtt_init();
     //mqtt_check();
     rtcUpdated = false;  // TRUE:Not auto update
 
-    init_clock();        // I2C for clock
+    //init_clock();        // I2C for clock
   }
 
-  delay(100);
-  SD_Init();
+  //delay(100);
+  //SD_Init();
 
-  gps_init();
+  //gps_init();
   encoder_init();
   //init_glcd();
 
   // WatchDog Timer
+  // Crear una tarea FreeRTOS para monitorear los pulsos del encoder
+  xTaskCreatePinnedToCore(
+    checkEncoderPulses,   // Función de la tarea
+    "CheckEncoderPulses", // Nombre de la tarea
+    1024,                 // Tamaño del stack
+    NULL,                 // Parámetro de entrada
+    1,                    // Prioridad de la tarea
+    NULL,                 // Manejar de la tarea
+    0                    // Núcleo en el que se ejecutará la tarea
+  );
 
-  pinMode(BT_REPORT, INPUT_PULLUP);
+  //pinMode(BT_REPORT, INPUT_PULLUP);
 
   send_log = true;
 }
@@ -575,7 +586,7 @@ void reset_config()
 void loadConfig()
 {
   // ----------- Load Counters
-   esp_task_wdt_reset();
+  esp_task_wdt_reset();
   Serial.println("{\"loadConfig\":true}");
 
 
@@ -652,10 +663,16 @@ void loadConfig()
   gmtOffset_sec = obj["gmtOff"];               // Central Mexico (-5 UTC, -18000): Pacifico (-7 UTC, -25200) :  Noroeste (-8 UTC, -28800)
   daylightOffset_sec = obj["dayOff"];               // Horario de verano, disabled
 
-//  if ((!obj["enable_bt"].isNull()) && (obj["enable_bt"].as<bool>()))
-//    setupBLE();
+  //  if ((!obj["enable_bt"].isNull()) && (obj["enable_bt"].as<bool>()))
+  //    setupBLE();
   //else
-    //disableBLE();
+  //disableBLE();
+
+  if (!obj["delta"].isNull())
+    MAX_DELTA = obj["delta"];                //10 Pulsos detectados en Intervalo2  (DELTA)
+
+  if (!obj["t_delta"].isNull())
+    t_delta = obj["t_delta"];  //DELTA Intervalo de tiempo (500 milisegundos)
 
 
   Serial.println("{\"config\":true}");

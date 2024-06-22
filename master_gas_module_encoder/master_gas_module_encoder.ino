@@ -8,12 +8,12 @@
 void setup()
 {
   system_init();
-  search_nclient(0);
+  //search_nclient(0);
   //saveNewlog();
   //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
 
-  buttonState = LOW;
-  lastButtonState = HIGH;
+  //buttonState = LOW;
+  //lastButtonState = HIGH;
 
 
 
@@ -34,7 +34,10 @@ void setup()
 // ------------------------------------------------------ loop
 void loop()
 {
-  // ----------------------------------- Serial Monitor
+
+  Serial_CMD();
+  
+ /* // ----------------------------------- Serial Monitor
   if ((millis() - serialRefresh > serialTime) && (obj["test"]))
   {
     serialRefresh = millis();
@@ -53,7 +56,7 @@ void loop()
     //delay(TIME_SPACE);
   }
 
-  Serial_CMD();
+  
 
 
   // PRead button for report
@@ -63,7 +66,7 @@ void loop()
 
   //I2C_Get();
   //I2C_GetTO();
-  read_encoder();
+  //read_encoder();
   
 
 
@@ -519,6 +522,6 @@ void loop()
 
   lastButtonState = buttonState;
 
-
+*/
   esp_task_wdt_reset();
 }
