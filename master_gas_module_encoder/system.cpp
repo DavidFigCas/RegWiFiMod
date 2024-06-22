@@ -79,6 +79,7 @@ float uprice = 9.8; //price of 1 litre
 float factor;
 uint32_t litros_check;
 uint32_t precio_check;
+uint32_t current;
 
 uint32_t folio;
 uint32_t reporte;
@@ -412,6 +413,7 @@ void system_init()
   SD_Init();
 
   gps_init();
+  encoder_init();
   //init_glcd();
 
   // WatchDog Timer
@@ -658,4 +660,31 @@ void loadConfig()
 
   Serial.println("{\"config\":true}");
 
+}
+
+
+// -------------------------------------------------- Serial_CMD
+void Serial_CMD()
+{
+  if (Serial.available())
+  {
+    // Suponiendo que los datos del puerto serie terminan con un salto de línea
+    String data = Serial.readStringUntil('\n');
+    Serial.print("Data: ");
+    Serial.println(data);
+
+
+    DynamicJsonDocument doc_patch(FILE_SIZE);
+    deserializeJson(doc_patch, data);
+
+    // Combinar los objetos JSON
+    for (const auto& kv : doc_patch.as<JsonObject>())
+    {
+      obj[kv.key()] = kv.value();
+    }
+
+    serializeJson(obj, Serial);
+    Serial.println();
+    saveConfig = true;
+  }
 }

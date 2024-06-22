@@ -53,47 +53,31 @@ void loop()
     //delay(TIME_SPACE);
   }
 
-  if (Serial.available())
-  {
-    // Suponiendo que los datos del puerto serie terminan con un salto de línea
-    String data = Serial.readStringUntil('\n');
-    Serial.print("Data: ");
-    Serial.println(data);
-
-
-    DynamicJsonDocument doc_patch(FILE_SIZE);
-    deserializeJson(doc_patch, data);
-
-    // Combinar los objetos JSON
-    for (const auto& kv : doc_patch.as<JsonObject>())
-    {
-      obj[kv.key()] = kv.value();
-    }
-
-    serializeJson(obj, Serial);
-    Serial.println();
-    saveConfig = true;
-  }
+  Serial_CMD();
 
 
   // PRead button for report
-  buttonState = digitalRead(BT_REPORT);
+  //buttonState = digitalRead(BT_REPORT);
   status_doc["elapsed_time"] = millis() / 1000;
   // ----------------------------------------------- leer
 
   //I2C_Get();
   //I2C_GetTO();
+  read_encoder();
   
 
 
   // ----------------------------------------------- procesar
   //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
   // Encoder value is ready and not null
-  if (!doc_encoder["current"].isNull())
-  {
-    litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
-    precio = ceil(litros) * uprice;
-  }
+  //if (!doc_encoder["current"].isNull())
+  //{
+    //litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
+    //precio = ceil(litros) * uprice;
+  //}
+
+  litros = current / pulsos_litro;
+  precio = ceil(litros) * uprice;
 
   display_reset = false;
 
@@ -121,22 +105,6 @@ void loop()
       clear_key = true;
     }
 
-    /*const char* cadenaTeclasRecibida = doc_display["k"];
-
-      // Procesar la cadena recibida
-      for (size_t i = 0; i < strlen(cadenaTeclasRecibida); i++) {
-      char c = cadenaTeclasRecibida[i];
-      if (c >= '0' && c <= '9') {
-       int litros = c - '0'; // Convertir el carácter a número
-       Serial.print("Litros: ");
-       Serial.println(litros);
-       // Aquí puedes realizar la acción con los litros
-      } else if (c == 'A' || c == 'B' || c == 'C' || c == 'D' || c == '*' || c == '#') {
-       Serial.print("Acción: ");
-       Serial.println(c);
-       // Aquí puedes realizar la acción específica para las letras y símbolos
-      }
-      }*/
   }
 
 

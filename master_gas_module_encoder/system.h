@@ -106,6 +106,7 @@
 #include "clock.h"
 #include "gps_service.h"
 //#include "bt_service.h"
+#include "encoder_service.h"
 
 
 // sd card
@@ -179,6 +180,7 @@ extern float precio;
 extern float uprice; //price of 1 litre
 extern uint32_t litros_check;
 extern uint32_t precio_check;
+extern uint32_t current;
 
 extern uint32_t folio;
 extern uint32_t reporte;
@@ -224,6 +226,7 @@ void search_nclient(uint32_t aux_client);
 void register_client();
 void saveNewlog();
 void read_logs(String consult);
+void Serial_CMD();
 
 
 #endif

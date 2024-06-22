@@ -1,38 +1,23 @@
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef ENCODER_SERVICE_H
+#define ENDODER_SERVICE_H
 
 #include "system.h"
 
-//#define SDA1_PIN 10  // Cambia esto al pin que desees usar para SDA
-//#define SCL1_PIN 11  // Cambia esto al pin que desees usar para SCL
+#include <ESP32Encoder.h>
+#include <AS5601.h>
 
-extern char daysOfTheWeek[7][12];
-extern DateTime now;
-extern DateTime last_ac;
-extern RTC_DS1307 rtc;
+extern ESP32Encoder encoder;
+extern AS5601 Sensor;
 
-extern int dias;
-extern int mes;
-extern int anio;
-extern int dia_hoy;
-extern int hora;
-extern int minuto;
-extern int segundo;
+// ------------------------------ Configs
+//extern unsigned long interval;              // Print and send
+extern unsigned long MAX_DELTA;                //10 Pulsos detectados en Intervalo2  (DELTA)
+//extern unsigned long intervalo;    //ENCODER Intervalo de tiempo (milisegundos)
+//extern unsigned long intervalo2;    //DELTA Intervalo de tiempo (500 milisegundos)
+extern unsigned long noDelta_timeSTOP;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
 
-extern const char* ntpServer;
-extern int32_t  gmtOffset_sec;
-extern int32_t   daylightOffset_sec;
-extern bool ntpConnected;
-extern bool rtcUpdated;
-extern bool rtc_ready;
-
-
-extern WiFiUDP ntpUDP;
-extern NTPClient timeClient;
-
-void update_clock();
-void read_clock();
-void init_clock();
-String DateTimeToString(const DateTime& now);
+void encoder_init();
+void read_encoder();
+void print_encoder();
 
 #endif
