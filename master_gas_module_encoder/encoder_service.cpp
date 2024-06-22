@@ -67,20 +67,40 @@ void print_encoder()
 
 // -------------------------------------------------- checkEncoderPulses
 void checkEncoderPulses(void * parameter) {
-   for (;;) {
-        // Leer el valor del encoder
-        read_encoder();
-        
-        // Verificar si el cambio supera el umbral
-        if (abs((int32_t)(current - previous_pulses)) > MAX_DELTA)
-        {
-            Serial.println((current - previous_pulses));
-        }
-        
-        // Actualizar el valor anterior de los pulsos
-        previous_pulses = current;
-        
-        // Esperar 1 ms antes de la siguiente verificación
-        vTaskDelay(t_delta / portTICK_PERIOD_MS);
+  for (;;) {
+    // Leer el valor del encoder
+    read_encoder();
+
+    // Verificar si el cambio supera el umbral
+    if (abs((int32_t)(current - previous_pulses)) > MAX_DELTA)
+    {
+      Serial.println((current - previous_pulses));
+      startFlowing = true;
     }
+    else{
+       startFlowing = false;
+    }
+
+    // Si el flujo ha comenzado, monitorear si se detiene
+    if (on_service) 
+    {
+      static unsigned long lastFlowCheck = millis();
+      if (millis() - lastFlowCheck >= 10000) 
+      { // Revisar cada segundo
+        lastFlowCheck = millis();
+        if (abs((int32_t)(current - previous_pulses)) <= MAX_DELTA)
+        {
+          //startFlowing = false;
+          stopFlowing = true;
+          //Serial.println("Flow stopped");
+        }
+      }
+    }
+
+    // Actualizar el valor anterior de los pulsos
+    previous_pulses = current;
+
+    // Esperar 1 ms antes de la siguiente verificación
+    vTaskDelay(t_delta / portTICK_PERIOD_MS);
+  }
 }

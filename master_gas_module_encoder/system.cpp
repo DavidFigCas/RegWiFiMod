@@ -103,8 +103,9 @@ volatile bool encoder_reset = false;
 volatile bool start_print = false;
 volatile bool startCounting = false;
 volatile bool startFlowing = false;
-volatile bool stopFlowing = false;
+volatile bool stopFlowing = true;
 volatile bool readyToPrint = false;
+volatile bool on_service = false; 
 
 volatile uint32_t pesos;
 

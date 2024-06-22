@@ -206,6 +206,7 @@ extern volatile bool startCounting;
 extern volatile bool startFlowing;
 extern volatile bool stopFlowing;
 extern volatile bool readyToPrint;
+extern volatile bool on_service;
 
 extern volatile uint32_t pesos;
 
