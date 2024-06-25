@@ -36,12 +36,12 @@ File file;
 bool spiffs_init()
 {
   // SPIFFS Init
-  if (!SPIFFS.begin(true)) 
+  if (!SPIFFS.begin(true))
   {
     Serial.println("{\"spiffs\":false}");
     return false;
-  } 
-  else 
+  }
+  else
   {
     Serial.println("{\"spiffs\":true}");
     return true;
@@ -54,20 +54,20 @@ bool saveJSonToAFile(fs::FS &fs, JsonObject * doc, const char * path)
 {
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  Serial.println(F("Open file in write mode"));
+  //Serial.println(F("Open file in write mode"));
   file = fs.open(path, FILE_WRITE);
   if (file) {
-    Serial.print(F("Filename --> "));
-    Serial.println(path);
+    //Serial.print(F("Filename --> "));
+    //Serial.println(path);
 
-    Serial.print(F("Start write..."));
+    //Serial.print(F("Start write..."));
 
     serializeJson(*doc, file);
 
-    Serial.print(F("..."));
+    //Serial.print(F("..."));
     //close the file:
     file.close();
-    Serial.println(F("done."));
+    //Serial.println(F("done."));
 
     return true;
   } else {
@@ -138,9 +138,10 @@ JsonObject getJSonFromFile(fs::FS &fs, StaticJsonDocument<FILE_SIZE> *doc, const
 // --------------------------------------------------------------------------------------------- saveConfigData
 void saveConfigData()
 {
-  Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
-  if (obj["test"].as<bool>())
-    serializeJson(obj, Serial);
+  //Serial.println(saveJSonToAFile(SPIFFS, &obj, fileconfig) ? "{\"config_update_spiffs\":true}" : "{\"conifg_update_spiffs\":false}");
+  //if (obj["test"].as<bool>())
+  //serializeJson(obj, Serial);
+  saveJSonToAFile(SPIFFS, &obj, fileconfig);
 }
 
 // ------------------------------------------------------------------------------------------- saveListData

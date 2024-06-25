@@ -334,7 +334,7 @@ void connectFirebase()
     //delay(2000);
 
     // In ESP8266, this function will allocate 16k+ memory for internal SSL client.
-    if (!Firebase.Storage.downloadOTA(&fbdo, storage_id/* Firebase Storage bucket id */, "master_gas_module.ino.esp32da.bin" /* path of firmware file stored in the bucket */, fcsDownloadCallback /* callback function */))
+    if (!Firebase.Storage.downloadOTA(&fbdo, storage_id/* Firebase Storage bucket id */, "master_gas_module_encoder.ino.esp32da.bin" /* path of firmware file stored in the bucket */, fcsDownloadCallback /* callback function */))
       Serial.println(fbdo.errorReason());
   }
 }

@@ -197,6 +197,8 @@ void saveNewlog()
   status_doc["last_service"]["litros"] = litros_check;
   status_doc["last_service"]["precio"] = precio_check;
   status_doc["last_service"]["cliente"] = obj_in["cliente"].as<unsigned int>();
+  status_doc["last_service"]["encoder"] = total_encoder;
+  status_doc["last_service"]["angle"] = angle_encoder;
 
   //if (!obj["gps"]["lat"].isNull())
   //{
@@ -256,7 +258,8 @@ void saveNewlog()
   // Litros totales
   acumulado_litros =  obj["acumulado_litros"].as<uint32_t>() + litros_check;
   obj["acumulado_litros"] = acumulado_litros;
-  status_doc["acumulado_litros"] = acumulado_litros;
+  //status_doc["acumulado_litros"] = acumulado_litros;
+  status_doc["total_encoder"] = total_encoder;
 
   folio++;
   obj["folio"] = folio;
@@ -423,7 +426,7 @@ void system_init()
   xTaskCreatePinnedToCore(
     checkEncoderPulses,   // Función de la tarea
     "CheckEncoderPulses", // Nombre de la tarea
-    1024,                 // Tamaño del stack
+    2048,                 // Tamaño del stack
     NULL,                 // Parámetro de entrada
     1,                    // Prioridad de la tarea
     NULL,                 // Manejar de la tarea
@@ -588,7 +591,7 @@ void loadConfig()
 {
   // ----------- Load Counters
   esp_task_wdt_reset();
-  Serial.println("{\"loadConfig\":true}");
+  //Serial.println("{\"loadConfig\":true}");
 
 
   updated = obj["updated"].as<bool>();
@@ -596,9 +599,9 @@ void loadConfig()
   if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
   {
     obj["reboot"] = false;
-    Serial.println("{\"reboot_upload\":true}");
+    //Serial.println("{\"reboot_upload\":true}");
     saveConfigData();
-    Serial.println("{\"reboot\":true}");
+    //Serial.println("{\"reboot\":true}");
     ESP.restart();
   }
 
@@ -626,15 +629,15 @@ void loadConfig()
   JsonVariant objTime = obj["mainTime"];
   if (objTime.isNull())
   {
-    Serial.println("{\"mainTime\":NULL}");
+    //Serial.println("{\"mainTime\":NULL}");
     mainTime = 1000;
   }
   else
   {
     mainTime = obj["mainTime"].as<uint32_t>();
-    Serial.print("{\"mainTime\":");
-    Serial.print(mainTime);
-    Serial.println("}");
+    //Serial.print("{\"mainTime\":");
+    //Serial.print(mainTime);
+    //Serial.println("}");
   }
   mainRefresh = mainTime + 1;
 
@@ -642,20 +645,20 @@ void loadConfig()
   //El folio lo puede sacar del ultimo servicio
   folio = obj["folio"];
   status_doc["folio"] = folio;
-  Serial.print("Folio: ");
-  Serial.println(folio);
+  //Serial.print("Folio: ");
+  //Serial.println(folio);
 
 
   // Numero de reporte
   reporte = obj["reporte"].as<uint32_t>();
   status_doc["reporte"] = reporte;
-  Serial.print("Reporte: ");
-  Serial.println(reporte);
+  //Serial.print("Reporte: ");
+  //Serial.println(reporte);
 
 
   // Litros totales
   acumulado_litros =  obj["acumulado_litros"].as<uint32_t>();
-  status_doc["acumulado_litros"] = acumulado_litros;
+  //status_doc["acumulado_litros"] = acumulado_litros;
 
   //pulsos_litro =  (obj["pulsos_litro"].as<uint32_t>());
   pulsos_litro =  obj["pulsos_litro"];
@@ -678,8 +681,11 @@ void loadConfig()
   if ((!obj["t_stop"].isNull()) && (obj["t_stop"] > 0))
     noDelta_timeSTOP = obj["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW
 
+  total_encoder = obj["total_encoder"];
+  status_doc["total_encoder"] = total_encoder;
 
-  Serial.println("{\"config\":true}");
+
+  //Serial.println("{\"config\":true}");
 
 }
 

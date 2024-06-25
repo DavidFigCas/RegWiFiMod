@@ -42,7 +42,7 @@ void I2C_Get()
 
   // --------------------- leer encoder
   // Read from the slave and print out
-  Wire.requestFrom(ENCODE_ADD, 199);
+  /*Wire.requestFrom(ENCODE_ADD, 199);
   memset(buff, 0, sizeof(buff));
   i = 0;
   while (Wire.available())
@@ -59,7 +59,7 @@ void I2C_Get()
 
   if (doc_encoder.isNull())
     status_doc["encoder"] = false;
-  else
+  else*/
     status_doc["encoder"] = true;
 }
 

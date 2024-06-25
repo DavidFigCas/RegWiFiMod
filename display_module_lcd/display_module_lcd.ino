@@ -114,22 +114,15 @@ void recv(int len)
     //Serial.println(error.f_str());
   }
 
-  //if (buttonState == false) // solo para test
-  litros = doc_aux["litros"];
-  //else
-  //litros = 123;
+  if (!doc_aux["litros"].isNull())
+  {
+    litros = doc_aux["litros"];
 
-  //print_litros = doc_aux["litros_check"];
-  print_litros = ceil(litros);
-  pesos = doc_aux["precio"].as<uint32_t>();
-  //print_pesos = doc_aux["precio_check"];
-  print_pesos = pesos;
-
-  //if (!doc_aux["k"].isNull())
-  //{
-    //cadenaNumeros = "";
-    //litros_target = 0;
-  //}
+    //print_litros = ceil(litros);
+    print_litros = litros;
+    pesos = doc_aux["precio"].as<uint32_t>();
+    print_pesos = pesos;
+  }
 
 
 }
@@ -145,21 +138,9 @@ void req()
   //if ((doc_aux["valve"] != open_valve)) ////AQUIE ESYOY TRABAJANDO
   //  doc["valve"] = open_valve;
 
-   if ((open_valve == true) && (litros_target > 0))
+  if ((open_valve == true) && (litros_target > 0))
     doc["litros_target"] = litros_target;
 
-  //if (prevButtonState != buttonState)
-  //{
-  //if (buttonState == true) // solo para test
-  //{
-  //doc["valve"] =  buttonState;
-  //doc["litros_target"] = 123;
-  //}
-
-  //}
-  //else
-  //  doc["litros"] = litros;
-  //prevButtonState = buttonState;
 
   //serializeJson(doc, respx);
 
@@ -362,14 +343,14 @@ void loop1()
   if (doc_aux.isNull())
   {
 
-    display.fillRect(0, 22, 340, 180, WHITE);
+    //display.fillRect(0, 22, 340, 180, WHITE);
 
-    u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
-    u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+    //u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+    //u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
     //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
-    u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
-    u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
-    u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
+    //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
+    //u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
+    //u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
   }
 
   // ----------------------- Despliega los contadores

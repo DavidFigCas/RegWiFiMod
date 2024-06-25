@@ -11,11 +11,14 @@ unsigned long t_delta = 100;  //DELTA Intervalo de tiempo (500 milisegundos)
 unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
 uint32_t current;
 uint32_t previous_pulses;
+uint32_t total_encoder;
+volatile uint32_t angle_encoder;
 
 //----------------------------------- endoer_init
 void encoder_init()
 {
-  Sensor.setResolution(1024);
+  Sensor.setResolution(2048); // coerce angle steps to supported values (8, 16, 32, …, 2048)
+  angle_encoder = Sensor.getRawAngle();
 
   //ESP32Encoder::useInternalWeakPullResistors = puType::down;
   // Enable the weak pull up resistors
@@ -44,6 +47,12 @@ void read_encoder()
 
   //Serial.println();
   current = abs(encoder.getCount());
+  
+  angle_encoder = Sensor.getRawAngle();
+  
+  //obj["angle_encoder"] = Sensor.getRawAngle();
+  //status_doc["angle_encoder"] = obj["angle_encoder"];
+  
 }
 
 // ----------------------------------- print_encoder
@@ -77,8 +86,10 @@ void checkEncoderPulses(void * parameter) {
     // Verificar si el cambio supera el umbral
     if (abs((int32_t)(current - previous_pulses)) > MAX_DELTA)
     {
-      Serial.println((current - previous_pulses));
+      //Serial.println((current - previous_pulses));
+      //angle_encoder = Sensor.getRawAngle();
       startFlowing = true;
+      saveConfig = true;
       lastFlowCheck = millis();
     }
     else
@@ -96,6 +107,8 @@ void checkEncoderPulses(void * parameter) {
         {
           //startFlowing = false;
           stopFlowing = true;
+          encoder.setCount(0);
+          saveConfig = true;
           //on_service = false;
           //Serial.println("Flow stopped");
         }
@@ -103,6 +116,8 @@ void checkEncoderPulses(void * parameter) {
     }
 
     // Actualizar el valor anterior de los pulsos
+    total_encoder = total_encoder + current;
+    obj["total_encoder"] = total_encoder;
     previous_pulses = current;
 
     // Esperar 1 ms antes de la siguiente verificación

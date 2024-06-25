@@ -249,7 +249,7 @@ void mqtt_send_report()
   status_doc["last_report"]["litros_suma"] = litros_suma;
   status_doc["last_report"]["total_ventas"] = total_ventas;
   status_doc["last_report"]["reporte"] = reporte;
-  status_doc["last_report"]["acumulado_litros"] = acumulado_litros;
+  status_doc["last_report"]["total_encoder"] = total_encoder;
   status_doc["last_report"]["folio_inicial"] = folio_ini;
   status_doc["last_report"]["folio_final"] = folio_fin;
   status_doc["last_report"]["litros_inicial"] = litros_ini;
