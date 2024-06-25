@@ -11,7 +11,7 @@ void setup()
   Serial.begin(115200);
   // Enable the weak pull down resistors
 
-  Sensor.setResolution(1024);
+  Sensor.setResolution(2048);
 
   //ESP32Encoder::useInternalWeakPullResistors = puType::down;
   // Enable the weak pull up resistors

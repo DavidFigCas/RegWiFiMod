@@ -1,5 +1,13 @@
 #include "printerservice.h"
 
+
+
+const char* especiales[] = {"ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"};
+const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
+const char* decenas[] = {"", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
+const char* centenas[] = {"", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"};
+
+
 // --------------------------------------------------------------------------- printRepot emty
 void printReport(void)
 {
@@ -238,62 +246,62 @@ void printNumber(uint32_t num) {
 // --------------------------------------------------------------------------convertNumberToWords
 void convertNumberToWords(uint32_t num, char* resultado) 
 {
-  if (num == 0) {
-    strcpy(resultado, "CERO");
-    return;
-  } else {
-    strcpy(resultado, "");
-  }
-
-  if (num >= 1000) {
-    int miles = num / 1000;
-    strcat(resultado, unidades[miles]);
-    strcat(resultado, " MIL ");
-    num %= 1000;
-  }
-
-  if (num >= 200) {
-    int centenas = num / 100;
-    strcat(resultado, unidades[centenas]);
-    strcat(resultado, " CIENTOS ");
-    num %= 100;
-  } else if (num > 100) {
-    strcat(resultado, "CIENTO ");
-    num %= 100;
-  } else if (num == 100) {
-    strcat(resultado, "CIEN");
-    num %= 100;
-  }
-
-  if (num > 29) {
-    int decena = num / 10;
-    strcat(resultado, decenas[decena]);
-    if (num % 10 > 0) {
-      strcat(resultado, " Y ");
+    if (num == 0) {
+        strcpy(resultado, "CERO");
+        return;
+    } else {
+        strcpy(resultado, "");
     }
-    num %= 10;
-  } else if (num > 20) {
-    strcat(resultado, "VEINTI");
-    num %= 10;
-  } else if (num == 20) {
-    strcat(resultado, "VEINTE");
-    num = 0;
-  } else if (num > 15) {
-    strcat(resultado, "DIECI");
-    num %= 10;
-  } else if (num >= 11) {
-    strcat(resultado, especiales[num - 10]);
-    num = 0;
-  } else if (num == 10) {
-    strcat(resultado, "DIEZ");
-    num = 0;
-  }
 
-  if (num > 0) {
-    strcat(resultado, unidades[num]);
-  }
+    if (num >= 1000) {
+        int miles = num / 1000;
+        if (miles == 1) {
+            strcat(resultado, "MIL ");
+        } else {
+            strcat(resultado, unidades[miles]);
+            strcat(resultado, " MIL ");
+        }
+        num %= 1000;
+    }
+
+    if (num >= 100) {
+        int centenasNum = num / 100;
+        strcat(resultado, centenas[centenasNum]);
+        if (centenasNum == 1 && num % 100 == 0) {
+            num = 0;
+        } else {
+            num %= 100;
+        }
+    }
+
+    if (num > 29) {
+        int decena = num / 10;
+        strcat(resultado, decenas[decena]);
+        if (num % 10 > 0) {
+            strcat(resultado, " Y ");
+        }
+        num %= 10;
+    } else if (num >= 21) {
+        strcat(resultado, "VEINTI");
+        num %= 10;
+    } else if (num == 20) {
+        strcat(resultado, "VEINTE");
+        num = 0;
+    } else if (num >= 16) {
+        strcat(resultado, "DIECI");
+        num %= 10;
+    } else if (num >= 11) {
+        strcat(resultado, especiales[num - 11]);
+        num = 0;
+    } else if (num == 10) {
+        strcat(resultado, "DIEZ");
+        num = 0;
+    }
+
+    if (num > 0) {
+        strcat(resultado, unidades[num]);
+    }
 }
-
 //-------------------------------------------- print price
 void printPrice(uint32_t price) {
   char buffer[20];

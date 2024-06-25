@@ -144,9 +144,9 @@ extern uint32_t pendingPrint;
 
 extern char resultado[400];
 
-extern const char* unidades[];
-extern const char* decenas[];
-extern const char* especiales[];
+//extern const char* unidades[];
+//extern const char* decenas[];
+//extern const char* especiales[];
 //uint32_t unitprice;
 extern uint32_t startTimeToPrint;
 
