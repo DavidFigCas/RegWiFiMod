@@ -684,6 +684,9 @@ void loadConfig()
   total_encoder = obj["total_encoder"];
   status_doc["total_encoder"] = total_encoder;
 
+  if (!obj["uprice"].isNull())
+    uprice = obj["uprice"];
+
 
   //Serial.println("{\"config\":true}");
 

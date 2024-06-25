@@ -107,7 +107,6 @@ void checkEncoderPulses(void * parameter) {
         {
           //startFlowing = false;
           stopFlowing = true;
-          encoder.setCount(0);
           saveConfig = true;
           //on_service = false;
           //Serial.println("Flow stopped");

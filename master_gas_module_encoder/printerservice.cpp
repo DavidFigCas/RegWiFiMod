@@ -2,10 +2,10 @@
 
 
 
-const char* especiales[] = {"ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE"};
 const char* unidades[] = {"", "UNO", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"};
-const char* decenas[] = {"", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
+const char* decenas[] = {"", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"};
 const char* centenas[] = {"", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"};
+const char* especiales[] = {"ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE"};
 
 
 // --------------------------------------------------------------------------- printRepot emty
@@ -244,8 +244,7 @@ void printNumber(uint32_t num) {
 
 
 // --------------------------------------------------------------------------convertNumberToWords
-void convertNumberToWords(uint32_t num, char* resultado) 
-{
+void convertNumberToWords(uint32_t num, char* resultado) {
     if (num == 0) {
         strcpy(resultado, "CERO");
         return;
@@ -266,42 +265,52 @@ void convertNumberToWords(uint32_t num, char* resultado)
 
     if (num >= 100) {
         int centenasNum = num / 100;
-        strcat(resultado, centenas[centenasNum]);
-        if (centenasNum == 1 && num % 100 == 0) {
-            num = 0;
+        if (centenasNum == 1 && num % 100 != 0) {
+            strcat(resultado, "CIENTO ");
         } else {
-            num %= 100;
+            strcat(resultado, centenas[centenasNum]);
+            if (num % 100 == 0) {
+                strcat(resultado, " ");
+                num = 0;
+            } else {
+                strcat(resultado, " ");
+                num %= 100;
+            }
         }
     }
 
-    if (num > 29) {
+    if (num >= 20) {
         int decena = num / 10;
         strcat(resultado, decenas[decena]);
         if (num % 10 > 0) {
             strcat(resultado, " Y ");
+        } else {
+            strcat(resultado, " ");
         }
-        num %= 10;
-    } else if (num >= 21) {
-        strcat(resultado, "VEINTI");
-        num %= 10;
-    } else if (num == 20) {
-        strcat(resultado, "VEINTE");
-        num = 0;
-    } else if (num >= 16) {
-        strcat(resultado, "DIECI");
         num %= 10;
     } else if (num >= 11) {
         strcat(resultado, especiales[num - 11]);
+        strcat(resultado, " ");
         num = 0;
     } else if (num == 10) {
-        strcat(resultado, "DIEZ");
+        strcat(resultado, "DIEZ ");
         num = 0;
     }
 
     if (num > 0) {
         strcat(resultado, unidades[num]);
+        strcat(resultado, " ");
+    }
+
+    // Eliminar el último espacio
+    size_t len = strlen(resultado);
+    if (len > 0 && resultado[len - 1] == ' ') {
+        resultado[len - 1] = '\0';
     }
 }
+
+
+
 //-------------------------------------------- print price
 void printPrice(uint32_t price) {
   char buffer[20];

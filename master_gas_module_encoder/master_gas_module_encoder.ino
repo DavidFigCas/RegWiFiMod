@@ -52,8 +52,8 @@ void loop()
   litros = int(current / pulsos_litro);
   precio = ceil(litros) * uprice;
 
-  status_doc["l"]=litros;
-  status_doc["$"]=precio;
+  status_doc["l"] = litros;
+  status_doc["$"] = precio;
 
   //if (!doc_encoder["STATE"].isNull())
   {
@@ -71,14 +71,6 @@ void loop()
         STATE_DISPLAY = 1;
       }
 
-      // encoder_reset = false;
-
-      //displays
-      //oled_display_number(litros);
-      //lcd.setCursor(0, 0); // Establecer cursor en la primera línea
-      //lcd.print("LITROS:  "); // Escribir en la primera línea
-      //lcd.print(litros); // Escribir en la primera línea
-
 
     }
     //else if (doc_encoder["STATE"] == 3)
@@ -90,20 +82,37 @@ void loop()
       {
         // Detectado por primera vez
         tiempoAnterior = millis();
-        startCounting = true;
+        
         startFlowing = false;
         stopFlowing = true;
         on_service = false;
         Serial.println("--------------------STOP FLOWING-----------------");
-        STATE_DISPLAY = 2;
-        litros_check = ceil(litros);
-        precio = litros_check * uprice;
-        precio_check = precio;
-        encoder_reset = true;
-        //angle_encoder = Sensor.getRawAngle();
-        read_clock();
-        saveNewlog();
-        send_event = true;        // Send event to mqtt
+
+        if (litros > 1)
+        {
+          STATE_DISPLAY = 2;
+          startCounting = true;
+          litros_check = ceil(litros);
+          precio = litros_check * uprice;
+          precio_check = precio;
+          encoder_reset = true;
+          //angle_encoder = Sensor.getRawAngle();
+          read_clock();
+          saveNewlog();
+          send_event = true;        // Send event to mqtt
+
+        }
+        else
+        {
+          startCounting = false;
+          STATE_DISPLAY = 0;
+          litros = 0;
+          litros_check = 0;
+          precio = 0;
+          precio_check = 0;
+          encoder_reset = true;
+        }
+        encoder.setCount(0);
       }
     }
     //oled_display_number(litros_check);
