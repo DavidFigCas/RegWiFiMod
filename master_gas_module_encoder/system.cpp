@@ -114,6 +114,8 @@ volatile bool updated = true;
 String cadenaTeclas = "";
 bool clear_key = true;
 
+TaskHandle_t serialTaskHandle = NULL;
+
 
 // -------------------------------------------------------------- read_logs
 void read_logs(String consult)
@@ -389,39 +391,9 @@ void system_init()
   esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);
 
-
-
-  //delay(100);
-  //I2C_Init();
-  //Serial.println("i2c_Init");
-
-
-  status_doc["ver"] = VERSION;
-  //oled_display_init();
-  //oled_display_text(VERSION);    // Draw 'stylized' characters
-
-
-
-  if (spiffs_init())
-  {
-    Cfg_get(/*NULL*/);  // Load File from spiffs
-    loadConfig();       // Load and update behaivor of system
-    //wifi_init();
-    //mqtt_init();
-    //mqtt_check();
-    rtcUpdated = false;  // TRUE:Not auto update
-
-    //init_clock();        // I2C for clock
-  }
-
-  //delay(100);
-  //SD_Init();
-
-  //gps_init();
-  encoder_init();
-  //init_glcd();
-
   // WatchDog Timer
+  encoder_init();
+
   // Crear una tarea FreeRTOS para monitorear los pulsos del encoder
   xTaskCreatePinnedToCore(
     checkEncoderPulses,   // Función de la tarea
@@ -433,7 +405,32 @@ void system_init()
     0                    // Núcleo en el que se ejecutará la tarea
   );
 
-  //pinMode(BT_REPORT, INPUT_PULLUP);
+
+  // Crear una tarea FreeRTOS para actualizar el display
+  xTaskCreatePinnedToCore(
+    updateDisplayTask,   // Función de la tarea
+    "UpdateDisplayTask", // Nombre de la tarea
+    2048,                // Tamaño del stack
+    NULL,                // Parámetro de entrada
+    1,                   // Prioridad de la tarea
+    NULL,                // Manejar de la tarea
+    1                    // Núcleo en el que se ejecutará la tarea
+  );
+
+
+  status_doc["ver"] = VERSION;
+
+
+
+  if (spiffs_init())
+  {
+    Cfg_get(/*NULL*/);  // Load File from spiffs
+    loadConfig();       // Load and update behaivor of system
+    rtcUpdated = false;  // TRUE:Not auto update
+
+
+  }
+
 
   send_log = true;
 }
@@ -688,6 +685,61 @@ void loadConfig()
     uprice = obj["uprice"];
 
 
+  if (obj["enable_wifi"]) {
+    wifi_init();
+    if (obj["enable_mqtt"])
+      mqtt_init();
+
+    // Crear una tarea FreeRTOS para las operaciones de WiFi solo si no está corriendo
+    if (wifiTaskHandle == NULL) {
+      xTaskCreatePinnedToCore(
+        wifiTask,            // Función de la tarea
+        "WiFiTask",          // Nombre de la tarea
+        8192,                // Tamaño del stack
+        NULL,                // Parámetro de entrada
+        2,                   // Prioridad de la tarea (menor que la de updateDisplayTask)
+        &wifiTaskHandle,     // Manejar de la tarea
+        1                    // Núcleo en el que se ejecutará la tarea
+      );
+    }
+  } else {
+    // Detener la tarea WiFi si está corriendo
+    if (wifiTaskHandle != NULL) {
+      vTaskDelete(wifiTaskHandle);
+      wifiTaskHandle = NULL;
+    }
+  }
+
+  // Verificar y crear la tarea de monitor serie si no está corriendo
+  if (obj["test"]) 
+  {
+    if (serialTaskHandle == NULL) {
+      xTaskCreatePinnedToCore(
+        serialMonitorTask,   // Función de la tarea
+        "SerialMonitorTask", // Nombre de la tarea
+        2048,                // Tamaño del stack
+        NULL,                // Parámetro de entrada
+        3,                   // Prioridad de la tarea (menor que la de WiFiTask)
+        &serialTaskHandle,   // Manejar de la tarea
+        1                    // Núcleo en el que se ejecutará la tarea
+      );
+    }
+  } else {
+    // Detener la tarea de monitor serie si está corriendo
+    if (serialTaskHandle != NULL) {
+      vTaskDelete(serialTaskHandle);
+      serialTaskHandle = NULL;
+    }
+  }
+
+
+
+
+  //delay(100);
+  //SD_Init();
+  //init_clock();        // I2C for clock
+  //gps_init();
+
   //Serial.println("{\"config\":true}");
 
 }
@@ -716,5 +768,28 @@ void Serial_CMD()
     serializeJson(obj, Serial);
     Serial.println();
     saveConfig = true;
+  }
+}
+
+// ----------------------------------- Serial Monitor
+void serialMonitorTask(void * parameter) {
+  for (;;) {
+    // Esperar 1 segundo antes de la ejecución
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    // Tareas del monitor serie
+    if (obj["test"]) {
+      Serial.print("Display: ");
+      serializeJson(doc_display, Serial);
+      Serial.println();
+
+      Serial.print("Encoder: ");
+      serializeJson(doc_encoder, Serial);
+      Serial.println();
+
+      Serial.print("main_status: ");
+      serializeJson(status_doc, Serial);
+      Serial.println();
+    }
   }
 }

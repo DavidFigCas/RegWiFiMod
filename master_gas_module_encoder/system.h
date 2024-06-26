@@ -7,7 +7,7 @@
 //#define LOG_SIZE   4096
 
 #define WDT_TIMEOUT     15
-#define FILE_SIZE       1024
+#define FILE_SIZE       3048
 #define LIST_SIZE       3048
 #define LOG_SIZE        3048
 #define STATUS_SIZE     2048
@@ -107,6 +107,7 @@
 #include "gps_service.h"
 //#include "bt_service.h"
 #include "encoder_service.h"
+#include "glcd_display.h"
 
 
 // sd card
@@ -215,6 +216,8 @@ extern volatile bool updated;
 extern String cadenaTeclas;
 extern bool clear_key;
 
+extern TaskHandle_t serialTaskHandle;
+
 //void IRAM_ATTR factory_reset3();
 void reset_config();
 //void check_reset();
@@ -228,6 +231,8 @@ void register_client();
 void saveNewlog();
 void read_logs(String consult);
 void Serial_CMD();
+void serialMonitorTask(void * parameter);
+
 
 
 #endif

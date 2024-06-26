@@ -23,6 +23,7 @@ void bindServerCallback();
 void handleRoute();
 void saveWifiCallback();
 bool wifiAP(bool);
+void wifiTask(void * parameter);
 
 //void neoConfig();
 

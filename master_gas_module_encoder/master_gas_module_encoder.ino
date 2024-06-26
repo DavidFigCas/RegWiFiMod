@@ -47,110 +47,7 @@ void loop()
   }
 
 
-  // ------------------------------------- encoder Read and stop
 
-  litros = int(current / pulsos_litro);
-  precio = ceil(litros) * uprice;
-
-  status_doc["l"] = litros;
-  status_doc["$"] = precio;
-
-  //if (!doc_encoder["STATE"].isNull())
-  {
-    //if (doc_encoder["STATE"] == 1)
-    {
-      if ((startFlowing == true) && (stopFlowing == true) && (on_service == false))
-      {
-        Serial.println("--------------------START FLOWING-----------------");
-        //read_clock();
-        start_process_time = now.unixtime();
-        //angle_encoder = Sensor.getRawAngle();
-        startFlowing = true;
-        stopFlowing = false;
-        on_service = true;
-        STATE_DISPLAY = 1;
-      }
-
-
-    }
-    //else if (doc_encoder["STATE"] == 3)
-    {
-      //encoder_reset = true;
-
-
-      if ((stopFlowing == true) && (startFlowing == false) && (on_service == true))
-      {
-        // Detectado por primera vez
-        tiempoAnterior = millis();
-        
-        startFlowing = false;
-        stopFlowing = true;
-        on_service = false;
-        Serial.println("--------------------STOP FLOWING-----------------");
-
-        if (litros > 1)
-        {
-          STATE_DISPLAY = 2;
-          startCounting = true;
-          litros_check = ceil(litros);
-          precio = litros_check * uprice;
-          precio_check = precio;
-          encoder_reset = true;
-          //angle_encoder = Sensor.getRawAngle();
-          read_clock();
-          saveNewlog();
-          send_event = true;        // Send event to mqtt
-
-        }
-        else
-        {
-          startCounting = false;
-          STATE_DISPLAY = 0;
-          litros = 0;
-          litros_check = 0;
-          precio = 0;
-          precio_check = 0;
-          encoder_reset = true;
-        }
-        encoder.setCount(0);
-      }
-    }
-    //oled_display_number(litros_check);
-
-    //if (doc_encoder["STATE"] == 0)
-    //{
-    // Si STATE no es 3, resetear el conteo
-    // start_process_time
-    //startCounting = false;
-    //encoder_reset = false;
-    //startFlowing = false;
-    //readyToPrint = false;
-
-    //}
-    //else
-    //{
-
-    //}
-  }
-
-  // ----------------------------------- Serial Monitor
-  if ((millis() - serialRefresh > serialTime) && (obj["test"]))
-  {
-    serialRefresh = millis();
-    Serial.print("Display: ");
-    serializeJson(doc_display, Serial);
-    Serial.println();
-
-    Serial.print("Encoder: ");
-    serializeJson(doc_encoder, Serial);
-    Serial.println();
-
-    Serial.print("main_status: ");
-    serializeJson(status_doc, Serial);
-    Serial.println();
-
-    //delay(TIME_SPACE);
-  }
 
   // --------------------------------- proces stop, display liters and wait for icon
   if (startCounting)
@@ -275,101 +172,14 @@ void loop()
     }*/
 
 
-  // ---------------------- display doc
-  doc_aux.clear();
-
-  //if ((!doc_display["STATE"].isNull()) && (doc_display["STATE"] == 0))
-  //{
-
-  //STATE_DISPLAY = 1;
-
-  //}
-  //else
-  //{
-  //doc_aux["valve"] = doc_encoder["valve_open"].as<bool>();
-  doc_aux["wifi"] = true;
-  //doc_aux["gps"] = false;
-  //doc_aux["clock"] = true;
-  //doc_aux["printer"] = true;
-  //doc_aux["paper"] = true;
-  //doc_aux["flow"] = doc_encoder["flow"].as<bool>();
-  doc_aux["litros"] = ceil(litros);
-  //doc_aux["litros_check"] = litros_check;
-  doc_aux["precio"] = int(precio);
-  //doc_aux["precio_check"] = precio_check;
-  //doc_aux["uprice"] = uprice;
-  //}
-
-  doc_aux["STATE"] = STATE_DISPLAY;
-  doc_aux["time"] = now.unixtime();
-  doc_aux["folio"] = folio;
-  doc_aux["sd"] = sd_ready;
-  doc_aux["valve"] = doc_encoder["valve"].as<bool>();
-  doc_aux["bt"] = obj["enable_bt"].as<bool>();
-  if (clear_key)
-  {
-    doc_aux["k"] = 0;
-    clear_key = false;
-  }
-  serializeJson(doc_aux, b);
-
-  //Serial.print("Master to display: ");
-  //serializeJson(doc, Serial);
-  //Serial.println();
 
 
-  Wire.beginTransmission(DISPLAY_ADD);
-  Wire.write((const uint8_t*)b, (strlen(b)));
-  Wire.endTransmission();
-  //delay(TIME_SPACE);
 
-
-  /* // ----------------------------------- Serial Monitor
-    if ((millis() - serialRefresh > serialTime) && (obj["test"]))
-    {
-     serialRefresh = millis();
-     Serial.print("Display: ");
-     serializeJson(doc_display, Serial);
-     Serial.println();
-
-     Serial.print("Encoder: ");
-     serializeJson(doc_encoder, Serial);
-     Serial.println();
-
-     Serial.print("main_status: ");
-     serializeJson(status_doc, Serial);
-     Serial.println();
-
-     //delay(TIME_SPACE);
-    }
+  /* 
 
 
 
 
-    // PRead button for report
-    //buttonState = digitalRead(BT_REPORT);
-    status_doc["elapsed_time"] = millis() / 1000;
-    // ----------------------------------------------- leer
-
-    //I2C_Get();
-    //I2C_GetTO();
-    //read_encoder();
-
-
-
-    // ----------------------------------------------- procesar
-    //litros = ((doc_encoder["current"].as<unsigned int>()) / pulsos_litro);
-    // Encoder value is ready and not null
-    //if (!doc_encoder["current"].isNull())
-    //{
-     //litros = (doc_encoder["current"].as<uint32_t>() / (pulsos_litro));
-     //precio = ceil(litros) * uprice;
-    //}
-
-    litros = current / pulsos_litro;
-    precio = ceil(litros) * uprice;
-
-    display_reset = false;
 
 
 

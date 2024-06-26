@@ -41,7 +41,7 @@ void mqtt_init()
   //if (obj["enable_mqtt"].as<bool>())
   {
 
-    Serial.println("{\"mqtt\":\"init\"}");
+    //Serial.println("{\"mqtt\":\"init\"}");
     Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     Mclient.setCallback(callback);

@@ -7,6 +7,8 @@ bool ALLOWONDEMAND   = true; // enable on demand
 bool WMISBLOCKING    = true;
 WiFiManager wifiManager;
 std::vector<WiFiManagerParameter*> customParams;
+// Manejador de tarea para la tarea WiFi
+TaskHandle_t wifiTaskHandle = NULL;
 
 
 
@@ -130,7 +132,7 @@ bool wifiAP(bool force)
 // --------------------------------------------------- wifiINIT
 void wifi_init()
 {
-  Serial.println("{\"wifi\":{\"init\":true}}");
+  //Serial.println("{\"wifi\":{\"init\":true}}");
   if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
   {
     WiFi.disconnect(true);
@@ -142,10 +144,10 @@ void wifi_init()
     // Star WiFi connection
     WiFi.begin(auxssid, auxpass);
 
-    Serial.print("{\"wifi\":{\"ssid\":\"");
-    Serial.print(auxssid);
-    Serial.println("\"}}");
-    Serial.println("{\"wifi\":\"init\"}");
+    //Serial.print("{\"wifi\":{\"ssid\":\"");
+    //Serial.print(auxssid);
+    //Serial.println("\"}}");
+    //Serial.println("{\"wifi\":\"init\"}");
 
     // Check wifi connection or make AP
     //wifiAP(false);
@@ -171,7 +173,7 @@ bool wifi_check()
 {
   bool flag;
 
-  if(WiFi.status() != WL_CONNECTED)
+  if (WiFi.status() != WL_CONNECTED)
   {
     wifi_init();
   }
@@ -274,4 +276,50 @@ void handleRoute() {
 void saveWifiCallback() {
   Serial.println("[CALLBACK] saveCallback fired");
   saveConfig = true;
+}
+
+// ------------------------------------------------------------------wifiTask
+void wifiTask(void * parameter) {
+  for (;;) {
+    // Esperar 1 segundo antes de la ejecución
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    // Tareas relacionadas con WiFi
+    //if ((((doc_encoder["STATE"] == 0)) || (doc_encoder["STATE"].isNull())) && (doc_display["k"].isNull()))
+    {
+      //if (!sd_ready)
+      //  SD_Init();
+
+      if (wifi_check())
+      {
+        //update_clock();
+        if (mqtt_check())
+        {
+          if (send_file)
+          {
+            mqtt_send_file(file_to_send);
+          }
+          if (send_log)
+          {
+            mqtt_send_log();
+          }
+          if (send_event)
+          {
+            mqtt_send_event();
+          }
+          if (send_report)
+          {
+            file_to_send = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+            mqtt_send_report();
+            send_file = true;
+          }
+          if (send_list)
+          {
+            mqtt_send_list();
+            send_list = false;
+          }
+        }
+      }
+    }
+  }
 }
