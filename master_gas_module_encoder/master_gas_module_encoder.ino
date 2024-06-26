@@ -94,15 +94,18 @@ void loop()
     }
   }
 
-
+  
   // ------------------------------------------- Print LOG
-  if (print_log == true)
+  if (print_report == true)
   {
+    consult_filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
     read_logs(consult_filelog);
-    print_log = false;
+    print_report = false;
     send_report = true;
 
   }
+
+  
 
 
   // ---------------------------------------------------------------- MAIN TIME

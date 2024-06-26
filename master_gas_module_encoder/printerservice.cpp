@@ -136,7 +136,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
   Serial.println(f);
 
   setPrintMode(0); // Configurar modo de impresión
-  printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r");
+  printString("VERACRUZANA DE GAS S.A. DE C.V.\n\r ");
 
   // Imprimir número de unidad y folio
   //String id_str = obj["id"].as<String>();
@@ -209,7 +209,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
 
   // Resetear tamaño de texto y finalizar impresión
   setPrintMode(0);
-  printString("GRACIAS POR SU PREFERENCIA");
+  printString("GRACIAS POR SU PREFERENCIA\n\r PARA SERVIRLE\n\r");
   endPrint();
 
   return;

@@ -109,7 +109,7 @@ volatile bool on_service = false;
 
 volatile uint32_t pesos;
 
-volatile bool updated = true;
+volatile bool updated = false;
 
 String cadenaTeclas = "";
 bool clear_key = true;
@@ -431,6 +431,8 @@ void system_init()
 
   }
 
+  gps_init();
+
 
   send_log = true;
 }
@@ -685,7 +687,8 @@ void loadConfig()
     uprice = obj["uprice"];
 
 
-  if (obj["enable_wifi"]) {
+  if (obj["enable_wifi"])
+  {
     wifi_init();
     if (obj["enable_mqtt"])
       mqtt_init();
@@ -779,15 +782,15 @@ void serialMonitorTask(void * parameter) {
 
     // Tareas del monitor serie
     if (obj["test"]) {
-      Serial.print("Display: ");
+      Serial.print("display: ");
       serializeJson(doc_display, Serial);
       Serial.println();
 
-      Serial.print("Encoder: ");
-      serializeJson(doc_encoder, Serial);
-      Serial.println();
+      //Serial.print("Encoder: ");
+      //serializeJson(doc_encoder, Serial);
+      //Serial.println();
 
-      Serial.print("main_status: ");
+      Serial.print("MAIN: ");
       serializeJson(status_doc, Serial);
       Serial.println();
     }

@@ -92,7 +92,9 @@ bool prevButtonState;
 String cadenaNumeros = "";
 String cadenaLetras = "";
 bool open_valve = false;
-
+bool valve_state = false;
+bool print_report = false;
+bool enable_ap = false;
 
 
 // Called when the I2C slave gets written to
@@ -124,6 +126,9 @@ void recv(int len)
     print_pesos = pesos;
   }
 
+  //if(!doc_aux["valve"].isNull())
+  valve_state = doc_aux["valve"];
+
 
 }
 
@@ -135,11 +140,23 @@ void req()
   //doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  //if ((doc_aux["valve"] != open_valve)) ////AQUIE ESYOY TRABAJANDO
-  //  doc["valve"] = open_valve;
+  //if (open_valve != valve_state) ////AQUIE ESYOY TRABAJANDO
+  doc["valve"] = open_valve;
 
-  if ((open_valve == true) && (litros_target > 0))
+  if ((litros_target > 0))
     doc["litros_target"] = litros_target;
+
+  if(print_report)
+  {
+    doc["print_report"] = print_report;
+    print_report = false;
+  }
+
+  if(enable_ap)
+  {
+    doc["enable_ap"] = enable_ap;
+    enable_ap = false;
+  }
 
 
   //serializeJson(doc, respx);
@@ -156,6 +173,7 @@ void req()
 
   Wire.write(respx, len);
   //cadenaTeclas = "";
+  
 }
 
 
@@ -211,10 +229,10 @@ void loop() {
 
     //if (doc_conf["test"] == true)
     {
-      Serial.print("Master: ");
+      Serial.print("master: ");
       serializeJson(doc_aux, Serial);
       Serial.println();
-      Serial.print("Display: ");
+      Serial.print("DISPLAY: ");
       Serial.println(respx);
     }
 
@@ -249,7 +267,7 @@ void loop() {
     // Verifica si es una letra (A, B, C, D, *, #)
     else if (isLetter(tecla) && cadenaLetras.length() <= 10)
     {
-      cadenaLetras += tecla;
+      cadenaLetras = tecla;
       //Serial.print("Cadena de Letras acumulada: ");
       Serial.println(cadenaLetras);
       if (tecla == '*')
@@ -266,11 +284,20 @@ void loop() {
         litros_target = cadenaNumeros.toInt();;
         open_valve = true;
       }
+      if (tecla == 'A')
+      {
+        print_report = true;
+      }
+
+      if (tecla == 'C')
+      {
+        enable_ap = true;
+      }
     }
 
     // Si es un número, actualizar litros_target
     if (cadenaNumeros.toInt() > 0) {
-      litros_target = cadenaNumeros.toInt();
+       litros_target = cadenaNumeros.toInt();
       //Serial.print("Litros: ");
       Serial.println(litros_target);
     }

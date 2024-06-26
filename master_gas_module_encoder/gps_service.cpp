@@ -1,7 +1,19 @@
 #include "gps_service.h"
 
 TinyGPSPlus gps;
+TaskHandle_t gpsTaskHandle = NULL;
 
+// ------------------------------------------------------ gpsTask
+void gpsTask(void * parameter) {
+  for (;;) {
+    // Actualizar y guardar los datos del GPS
+    gps_update();
+    save_gps_log();
+    send_gps = true;
+    // Esperar 1 minuto antes de la ejecución
+    vTaskDelay(60000 / portTICK_PERIOD_MS);
+  }
+}
 
 // ------------------------------------------------------ save gps_log
 void save_gps_log()
@@ -13,7 +25,7 @@ void save_gps_log()
     // Guarda cada minuto la posicion
     // ----------------------------------------------- 1 minute refresh
     if (millis() - previousMillisGPS >= intervalGPS)
-    //if (millis() - previousMillisGPS >= 5000)
+      //if (millis() - previousMillisGPS >= 5000)
     {
       // Guarda la última vez que actualizaste el evento
       previousMillisGPS = millis();
@@ -57,12 +69,25 @@ void save_gps_log()
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
-  
+
   uint8_t rxPin = 34;
   uint8_t txPin = 33;
   Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
   //Serial2.begin(9600, SERIAL_8N1, rxPin, txPin);
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
+
+  // Verificar y crear la tarea GPS si no está corriendo
+  if (gpsTaskHandle == NULL) {
+    xTaskCreatePinnedToCore(
+      gpsTask,            // Función de la tarea
+      "GPSTask",          // Nombre de la tarea
+      2048,               // Tamaño del stack
+      NULL,               // Parámetro de entrada
+      4,                  // Prioridad de la tarea (menor que la de SerialMonitorTask)
+      &gpsTaskHandle,     // Manejar de la tarea
+      1                   // Núcleo en el que se ejecutará la tarea
+    );
+  }
 }
 
 

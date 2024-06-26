@@ -34,8 +34,9 @@ extern volatile boolean send_report;
 extern volatile boolean send_list;
 extern volatile boolean clear_log;
 extern volatile boolean new_log;
-extern volatile boolean print_log;
+extern volatile boolean print_report;
 extern volatile boolean flag_new_list;
+extern volatile boolean send_gps;
 
 extern byte STATE, todo_byte;
 extern bool newcommand;
@@ -45,12 +46,13 @@ void callback(char* topic, byte* payload, unsigned int length);
 bool reconnect();
 void mqtt_init();
 bool mqtt_check();
-void mqtt_send();
+void mqtt_send(const char* buffer_union_publish, const char* buffer_msg);
 void mqtt_send_list();
 void mqtt_send_file(String file_to_send);
 void mqtt_send_log();
 void mqtt_send_event();
 void mqtt_send_report();
+void mqtt_send_gps();
 
 
 

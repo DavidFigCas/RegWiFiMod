@@ -6,6 +6,8 @@
 #include <ESP32Encoder.h>
 #include <AS5601.h>
 
+
+
 extern ESP32Encoder encoder;
 extern AS5601 Sensor;
 
@@ -19,8 +21,10 @@ extern uint32_t previous_pulses;
 extern uint32_t current;
 extern uint32_t total_encoder;
 extern volatile uint32_t angle_encoder;
+extern bool valve_state;
 
-
+void open_valve();
+void close_valve();
 void encoder_init();
 void read_encoder();
 void print_encoder();

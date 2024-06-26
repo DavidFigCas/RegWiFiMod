@@ -28,12 +28,41 @@ volatile boolean send_report = false;
 volatile boolean send_list = false;
 volatile boolean clear_log = false;
 volatile boolean new_log = false;
-volatile boolean print_log = false;
+volatile boolean print_report = false;
 volatile boolean flag_new_list = false;
+volatile boolean send_gps = false;
 byte STATE, todo_byte;
 bool newcommand;
 uint32_t nclient;
 
+
+// ---------------------------------------------------- mqtt_send_event
+void mqtt_send_gps()
+{
+  StaticJsonDocument<200> doc_gps;
+  send_gps = false;
+  
+  Serial.println("{\"mqtt_gps\":\"sending\"}");
+  
+
+  doc_gps["timestamp"] = now.unixtime();
+  doc_gps["gps_status"] = obj["gps_status"];
+  doc_gps["lat"] = obj["lat"];
+  doc_gps["lon"] = obj["lon"];
+
+
+  strcpy(buffer_union_publish, obj["id"].as<const char*>());
+  strcat(buffer_union_publish, publish_topic);
+  strcat(buffer_union_publish, gps_topic);
+
+  //JsonArray logObject = obj_log;
+  //size_t serializedLength = measureJson(logObject) + 1;
+  char tempBuffer[STATUS_SIZE];
+  serializeJson(doc_gps, tempBuffer);
+  strcpy(buffer_msg_status, tempBuffer);
+
+  Mclient.publish(buffer_union_publish, buffer_msg_status);
+}
 
 // -------------------------------------------------- mqtt_init
 void mqtt_init()
@@ -45,7 +74,7 @@ void mqtt_init()
     Mclient.setBufferSize(LIST_SIZE);
     Mclient.setServer(obj["mqtt_server"].as<const char*>(), obj["mqtt_port"].as<unsigned int>());
     Mclient.setCallback(callback);
-    Mclient.setKeepAlive(3600);
+   // Mclient.setKeepAlive(3600);
   }
 
 
@@ -72,7 +101,7 @@ bool mqtt_check()
 }
 
 //---------------------------------------------------- mqtt_send
-void mqtt_send()
+void mqtt_send(const char* buffer_union_publish, const char* buffer_msg)
 {
   Mclient.publish(buffer_union_publish, buffer_msg);
 }

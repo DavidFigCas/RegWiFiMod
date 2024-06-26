@@ -39,6 +39,10 @@
 #define SHARP_MOSI 23
 #define SHARP_SS   5
 
+#define SOLENOID 25
+#define ENCODER_A 27
+#define ENCODER_B 26
+
 //SYSTEM
 #include <Arduino.h>
 #include <esp_task_wdt.h>
@@ -89,8 +93,8 @@
 #include <TinyGPSPlus.h>
 
 //FIREBASE
-//#include <Firebase_ESP_Client.h>
-//#include "firebasedb.h"
+#include <Firebase_ESP_Client.h>
+#include "firebasedb.h"
 
 
 

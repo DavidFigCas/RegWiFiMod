@@ -13,6 +13,9 @@ uint32_t current;
 uint32_t previous_pulses;
 uint32_t total_encoder;
 volatile uint32_t angle_encoder;
+bool valve_state = false;
+
+
 
 //----------------------------------- endoer_init
 void encoder_init()
@@ -25,9 +28,35 @@ void encoder_init()
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
 
   // use pin 19 and 18 for the first encoder
-  encoder.attachFullQuad(27, 26);
+  encoder.attachFullQuad(ENCODER_A, ENCODER_B);
+  pinMode(SOLENOID, OUTPUT);
+  close_valve();
 }
 
+
+// ----------------------------------------------------------- open
+void open_valve()
+{
+  if (valve_state == false)
+  {
+    Serial.println("{\"valve_open\":true}");
+  }
+  status_doc["valve"] = true;
+  digitalWrite(SOLENOID, LOW);
+  valve_state = true;
+}
+
+// ----------------------------------------------------------- close
+void close_valve()
+{
+  if (valve_state == true)
+  {
+    Serial.println("{\"valve_open\":false}");
+  }
+  status_doc["valve"] = false;
+  digitalWrite(SOLENOID, HIGH);
+  valve_state = false;
+}
 
 // ----------------------------------- read_encoder
 void read_encoder()
@@ -48,7 +77,7 @@ void read_encoder()
   //Serial.println();
   current = abs(encoder.getCount());
 
-  angle_encoder = Sensor.getRawAngle();
+
 
   //obj["angle_encoder"] = Sensor.getRawAngle();
   //status_doc["angle_encoder"] = obj["angle_encoder"];
@@ -98,7 +127,7 @@ void checkEncoderPulses(void * parameter) {
         Serial.println("--------------------START FLOWING-----------------");
         //read_clock();
         start_process_time = now.unixtime();
-        //angle_encoder = Sensor.getRawAngle();
+        angle_encoder = Sensor.getRawAngle();
         startFlowing = true;
         stopFlowing = false;
         on_service = true;
@@ -130,7 +159,7 @@ void checkEncoderPulses(void * parameter) {
               precio = litros_check * uprice;
               precio_check = precio;
               encoder_reset = true;
-              //angle_encoder = Sensor.getRawAngle();
+              angle_encoder = Sensor.getRawAngle();
               read_clock();
               saveNewlog();
               send_event = true;        // Send event to mqtt
@@ -166,6 +195,20 @@ void checkEncoderPulses(void * parameter) {
 
     status_doc["l"] = litros;
     status_doc["$"] = precio;
+
+
+    if (!doc_display["valve"].isNull())
+    {
+      if (doc_display["valve"] == true)
+      {
+        open_valve();
+      }
+      else
+      {
+        close_valve();
+      }
+    }
+
 
 
     // Esperar 1 ms antes de la siguiente verificación

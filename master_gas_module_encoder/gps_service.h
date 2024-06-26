@@ -5,6 +5,9 @@
 extern TinyGPSPlus gps;
 
 
+extern TaskHandle_t gpsTaskHandle;
+
+void gpsTask(void * parameter);
 void save_gps_log();
 void gps_init();
 void gps_update();

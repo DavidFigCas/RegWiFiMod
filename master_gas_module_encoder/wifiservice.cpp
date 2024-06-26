@@ -13,9 +13,13 @@ TaskHandle_t wifiTaskHandle = NULL;
 
 
 // ------------------------------------------------ wifiAP
-bool wifiAP(bool force)
+bool wifiAP()
+//bool wifiAP(bool force)
 {
 
+  //WiFi.disconnect(true);
+  WiFi.mode(WIFI_AP_STA);
+  bool force = true;
   server_running = false;
   const char * ap_ssid = obj["ap"].as<const char *>();
   const char * ap_pass = obj["ap_pass"].as<const char *>();
@@ -128,6 +132,28 @@ bool wifiAP(bool force)
   return server_running;
 }
 
+bool wifi_AP_END()
+{
+  if (WiFi.getMode() & WIFI_AP) {
+    WiFi.softAPdisconnect(true);
+    Serial.println("{\"AP\":\"OFF\"}");
+  }
+  server_running = false;
+
+  // Limpia los parámetros personalizados añadidos al WiFiManager
+  for (auto p : customParams) {
+    delete p;
+  }
+  customParams.clear();
+
+  // Opcionalmente, puedes resetear el WiFiManager para limpiar cualquier configuración guardada
+  wifiManager.resetSettings();
+
+  Serial.print("{\"server_running\":");
+  Serial.print(bool(server_running));
+  Serial.println("}");
+}
+
 
 // --------------------------------------------------- wifiINIT
 void wifi_init()
@@ -161,6 +187,15 @@ void wifi_init()
     Serial.println("{\"wifi\":{\"enable\":false}}");
   }
 
+  if (obj["enable_ap"].as<bool>() == true)
+  {
+    //wifiAP();
+  }
+  else
+  {
+    //wifi_AP_END();
+  }
+
 
 }
 
@@ -188,33 +223,24 @@ bool wifi_check()
   if (obj["enable_wifi"].as<bool>())
   {
 
-    //if ((millis() - s_timestamp) >= connectTimeoutMs) // check to an interval of time
-    //{
-    //s_timestamp = millis();
-
     // ------------------ Wifi Connected
     if (WiFi.status() == WL_CONNECTED)
     {
-      Serial.print("{\"wifi_connected\": ");
-      serializeJson(obj["ssid"], Serial);
-      Serial.println("}");
-      Serial.print("{\"ip\":\"");
-      Serial.print(WiFi.localIP());
-      Serial.println("\"}");
-      status_doc["ssid"] = obj["ssid"];
-      status_doc["ip"] = WiFi.localIP();
-
-      flag = true;
-      //STATE = 1;
-      STATE |= (1 << 6);
-
-      // ------------------------ firebase connection
-      if (updated == false)
+      if (flag == false)
       {
-        //oled_display_text("VERSION \n NUEVA");
-        //connectFirebase();
-      }
+        Serial.print("{\"wifi_connected\": ");
+        serializeJson(obj["ssid"], Serial);
+        Serial.println("}");
+        Serial.print("{\"ip\":\"");
+        Serial.print(WiFi.localIP());
+        Serial.println("\"}");
+        status_doc["ssid"] = obj["ssid"];
+        status_doc["ip"] = WiFi.localIP();
 
+        flag = true;
+        //STATE = 1;
+        //STATE |= (1 << 6);
+      }
 
     }
 
@@ -247,7 +273,7 @@ bool wifi_check()
 
 
 
-// ------------------------- callback notifying us of the need to save config
+// --------------------------------------------------------------saveConfigCallback
 void saveConfigCallback () {
   Serial.println("Should save config");
 
@@ -293,6 +319,14 @@ void wifiTask(void * parameter) {
       if (wifi_check())
       {
         //update_clock();
+
+        // ------------------------ firebase connection
+        if ((updated == true) && (on_service == false))
+        {
+          connectFirebase();
+        }
+
+        // ------------------------ mqtt connection
         if (mqtt_check())
         {
           if (send_file)
@@ -317,6 +351,11 @@ void wifiTask(void * parameter) {
           {
             mqtt_send_list();
             send_list = false;
+          }
+          if (send_gps)
+          {
+            mqtt_send_gps();
+            send_gps = false;
           }
         }
       }

@@ -26,7 +26,7 @@ void fcsDownloadCallback(FCS_DownloadStatusInfo info)
   if (info.status == fb_esp_fcs_download_status_init)
   {
     Serial.printf("update %s (%d)\n", info.remoteFileName.c_str(), info.fileSize);
-    obj["updated"] = true;
+    obj["updated"] = false;
     obj["registered"] = false;
     saveConfig = true;
     //json.clear();
@@ -46,7 +46,7 @@ void fcsDownloadCallback(FCS_DownloadStatusInfo info)
     Serial.println();
 
     Serial.println("{\"save_last_config\":true}");
-    obj["updated"] = true;
+    obj["updated"] = false;
     obj["registered"] = false;
     saveConfig = true;
     saveConfigData();
@@ -325,16 +325,25 @@ void connectFirebase()
   }
 
 
-  if (!updated)
+  if ((updated) && (!on_service))
   {
-    updated = true;
+    updated = false;
     String storage_id = obj["storage_id"].as<String>();
-    //SendData();
-    Serial.println("{\"new_firmware\":true}");
-    //delay(2000);
+    //String key;
+    // key = p.key().c_str(); // Obtener la clave
+    if (obj["firmware"].isNull())
+      obj["firmware"] = "master_gas_module_encoder.ino.esp32da.bin";
 
-    // In ESP8266, this function will allocate 16k+ memory for internal SSL client.
-    if (!Firebase.Storage.downloadOTA(&fbdo, storage_id/* Firebase Storage bucket id */, "master_gas_module_encoder.ino.esp32da.bin" /* path of firmware file stored in the bucket */, fcsDownloadCallback /* callback function */))
+    String firname = obj["firmware"].as<String>();
+    String path = "gas_firm/" + firname;
+
+    // Pasar storage_id y path como const char* usando .c_str()
+    const char* c_storage_id = storage_id.c_str();
+    const char* c_path = path.c_str();
+
+    Serial.println("{\"new_firmware\":true}");
+    Serial.println(c_path);
+    if (!Firebase.Storage.downloadOTA(&fbdo, c_storage_id, c_path, fcsDownloadCallback))
       Serial.println(fbdo.errorReason());
   }
 }
