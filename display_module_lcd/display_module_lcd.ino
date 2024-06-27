@@ -457,6 +457,7 @@ void loop1()
         print_litros = ceil(litros);
         print_pesos = pesos;
         litros_target = 0;
+        cadenaLetras = "";
         //open_valve = false;
 
         /* Serial.print("Litros: ");
