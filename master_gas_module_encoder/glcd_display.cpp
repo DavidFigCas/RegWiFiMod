@@ -46,6 +46,7 @@ void updateDisplayTask(void * parameter) {
     jsonStr =  buff;
     //Serial.println(jsonStr);
     deserializeJson(doc_display, jsonStr);
+    
     if (doc_display.isNull())
       status_doc["display"] = false;
     else
@@ -57,6 +58,8 @@ void updateDisplayTask(void * parameter) {
         obj["enable_ap"] = !(obj["enable_ap"]);
         //saveConfig = true;
       }
+
+      
     }
   }
 }

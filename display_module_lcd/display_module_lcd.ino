@@ -92,6 +92,7 @@ bool prevButtonState;
 String cadenaNumeros = "";
 String cadenaLetras = "";
 bool open_valve = false;
+bool close_valve = false;
 bool valve_state = false;
 bool print_report = false;
 bool enable_ap = false;
@@ -140,19 +141,29 @@ void req()
   //doc["precio"] = doc_aux["precio"];     //Commands
   doc["STATE"] = STATE;     //Commands
 
-  //if (open_valve != valve_state) ////AQUIE ESYOY TRABAJANDO
-  doc["valve"] = open_valve;
+  if (open_valve) ////AQUIE ESYOY TRABAJANDO
+  {
+    doc["open"] = open_valve;
+    open_valve = false;
+  }
+    
+  if(close_valve)
+  {
+     doc["close"] = close_valve;
+     close_valve = false;
+  }
+   
 
   if ((litros_target > 0))
     doc["litros_target"] = litros_target;
 
-  if(print_report)
+  if (print_report)
   {
     doc["print_report"] = print_report;
     print_report = false;
   }
 
-  if(enable_ap)
+  if (enable_ap)
   {
     doc["enable_ap"] = enable_ap;
     enable_ap = false;
@@ -173,7 +184,7 @@ void req()
 
   Wire.write(respx, len);
   //cadenaTeclas = "";
-  
+
 }
 
 
@@ -275,7 +286,7 @@ void loop() {
         cadenaLetras = "";
         cadenaNumeros = "";
         litros_target = 0;
-        open_valve = false;
+        close_valve = true;
       }
 
       if (tecla == '#')
@@ -297,7 +308,7 @@ void loop() {
 
     // Si es un número, actualizar litros_target
     if (cadenaNumeros.toInt() > 0) {
-       litros_target = cadenaNumeros.toInt();
+      litros_target = cadenaNumeros.toInt();
       //Serial.print("Litros: ");
       Serial.println(litros_target);
     }
@@ -387,6 +398,8 @@ void loop1()
     {
       // -------------------------------------------------------- display icons
       case 0:
+
+        
         digitalWrite(25, HIGH);
 
         display.fillRect(0, 22, 340, 180, WHITE);
@@ -422,6 +435,11 @@ void loop1()
           u8g2_for_adafruit_gfx.print(" ");
 
         u8g2_for_adafruit_gfx.print(pesos);
+
+        if(litros > 0)
+        {
+          STATE = 1;
+        }
 
 
         break;

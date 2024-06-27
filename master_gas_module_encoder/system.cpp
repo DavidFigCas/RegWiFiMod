@@ -687,7 +687,7 @@ void loadConfig()
     uprice = obj["uprice"];
 
 
-  if (obj["enable_wifi"])
+  if ((obj["enable_wifi"]) && (on_service == false))
   {
     wifi_init();
     if (obj["enable_mqtt"])

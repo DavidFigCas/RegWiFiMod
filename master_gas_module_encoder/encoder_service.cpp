@@ -150,6 +150,7 @@ void checkEncoderPulses(void * parameter) {
             stopFlowing = true;
             on_service = false;
             Serial.println("--------------------STOP FLOWING-----------------");
+            close_valve();
 
             if (litros >= 1)
             {
@@ -190,24 +191,38 @@ void checkEncoderPulses(void * parameter) {
 
     // ------------------------------------- encoder Read and stop
 
+    /*if (target_value > 0)
+      {
+      if (current_value >= target_value)
+      {
+        if (digitalRead(SOLENOID) == LOW)
+        {
+          Serial.println("TARGET LITROS");
+          Serial.println("AUTO STOP");
+        }
+        close_valve();
+        target_value = 0;
+        //STATE = 2;
+      }
+
+      }*/
+
     litros = int(current / pulsos_litro);
     precio = ceil(litros) * uprice;
 
     status_doc["l"] = litros;
     status_doc["$"] = precio;
 
-
-    if (!doc_display["valve"].isNull())
+    if (!doc_display["open"].isNull())
     {
-      if (doc_display["valve"] == true)
-      {
-        open_valve();
-      }
-      else
-      {
-        close_valve();
-      }
+      open_valve();
     }
+
+    if (!doc_display["close"].isNull())
+    {
+      close_valve();
+    }
+
 
 
 
