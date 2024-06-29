@@ -378,8 +378,8 @@ void loop1()
 
   // ----------------------------------------------- Contadores
   // --------------------- Error no hay tarjeta principal
-  if (doc_aux.isNull())
-  {
+  //if (doc_aux.isNull())
+  //{
 
     //display.fillRect(0, 22, 340, 180, WHITE);
 
@@ -389,10 +389,10 @@ void loop1()
     //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
     //u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
     //u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
-  }
+  //}
 
   // ----------------------- Despliega los contadores
-  else
+  //else
   {
     switch (STATE)
     {
@@ -761,8 +761,8 @@ void print_icons()
 
 
   // -------------------------------------------------- NOT CLOCK
-  if (stamp.year < 2000)
-  {
+  //if (stamp.year < 2000)
+  //{
 
     /*
 
@@ -786,10 +786,10 @@ void print_icons()
 
         u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
         u8g2_for_adafruit_gfx.print("0000000");*/
-  }
+  //}
 
   // --------------------------------------------- Display time/date
-  else
+  //else
   {
 
     display.fillRect(0, 0, 320, 20, WHITE);

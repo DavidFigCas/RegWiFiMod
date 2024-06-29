@@ -39,7 +39,7 @@
 #define SHARP_MOSI 23
 #define SHARP_SS   5
 
-#define SOLENOID 25
+#define SOLENOID 19
 #define ENCODER_A 27
 #define ENCODER_B 26
 
