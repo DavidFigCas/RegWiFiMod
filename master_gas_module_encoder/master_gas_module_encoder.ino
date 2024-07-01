@@ -10,24 +10,6 @@ void setup()
   system_init();
   //search_nclient(0);
   //saveNewlog();
-  //Serial1.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
-
-  //buttonState = LOW;
-  //lastButtonState = HIGH;
-
-
-
-  // Reset Display state
-  //doc_aux["STATE"] = 0;
-  //doc_aux["time"] = now.unixtime();
-  //serializeJson(doc_aux, b);
-
-  //Wire.beginTransmission(DISPLAY_ADD);
-  //Wire.write((const uint8_t*)b, (strlen(b)));
-  //Wire.endTransmission();
-  //delay(TIME_SPACE);
-
-  //oled_display_number(0);    // Draw 'stylized' characters
 }
 
 

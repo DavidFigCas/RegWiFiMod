@@ -129,6 +129,12 @@ void recv(int len)
 
   //if(!doc_aux["valve"].isNull())
   valve_state = doc_aux["valve"];
+  
+  if ((valve_state) && (open_valve))
+    open_valve = false;
+
+  if ((valve_state == false) && (close_valve))
+    close_valve = false;
 
 
 }
@@ -144,15 +150,15 @@ void req()
   if (open_valve) ////AQUIE ESYOY TRABAJANDO
   {
     doc["open"] = open_valve;
-    open_valve = false;
+
   }
-    
-  if(close_valve)
+
+  if (close_valve)
   {
-     doc["close"] = close_valve;
-     close_valve = false;
+    doc["close"] = close_valve;
+   // close_valve = false;
   }
-   
+
 
   if ((litros_target > 0))
     doc["litros_target"] = litros_target;
@@ -381,14 +387,14 @@ void loop1()
   //if (doc_aux.isNull())
   //{
 
-    //display.fillRect(0, 22, 340, 180, WHITE);
+  //display.fillRect(0, 22, 340, 180, WHITE);
 
-    //u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
-    //u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
-    //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
-    //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
-    //u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
-    //u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
+  //u8g2_for_adafruit_gfx.setForegroundColor(BLACK);      // apply Adafruit GFX color
+  //u8g2_for_adafruit_gfx.setBackgroundColor(WHITE);      // apply Adafruit GFX color
+  //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso92_tn );  // extended font
+  //u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso38_tr);
+  //u8g2_for_adafruit_gfx.setCursor(10, 78 + 30);             // start writing at this position
+  //u8g2_for_adafruit_gfx.print("Error Tarjeta Principal");
   //}
 
   // ----------------------- Despliega los contadores
@@ -399,7 +405,7 @@ void loop1()
       // -------------------------------------------------------- display icons
       case 0:
 
-        
+
         digitalWrite(25, HIGH);
 
         display.fillRect(0, 22, 340, 180, WHITE);
@@ -436,7 +442,7 @@ void loop1()
 
         u8g2_for_adafruit_gfx.print(pesos);
 
-        if(litros > 0)
+        if (litros > 0)
         {
           STATE = 1;
         }
@@ -764,28 +770,28 @@ void print_icons()
   //if (stamp.year < 2000)
   //{
 
-    /*
+  /*
 
-        // ----------- hora
-        u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print(" 0");
+      // ----------- hora
+      u8g2_for_adafruit_gfx.setCursor(0, 15);             // start writing at this position
+      u8g2_for_adafruit_gfx.print(" 0");
 
-        if ((millis() / 1000) % 2 == 0)
-          u8g2_for_adafruit_gfx.print(":");
-        else
-          u8g2_for_adafruit_gfx.print(" ");
-        u8g2_for_adafruit_gfx.print("00");
+      if ((millis() / 1000) % 2 == 0)
+        u8g2_for_adafruit_gfx.print(":");
+      else
+        u8g2_for_adafruit_gfx.print(" ");
+      u8g2_for_adafruit_gfx.print("00");
 
-        // ------------ fecha
-        u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print("00");
-        u8g2_for_adafruit_gfx.print("/");
-        u8g2_for_adafruit_gfx.print("00");
-        u8g2_for_adafruit_gfx.print("/");
-        u8g2_for_adafruit_gfx.print("0000");
+      // ------------ fecha
+      u8g2_for_adafruit_gfx.setCursor(90, 15);             // start writing at this position
+      u8g2_for_adafruit_gfx.print("00");
+      u8g2_for_adafruit_gfx.print("/");
+      u8g2_for_adafruit_gfx.print("00");
+      u8g2_for_adafruit_gfx.print("/");
+      u8g2_for_adafruit_gfx.print("0000");
 
-        u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
-        u8g2_for_adafruit_gfx.print("0000000");*/
+      u8g2_for_adafruit_gfx.setCursor(235, 15);             // start writing at this position
+      u8g2_for_adafruit_gfx.print("0000000");*/
   //}
 
   // --------------------------------------------- Display time/date

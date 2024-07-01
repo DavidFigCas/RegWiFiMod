@@ -219,24 +219,30 @@ void saveNewlog()
   log_str += '\n'; // O puedes usar gps_str.concat('\n');
 
   // ------------------------------------------- log de GPS existe?
-  //if (testFileIO(SD, gps_name_file.c_str()) == true)
-  if (SD.exists(filelog))
+  if (sd_ready)
   {
-    //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
-    appendFile(SD, filelog.c_str(), log_str.c_str());
+    //if (testFileIO(SD, gps_name_file.c_str()) == true)
+    if (SD.exists(filelog))
+    {
+      //appendFile(SD, gps_name_file.c_str(), gps_str.c_str());
+      appendFile(SD, filelog.c_str(), log_str.c_str());
+    }
+    else
+    {
+      //Serial.println("File not found, init SD");
+      //sd_ready = false;
+      //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
+      //if (!SD.exists(filelog))
+      //{
+      Serial.print("File not found, create?: ");
+      Serial.println(filelog);
+      writeFile(SD, filelog.c_str(), log_str.c_str());
+      //}
+    }
   }
   else
-  {
-    //Serial.println("File not found, init SD");
-    //sd_ready = false;
-    //filelog = "/logs/" + String(anio) + "_" + String(mes) + "_" + String(dia_hoy) + ".json";
-    //if (!SD.exists(filelog))
-    //{
-    Serial.print("File not found, create?: ");
-    Serial.println(filelog);
-    writeFile(SD, filelog.c_str(), log_str.c_str());
-    //}
-  }
+    SD_Init();
+
 
   //Serial.println(saveJSonArrayToAFile(SD, &obj_log, filelog) ? "{\"log_update_SD\":true}" : "{\"log_update_SD\":false}");
   //if (saveJSonArrayToAFile(SD, &obj_log, filelog))
@@ -382,7 +388,7 @@ void search_nclient(uint32_t aux_client)
 void system_init()
 {
 
-  delay(100);
+  delay(500);
   Serial.begin(115200);
   Serial.println("Main Logic");
   Serial.print("Version:"); Serial.println(VERSION);
@@ -428,10 +434,14 @@ void system_init()
     loadConfig();       // Load and update behaivor of system
     rtcUpdated = false;  // TRUE:Not auto update
 
-
   }
 
   gps_init();
+
+  //delay(100);
+  SD_Init();
+  //init_clock();        // I2C for clock
+  //gps_init();
 
 
   send_log = true;
@@ -595,14 +605,7 @@ void loadConfig()
 
   updated = obj["updated"].as<bool>();
 
-  if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
-  {
-    obj["reboot"] = false;
-    //Serial.println("{\"reboot_upload\":true}");
-    saveConfigData();
-    //Serial.println("{\"reboot\":true}");
-    ESP.restart();
-  }
+
 
   // ------------- ID
   String s_aux = obj["id"].as<String>();
@@ -714,7 +717,7 @@ void loadConfig()
   }
 
   // Verificar y crear la tarea de monitor serie si no está corriendo
-  if (obj["test"]) 
+  if (obj["test"])
   {
     if (serialTaskHandle == NULL) {
       xTaskCreatePinnedToCore(
@@ -737,13 +740,16 @@ void loadConfig()
 
 
 
-
-  //delay(100);
-  //SD_Init();
-  //init_clock();        // I2C for clock
-  //gps_init();
-
+  if (/*(!obj["reboot"].isNull()) && */(obj["reboot"].as<bool>() == true))
+  {
+    obj["reboot"] = false;
+    //Serial.println("{\"reboot_upload\":true}");
+    saveConfigData();
+    //Serial.println("{\"reboot\":true}");
+    ESP.restart();
+  }
   //Serial.println("{\"config\":true}");
+
 
 }
 

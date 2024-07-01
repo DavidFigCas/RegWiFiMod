@@ -64,14 +64,15 @@ void save_gps_log()
 
     }
   }
+  else
+    SD_Init();
 }
 
 // ---------------------------------------------------- gps_init
 void gps_init()
 {
 
-  uint8_t rxPin = 34;
-  uint8_t txPin = 33;
+
   Serial2.begin(9600, SERIAL_8N1);  // Inicializa UART1 con 9600 baudios
   //Serial2.begin(9600, SERIAL_8N1, rxPin, txPin);
   Serial.println(F("{\"gps_init\":true}")); //Serial.println(TinyGPSPlus::libraryVersion());
@@ -81,7 +82,7 @@ void gps_init()
     xTaskCreatePinnedToCore(
       gpsTask,            // Función de la tarea
       "GPSTask",          // Nombre de la tarea
-      2048,               // Tamaño del stack
+      4096,               // Tamaño del stack
       NULL,               // Parámetro de entrada
       4,                  // Prioridad de la tarea (menor que la de SerialMonitorTask)
       &gpsTaskHandle,     // Manejar de la tarea

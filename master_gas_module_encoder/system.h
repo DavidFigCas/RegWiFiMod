@@ -24,7 +24,7 @@
 // --------------------------------sd card
 //#define UART_BAUD           9600
 //#define PIN_DTR             25
-//#define PIN_TX              27  
+//#define PIN_TX              27
 //#define PIN_RX              26
 //#define PWR_PIN             4
 
@@ -35,9 +35,12 @@
 #define SD_CS               13
 
 // ------------------------- LCD
-#define SHARP_SCK  18
-#define SHARP_MOSI 23
-#define SHARP_SS   5
+//#define SHARP_SCK  18
+//#define SHARP_MOSI 23
+//#define SHARP_SS   5
+
+//#define rxPin 34   //16 uart2
+//#define txPin 33   //17 uart2
 
 #define SOLENOID 19
 #define ENCODER_A 27
@@ -168,7 +171,7 @@ extern volatile bool startCounting2;
 // ----------------------------------------GPS intervalos para gps
 extern unsigned long previousMillisGPS;  // Variable para almacenar la última vez que se ejecutó el evento
 extern const long intervalGPS;  // Intervalo en milisegundos (60,000 milisegundos = 1 minuto)
-extern unsigned long currentMillisGPS; 
+extern unsigned long currentMillisGPS;
 
 // ------------------------------------- wifi flag
 extern bool server_running;

@@ -42,6 +42,7 @@ void open_valve()
     Serial.println("{\"valve_open\":true}");
   }
   status_doc["valve"] = true;
+  pinMode(SOLENOID,OUTPUT);
   digitalWrite(SOLENOID, LOW);
   valve_state = true;
 }
@@ -55,6 +56,7 @@ void close_valve()
   }
   status_doc["valve"] = false;
   digitalWrite(SOLENOID, HIGH);
+  pinMode(SOLENOID,INPUT);
   valve_state = false;
 }
 
