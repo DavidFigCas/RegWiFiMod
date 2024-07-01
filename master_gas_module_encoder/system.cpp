@@ -404,7 +404,7 @@ void system_init()
   xTaskCreatePinnedToCore(
     checkEncoderPulses,   // Función de la tarea
     "CheckEncoderPulses", // Nombre de la tarea
-    2048,                 // Tamaño del stack
+    4096,                 // Tamaño del stack
     NULL,                 // Parámetro de entrada
     1,                    // Prioridad de la tarea
     NULL,                 // Manejar de la tarea
@@ -440,7 +440,7 @@ void system_init()
 
   //delay(100);
   SD_Init();
-  //init_clock();        // I2C for clock
+  init_clock();        // I2C for clock
   //gps_init();
 
 
