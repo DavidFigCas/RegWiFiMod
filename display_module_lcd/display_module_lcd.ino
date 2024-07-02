@@ -1,4 +1,4 @@
-
+#include "hardware/watchdog.h"
 #include "icons.h"
 #include "pico/stdlib.h"
 #include <Adafruit_GFX.h>
@@ -202,6 +202,7 @@ void setup()
 
   Serial.begin(115200);
   delay(2000);
+  // watchdog_reboot(0, 0, 0);
   Serial.println("Init Display");
 
   pinMode(28, OUTPUT);

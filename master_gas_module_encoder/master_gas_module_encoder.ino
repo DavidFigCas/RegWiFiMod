@@ -554,5 +554,5 @@ void loop()
     lastButtonState = buttonState;
 
   */
-  esp_task_wdt_reset();
+  //esp_task_wdt_reset();
 }

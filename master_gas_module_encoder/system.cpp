@@ -394,8 +394,8 @@ void system_init()
   Serial.print("Version:"); Serial.println(VERSION);
   //delay(5000);
 
-  esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
-  esp_task_wdt_add(NULL);
+  //esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
+  //esp_task_wdt_add(NULL);
 
   // WatchDog Timer
   encoder_init();
@@ -416,7 +416,7 @@ void system_init()
   xTaskCreatePinnedToCore(
     updateDisplayTask,   // Función de la tarea
     "UpdateDisplayTask", // Nombre de la tarea
-    2048,                // Tamaño del stack
+    4096,                // Tamaño del stack
     NULL,                // Parámetro de entrada
     1,                   // Prioridad de la tarea
     NULL,                // Manejar de la tarea
@@ -563,12 +563,12 @@ void reset_config()
   }
 
   // ------------------------------------------------------------ Load list of clients
-  obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist); // Cambiar ubicación a SD
-  if (obj_list.isNull())
-  {
-    Serial.println("Rehaciendo null");
-    obj_list = doc_list.to<JsonArray>();
-  }
+  //obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist); // Cambiar ubicación a SD
+  //if (obj_list.isNull())
+  //{
+    //Serial.println("Rehaciendo null");
+    //obj_list = doc_list.to<JsonArray>();
+  //}
 
 
 

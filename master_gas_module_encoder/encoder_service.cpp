@@ -9,9 +9,9 @@ unsigned long MAX_DELTA = 3;                //10 Pulsos detectados en Intervalo2
 //unsigned long intervalo = 100;    //ENCODER Intervalo de tiempo (milisegundos)
 unsigned long t_delta = 100;  //DELTA Intervalo de tiempo (500 milisegundos)
 unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
-uint32_t current;
-uint32_t previous_pulses;
-uint32_t total_encoder;
+int32_t current;
+int32_t previous_pulses;
+int32_t total_encoder;
 volatile uint32_t angle_encoder;
 bool valve_state = false;
 
@@ -42,7 +42,7 @@ void open_valve()
     Serial.println("{\"valve_open\":true}");
   }
   status_doc["valve"] = true;
-  pinMode(SOLENOID,OUTPUT);
+  pinMode(SOLENOID, OUTPUT);
   digitalWrite(SOLENOID, LOW);
   valve_state = true;
 }
@@ -56,8 +56,38 @@ void close_valve()
   }
   status_doc["valve"] = false;
   digitalWrite(SOLENOID, HIGH);
-  pinMode(SOLENOID,INPUT);
+  pinMode(SOLENOID, INPUT);
   valve_state = false;
+
+  /*if (on_service)
+  {
+    readyToPrint = true;
+    if (litros >= 1)
+    {
+      STATE_DISPLAY = 2;
+      startCounting = true;
+      litros_check = ceil(litros);
+      precio = litros_check * uprice;
+      precio_check = precio;
+      encoder_reset = true;
+      angle_encoder = Sensor.getRawAngle();
+      read_clock();
+      saveNewlog();
+      send_event = true;        // Send event to mqtt
+
+    }
+    else
+    {
+      startCounting = false;
+      STATE_DISPLAY = 0;
+      litros = 0;
+      litros_check = 0;
+      precio = 0;
+      precio_check = 0;
+      encoder_reset = true;
+    }
+  }*/
+
 }
 
 // ----------------------------------- read_encoder
@@ -105,10 +135,15 @@ void print_encoder()
   Serial.println();
 }
 
-// -------------------------------------------------- checkEncoderPulses
-void checkEncoderPulses(void * parameter) {
 
-  static unsigned long lastFlowCheck = 0;
+//---------------------------------------------------------- checkEncoderPulses
+void checkEncoderPulses(void * parameter) 
+{
+  unsigned long lastFlowCheck = 0;
+  unsigned long debounceStart = 0;
+  bool debounceActive = false;
+  const unsigned long debounceDelay = 200; // Ajusta esto según sea necesario
+
   for (;;)
   {
     // Leer el valor del encoder
@@ -117,38 +152,45 @@ void checkEncoderPulses(void * parameter) {
     // Verificar si el cambio supera el umbral
     if (abs((int32_t)(current - previous_pulses)) >= MAX_DELTA)
     {
-      //Serial.println((current - previous_pulses));
-      //angle_encoder = Sensor.getRawAngle();
-      startFlowing = true;
-      saveConfig = true;
-      lastFlowCheck = millis();
-
-
-      if ((startFlowing == true) && (stopFlowing == true) && (on_service == false))
+      if (!debounceActive)
       {
-        Serial.println("--------------------START FLOWING-----------------");
-        //read_clock();
-        start_process_time = now.unixtime();
-        angle_encoder = Sensor.getRawAngle();
+        debounceStart = millis();
+        debounceActive = true;
+      }
+
+      if (millis() - debounceStart >= debounceDelay)
+      {
         startFlowing = true;
-        stopFlowing = false;
-        on_service = true;
-        STATE_DISPLAY = 1;
+        saveConfig = true;
+        lastFlowCheck = millis();
+
+        if (stopFlowing && !on_service)
+        {
+          Serial.println("--------------------START FLOWING-----------------");
+          start_process_time = now.unixtime();
+          angle_encoder = Sensor.getRawAngle();
+          stopFlowing = false;
+          on_service = true;
+          STATE_DISPLAY = 1;
+        }
+
+        debounceActive = false; // Reset debounce
       }
     }
     else
     {
+      debounceActive = false;
       startFlowing = false;
+
       // Si el flujo ha comenzado, monitorear si se detiene
       if (on_service)
       {
-        if (millis() - lastFlowCheck >= noDelta_timeSTOP * 1000) // Argumento noDelta en Segundos
-        { // Revisar cada segundo
+        if (millis() - lastFlowCheck >= noDelta_timeSTOP * 1000)
+        { 
           lastFlowCheck = millis();
           if (abs((int32_t)(current - previous_pulses)) < MAX_DELTA)
           {
             saveConfig = true;
-            startFlowing = false;
             stopFlowing = true;
             on_service = false;
             Serial.println("--------------------STOP FLOWING-----------------");
@@ -165,8 +207,7 @@ void checkEncoderPulses(void * parameter) {
               angle_encoder = Sensor.getRawAngle();
               read_clock();
               saveNewlog();
-              send_event = true;        // Send event to mqtt
-
+              send_event = true;
             }
             else
             {
@@ -184,31 +225,12 @@ void checkEncoderPulses(void * parameter) {
       }
     }
 
-
-
     // Actualizar el valor anterior de los pulsos
-    total_encoder = total_encoder + current;
+    total_encoder += current;
     obj["total_encoder"] = total_encoder;
     previous_pulses = current;
 
-    // ------------------------------------- encoder Read and stop
-
-    /*if (target_value > 0)
-      {
-      if (current_value >= target_value)
-      {
-        if (digitalRead(SOLENOID) == LOW)
-        {
-          Serial.println("TARGET LITROS");
-          Serial.println("AUTO STOP");
-        }
-        close_valve();
-        target_value = 0;
-        //STATE = 2;
-      }
-
-      }*/
-
+    // Calcular litros y precio
     litros = int(current / pulsos_litro);
     precio = ceil(litros) * uprice;
 
@@ -225,10 +247,7 @@ void checkEncoderPulses(void * parameter) {
       close_valve();
     }
 
-
-
-
-    // Esperar 1 ms antes de la siguiente verificación
+    // Esperar t_delta ms antes de la siguiente verificación
     vTaskDelay(t_delta / portTICK_PERIOD_MS);
   }
 }

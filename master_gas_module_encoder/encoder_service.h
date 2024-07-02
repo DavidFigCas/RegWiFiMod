@@ -17,9 +17,7 @@ extern unsigned long MAX_DELTA;                //10 Pulsos detectados en Interva
 //extern unsigned long intervalo;    //ENCODER Intervalo de tiempo (milisegundos)
 extern unsigned long t_delta;    //DELTA Intervalo de tiempo (500 milisegundos)
 extern unsigned long noDelta_timeSTOP;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
-extern uint32_t previous_pulses;
-extern uint32_t current;
-extern uint32_t total_encoder;
+extern int32_t current, previous_pulses, total_encoder;
 extern volatile uint32_t angle_encoder;
 extern bool valve_state;
 
