@@ -11,10 +11,14 @@ extern WiFiManager wifiManager;
 extern bool ALLOWONDEMAND; // enable on demand
 extern bool WMISBLOCKING;
 extern std::vector<WiFiManagerParameter*> customParams;
+extern SemaphoreHandle_t wifiMutex;
+
 
 //void Wifi_disconnected(WiFiEvent_t event, WiFiEventInfo_t info);
 bool wifi_check();
 void wifi_init();
+void disableWiFi();
+bool enableWiFi();
 
 
 //callback notifying us of the need to save config

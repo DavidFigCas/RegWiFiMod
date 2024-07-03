@@ -9,7 +9,82 @@ WiFiManager wifiManager;
 std::vector<WiFiManagerParameter*> customParams;
 // Manejador de tarea para la tarea WiFi
 TaskHandle_t wifiTaskHandle = NULL;
+SemaphoreHandle_t wifiMutex;
 
+
+// ---------------------------------------------------------- disableWiFi
+void disableWiFi() 
+{
+  if (xSemaphoreTake(wifiMutex, portMAX_DELAY) == pdTRUE) {
+    if (WiFi.status() == WL_CONNECTED) {
+      WiFi.disconnect(true);
+      delay(1000); // Esperar un segundo para asegurar la desconexión
+    }
+
+    WiFi.mode(WIFI_OFF);
+
+    esp_err_t err = esp_wifi_deinit();
+    if (err == ESP_OK) {
+      Serial.println("Wi-Fi deshabilitado completamente.");
+    } else {
+      Serial.printf("Error deshabilitando el Wi-Fi: %d\n", err);
+    }
+
+    if (wifiTaskHandle != NULL) {
+      vTaskDelete(wifiTaskHandle);
+      wifiTaskHandle = NULL;
+    }
+
+    xSemaphoreGive(wifiMutex);
+  }
+}
+
+// ---------------------------------------------------------- enableWiFi
+bool enableWiFi()
+{
+  int retries = 0;
+
+  if (xSemaphoreTake(wifiMutex, portMAX_DELAY) == pdTRUE) {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin("tu_SSID", "tu_PASSWORD");
+
+    while (WiFi.status() != WL_CONNECTED && retries < 10) {
+      delay(500);
+      Serial.print(".");
+      retries++;
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("");
+      Serial.println("Wi-Fi conectado.");
+      Serial.print("Dirección IP: ");
+      Serial.println(WiFi.localIP());
+      
+      if (wifiTaskHandle == NULL) {
+        xTaskCreatePinnedToCore(
+          wifiTask,            // Función de la tarea
+          "WiFiTask",          // Nombre de la tarea
+          8192,                // Tamaño del stack
+          NULL,                // Parámetro de entrada
+          2,                   // Prioridad de la tarea
+          &wifiTaskHandle,     // Manejar de la tarea
+          1                    // Núcleo en el que se ejecutará la tarea
+        );
+      }
+
+      xSemaphoreGive(wifiMutex);
+      return true;
+    } else {
+      Serial.println("");
+      Serial.println("No se pudo conectar al Wi-Fi.");
+      disableWiFi();
+      xSemaphoreGive(wifiMutex);
+      return false;
+    }
+  }
+
+  return false;
+}
 
 
 // ------------------------------------------------ wifiAP

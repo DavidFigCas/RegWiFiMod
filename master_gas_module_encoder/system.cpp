@@ -687,7 +687,10 @@ void loadConfig()
 
   if ((obj["enable_wifi"]) && (on_service == false))
   {
-    wifi_init();
+    
+    //wifi_init();
+    //enableWiFi();
+    
     if (obj["enable_mqtt"])
       mqtt_init();
 
@@ -703,7 +706,11 @@ void loadConfig()
         1                    // Núcleo en el que se ejecutará la tarea
       );
     }
-  } else {
+  } 
+  else 
+  {
+    
+    //disableWiFi();
     // Detener la tarea WiFi si está corriendo
     // Desconectar del Wi-Fi, si estaba conectado
     WiFi.disconnect(true);
