@@ -680,8 +680,8 @@ void loadConfig()
   if (!obj["t_delta"].isNull())
     t_delta = obj["t_delta"];  //DELTA Intervalo de tiempo (500 milisegundos)
 
-  if ((!obj["t_stop"].isNull()) && (obj["t_stop"] > 0))
-    noDelta_timeSTOP = obj["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW
+  //if ((!obj["t_stop"].isNull()) && (obj["t_stop"] > 0))
+  //  noDelta_timeSTOP = obj["t_stop"];// Maximo tiempo desde que se detecto STOP_FLOW
 
   total_encoder = obj["total_encoder"];
   status_doc["total_encoder"] = total_encoder;

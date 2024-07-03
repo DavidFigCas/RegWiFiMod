@@ -8,7 +8,7 @@ AS5601 Sensor;
 unsigned long MAX_DELTA = 3;                //10 Pulsos detectados en Intervalo2  (DELTA)
 //unsigned long intervalo = 100;    //ENCODER Intervalo de tiempo (milisegundos)
 unsigned long t_delta = 100;  //DELTA Intervalo de tiempo (500 milisegundos)
-unsigned long noDelta_timeSTOP = 60;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
+unsigned long noDelta_timeSTOP = 15;// Maximo tiempo desde que se detecto STOP_FLOW 60seg
 int32_t current;
 int32_t previous_pulses;
 int32_t total_encoder;
@@ -142,7 +142,7 @@ void checkEncoderPulses(void * parameter)
   unsigned long lastFlowCheck = 0;
   unsigned long debounceStart = 0;
   bool debounceActive = false;
-  const unsigned long debounceDelay = 200; // Ajusta esto según sea necesario
+  const unsigned long debounceDelay = 20; // Ajusta esto según sea necesario
 
   for (;;)
   {
@@ -212,7 +212,7 @@ void checkEncoderPulses(void * parameter)
             else
             {
               startCounting = false;
-              STATE_DISPLAY = 0;
+              STATE_DISPLAY = 1;
               litros = 0;
               litros_check = 0;
               precio = 0;
@@ -236,6 +236,7 @@ void checkEncoderPulses(void * parameter)
 
     status_doc["l"] = litros;
     status_doc["$"] = precio;
+    status_doc["ang"] = angle_encoder;
 
     if (!doc_display["open"].isNull())
     {
