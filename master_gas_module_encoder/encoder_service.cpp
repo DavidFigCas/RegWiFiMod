@@ -59,61 +59,13 @@ void close_valve()
   pinMode(SOLENOID, INPUT);
   valve_state = false;
 
-  /*if (on_service)
-  {
-    readyToPrint = true;
-    if (litros >= 1)
-    {
-      STATE_DISPLAY = 2;
-      startCounting = true;
-      litros_check = ceil(litros);
-      precio = litros_check * uprice;
-      precio_check = precio;
-      encoder_reset = true;
-      angle_encoder = Sensor.getRawAngle();
-      read_clock();
-      saveNewlog();
-      send_event = true;        // Send event to mqtt
-
-    }
-    else
-    {
-      startCounting = false;
-      STATE_DISPLAY = 0;
-      litros = 0;
-      litros_check = 0;
-      precio = 0;
-      precio_check = 0;
-      encoder_reset = true;
-    }
-  }*/
 
 }
 
 // ----------------------------------- read_encoder
 void read_encoder()
 {
-  //Serial.print( F("Magnitude: ") );
-  //Serial.print( Sensor.getMagnitude() );
-
-  //Serial.print( F(" | Magnet  : ") );
-  //Serial.print( Sensor.magnetDetected() );
-
-  //Serial.print( F(" | Raw angle: ") );
-  //Serial.print( Sensor.getRawAngle() );
-
-
-  //Serial.print( F(" | Encoder: ") );
-  //Serial.print(String((int32_t)encoder.getCount()));
-
-  //Serial.println();
   current = abs(encoder.getCount());
-
-
-
-  //obj["angle_encoder"] = Sensor.getRawAngle();
-  //status_doc["angle_encoder"] = obj["angle_encoder"];
-
 }
 
 // ----------------------------------- print_encoder
@@ -168,7 +120,7 @@ void checkEncoderPulses(void * parameter)
         {
           Serial.println("--------------------START FLOWING-----------------");
           start_process_time = now.unixtime();
-          angle_encoder = Sensor.getRawAngle();
+          //angle_encoder = Sensor.getRawAngle();
           stopFlowing = false;
           on_service = true;
           STATE_DISPLAY = 1;

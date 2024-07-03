@@ -19,7 +19,7 @@ bool reset_time = false;
 volatile bool found_client = false;
 
 
-unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
+//unsigned long mainRefresh = obj["mainTime"].as<uint32_t>();
 unsigned long mainTime = 1000;
 
 unsigned long serialRefresh = 1000;
@@ -437,13 +437,8 @@ void system_init()
   }
 
   gps_init();
-
-  //delay(100);
   SD_Init();
   init_clock();        // I2C for clock
-  //gps_init();
-
-
   send_log = true;
 }
 
@@ -566,8 +561,8 @@ void reset_config()
   //obj_list = getJSonArrayFromFile(SPIFFS, &doc_list, filelist); // Cambiar ubicación a SD
   //if (obj_list.isNull())
   //{
-    //Serial.println("Rehaciendo null");
-    //obj_list = doc_list.to<JsonArray>();
+  //Serial.println("Rehaciendo null");
+  //obj_list = doc_list.to<JsonArray>();
   //}
 
 
@@ -599,7 +594,7 @@ void reset_config()
 void loadConfig()
 {
   // ----------- Load Counters
-  esp_task_wdt_reset();
+  //esp_task_wdt_reset();
   //Serial.println("{\"loadConfig\":true}");
 
 
@@ -628,20 +623,20 @@ void loadConfig()
 
   // -------------------------------- mainTime
   // refres time
-  JsonVariant objTime = obj["mainTime"];
-  if (objTime.isNull())
-  {
-    //Serial.println("{\"mainTime\":NULL}");
-    mainTime = 1000;
-  }
-  else
-  {
-    mainTime = obj["mainTime"].as<uint32_t>();
-    //Serial.print("{\"mainTime\":");
-    //Serial.print(mainTime);
-    //Serial.println("}");
-  }
-  mainRefresh = mainTime + 1;
+  //JsonVariant objTime = obj["mainTime"];
+  //if (objTime.isNull())
+  //{
+  //Serial.println("{\"mainTime\":NULL}");
+  //mainTime = 1000;
+  //}
+  //else
+  //{
+  //mainTime = obj["mainTime"].as<uint32_t>();
+  //Serial.print("{\"mainTime\":");
+  //Serial.print(mainTime);
+  //Serial.println("}");
+  //}
+  //mainRefresh = mainTime + 1;
 
 
   //El folio lo puede sacar del ultimo servicio
@@ -710,6 +705,16 @@ void loadConfig()
     }
   } else {
     // Detener la tarea WiFi si está corriendo
+    // Desconectar del Wi-Fi, si estaba conectado
+    WiFi.disconnect(true);
+    delay(1000); // Esperar un segundo para asegurar la desconexión
+
+    // Apagar el modo Wi-Fi
+    WiFi.mode(WIFI_OFF);
+
+    // Desinicializar el Wi-Fi para liberar recursos
+    esp_wifi_deinit();
+
     if (wifiTaskHandle != NULL) {
       vTaskDelete(wifiTaskHandle);
       wifiTaskHandle = NULL;

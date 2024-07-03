@@ -132,7 +132,7 @@ extern unsigned long factory_time;
 extern unsigned long prev_factory_time;
 //extern bool reset_time;
 //extern byte localAddress;     // address of this device
-extern unsigned long mainRefresh;
+//extern unsigned long mainRefresh;
 extern unsigned long mainTime;
 extern const uint32_t connectTimeoutMs;
 extern unsigned long  s_timestamp;
