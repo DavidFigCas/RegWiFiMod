@@ -14,7 +14,7 @@ void updateDisplayTask(void * parameter) {
     doc_aux["folio"] = folio;
     doc_aux["sd"] = sd_ready;
     doc_aux["valve"] = valve_state;
-     //doc["valve"] = !((digitalRead(SOLENOID)));
+    //doc["valve"] = !((digitalRead(SOLENOID)));
     doc_aux["bt"] = obj["enable_bt"].as<bool>();
     if (clear_key) {
       doc_aux["k"] = 0;
@@ -46,9 +46,17 @@ void updateDisplayTask(void * parameter) {
     jsonStr =  buff;
     //Serial.println(jsonStr);
     deserializeJson(doc_display, jsonStr);
-    
+
     if (doc_display.isNull())
+    {
       status_doc["display"] = false;
+      pinMode(RESET_DISPLAY,OUTPUT);
+      digitalWrite(RESET_DISPLAY, HIGH);  // Asegúrate de que el pin esté en estado bajo antes de enviar el pulso
+      vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
+      digitalWrite(RESET_DISPLAY, LOW);  // Enviar el pulso (cambio de estado)
+      vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
+      digitalWrite(RESET_DISPLAY, HIGH);  // Asegurar que el pin vuelva a estado bajo
+    }
     else
     {
       status_doc["display"] = true;
@@ -59,7 +67,7 @@ void updateDisplayTask(void * parameter) {
         //saveConfig = true;
       }
 
-      
+
     }
   }
 }

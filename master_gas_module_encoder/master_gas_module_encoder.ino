@@ -7,6 +7,7 @@
 // ------------------------------------------------------ (CONFIG) setup
 void setup()
 {
+  delay(2500);
   system_init();
   //search_nclient(0);
   //saveNewlog();
@@ -65,7 +66,7 @@ void loop()
       printCheck(uint32_t (precio_check), uint32_t(litros_check), uint32_t (uprice * 100), folio - 1, uint32_t(now.unixtime()), uint32_t(now.unixtime()));
       
       readyToPrint = false;
-      STATE_DISPLAY = 0;
+      STATE_DISPLAY = 1;
       clear_key = true;
       //saveConfig = true;
       //new_log = true;

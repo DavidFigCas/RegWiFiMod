@@ -95,7 +95,7 @@ char b[200];
 char buff[200];
 int i;
 String jsonStr;
-unsigned int STATE_DISPLAY = 0;
+unsigned int STATE_DISPLAY = 1;
 
 
 volatile bool display_reset = false;

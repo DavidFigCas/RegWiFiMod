@@ -7,8 +7,8 @@
   "test": true,
   "id": "0",
   "enable_wifi": true,
-  "ssid": "Inventoteca_2G",
-  "pass": "science_7425",
+  "ssid": "4G-MIFI-C91",
+  "pass": "1234567890",
   "email": "info@inventoteca.com",
   "ap": "GasSolutions",
   "ap_pass": "12345678",
@@ -26,5 +26,6 @@
   "lat": 19.03793, 
   "lon": -98.20346,
   "reporte": 1,
-  "acumulado_litros": 0
+  "acumulado_litros": 0,
+  "t_stop":15
 }

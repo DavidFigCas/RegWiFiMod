@@ -41,7 +41,7 @@ void printReport (uint32_t servicios, uint32_t ltr, uint32_t total, uint32_t rep
   //Serial.println(reporte);
 
   Serial.print("REPORTE: ");
-  Serial.println(ltr);
+  Serial.println(reporte);
   Serial.print("LITROS: ");
   Serial.println(ltr);
   Serial.print("SERVICIOS: ");
@@ -185,7 +185,7 @@ void printCheck(uint32_t num, uint32_t ltr, uint32_t unitprice, uint32_t f, uint
   setPrintMode(48); // Configurar modo de impresión
   printString("LITROS: ");
   printNumber(ltr);
-  printString("Lts\n\r");
+  printString(" Lts\n\r");
 
   Serial.print("Litros: ");
   Serial.println(ltr);

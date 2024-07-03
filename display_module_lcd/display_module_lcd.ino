@@ -14,6 +14,7 @@
 #define SHARP_SCK  2
 #define SHARP_MOSI 3
 #define SHARP_SS   1
+#define RESTART_PIN 15
 
 #define BLACK 0
 #define WHITE 1
@@ -129,7 +130,7 @@ void recv(int len)
 
   //if(!doc_aux["valve"].isNull())
   valve_state = doc_aux["valve"];
-  
+
   if ((valve_state) && (open_valve))
     open_valve = false;
 
@@ -156,7 +157,7 @@ void req()
   if (close_valve)
   {
     doc["close"] = close_valve;
-   // close_valve = false;
+    // close_valve = false;
   }
 
 
@@ -199,9 +200,9 @@ void req()
 void setup()
 {
 
-
-  Serial.begin(115200);
   delay(2000);
+  Serial.begin(115200);
+
   // watchdog_reboot(0, 0, 0);
   Serial.println("Init Display");
 
@@ -321,7 +322,18 @@ void loop() {
     }
   }
 
+  bool button_pressed = !gpio_get(buttonPin); // Active low
+  if (button_pressed) {
+    printf("Button pressed. System will restart.\n");
+    // Esperar un momento para evitar rebotes
+    sleep_ms(100);
 
+    // Reiniciar usando el watchdog
+    watchdog_reboot(0, 0, 0);
+
+    // Espera un poco antes de reiniciar
+    sleep_ms(100);
+  }
 
 }
 
@@ -329,6 +341,7 @@ void loop() {
 // ----------------------------------------------------------------- SETUP1
 void setup1()
 {
+  delay(2000);
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
 
