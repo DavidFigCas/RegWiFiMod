@@ -46,7 +46,11 @@ bool enableWiFi()
 
   if (xSemaphoreTake(wifiMutex, portMAX_DELAY) == pdTRUE) {
     WiFi.mode(WIFI_STA);
-    WiFi.begin("tu_SSID", "tu_PASSWORD");
+    const char * auxssid = obj["ssid"].as<const char *>();
+    const char * auxpass = obj["pass"].as<const char *>();
+
+    // Star WiFi connection
+    WiFi.begin(auxssid, auxpass);
 
     while (WiFi.status() != WL_CONNECTED && retries < 10) {
       delay(500);
@@ -93,7 +97,7 @@ bool wifiAP()
 {
 
   //WiFi.disconnect(true);
-  WiFi.mode(WIFI_AP_STA);
+ /* WiFi.mode(WIFI_AP_STA);
   bool force = true;
   server_running = false;
   const char * ap_ssid = obj["ap"].as<const char *>();
@@ -203,13 +207,13 @@ bool wifiAP()
   }
   Serial.print("{\"server_running\":");
   Serial.print(bool(server_running));
-  Serial.println("}");
+  Serial.println("}");*/
   return server_running;
 }
 
 bool wifi_AP_END()
 {
-  if (WiFi.getMode() & WIFI_AP) {
+  /*if (WiFi.getMode() & WIFI_AP) {
     WiFi.softAPdisconnect(true);
     Serial.println("{\"AP\":\"OFF\"}");
   }
@@ -226,7 +230,7 @@ bool wifi_AP_END()
 
   Serial.print("{\"server_running\":");
   Serial.print(bool(server_running));
-  Serial.println("}");
+  Serial.println("}");*/
 }
 
 
@@ -234,7 +238,7 @@ bool wifi_AP_END()
 void wifi_init()
 {
   //Serial.println("{\"wifi\":{\"init\":true}}");
-  if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
+  /*if ((obj["enable_wifi"].as<bool>() == true && (WiFi.status() != WL_CONNECTED)) || (obj["enable_wifi"].isNull()))
   {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_STA);
@@ -270,7 +274,7 @@ void wifi_init()
   {
     //wifi_AP_END();
   }
-
+*/
 
 }
 
@@ -283,19 +287,19 @@ bool wifi_check()
 {
   bool flag;
 
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    wifi_init();
-  }
+  //if (WiFi.status() != WL_CONNECTED)
+  //{
+    //wifi_init();
+  //}
 
   // -------------------------------------------- server is running
-  if (server_running)
-  {
-    Serial.println("{\"wifi\":\"manager process\"}");
-    wifiManager.process();
-  }
+  //if (server_running)
+  //{
+    //Serial.println("{\"wifi\":\"manager process\"}");
+    //wifiManager.process();
+  //}
 
-  if (obj["enable_wifi"].as<bool>())
+ if (obj["enable_wifi"].as<bool>())
   {
 
     // ------------------ Wifi Connected
@@ -324,7 +328,7 @@ bool wifi_check()
       Serial.println("{\"wifi\":\"disconnected\"}");
       flag = false;
 
-      STATE &= ~(1 << 6);
+      //STATE &= ~(1 << 6);
       //if (server_running == false)
       //  wifiAP(true);         // run force server
       //else
@@ -335,13 +339,13 @@ bool wifi_check()
   }
 
   //}
-  else
-  {
-    Serial.println("{\"wifi\":\"disabled\"}");
-    flag = false;
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
-  }
+  //else
+  //{
+    //Serial.println("{\"wifi\":\"disabled\"}");
+    //flag = false;
+    //WiFi.disconnect(true);
+    //WiFi.mode(WIFI_OFF);
+  //}
 
   return flag;
 }
@@ -393,7 +397,7 @@ void wifiTask(void * parameter) {
 
       if (wifi_check())
       {
-        //update_clock();
+        update_clock();
 
         // ------------------------ firebase connection
         if ((updated == true) && (on_service == false))

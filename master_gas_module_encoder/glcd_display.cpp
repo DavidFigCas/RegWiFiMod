@@ -28,7 +28,7 @@ void updateDisplayTask(void * parameter) {
     Wire.endTransmission();
 
     // Esperar 41 ms antes de la siguiente ejecución
-    vTaskDelay(30 / portTICK_PERIOD_MS);
+    vTaskDelay(81 / portTICK_PERIOD_MS);
 
     // --------------------- leer display
     // Read from the slave and print out
@@ -50,12 +50,12 @@ void updateDisplayTask(void * parameter) {
     if (doc_display.isNull())
     {
       status_doc["display"] = false;
-      pinMode(RESET_DISPLAY,OUTPUT);
-      digitalWrite(RESET_DISPLAY, HIGH);  // Asegúrate de que el pin esté en estado bajo antes de enviar el pulso
-      vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
-      digitalWrite(RESET_DISPLAY, LOW);  // Enviar el pulso (cambio de estado)
-      vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
-      digitalWrite(RESET_DISPLAY, HIGH);  // Asegurar que el pin vuelva a estado bajo
+      //pinMode(RESET_DISPLAY,OUTPUT);
+      //digitalWrite(RESET_DISPLAY, HIGH);  // Asegúrate de que el pin esté en estado bajo antes de enviar el pulso
+      //vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
+      //digitalWrite(RESET_DISPLAY, LOW);  // Enviar el pulso (cambio de estado)
+      //vTaskDelay(100 / portTICK_PERIOD_MS);  // Esperar 100 ms
+      //digitalWrite(RESET_DISPLAY, HIGH);  // Asegurar que el pin vuelva a estado bajo
     }
     else
     {
@@ -63,7 +63,7 @@ void updateDisplayTask(void * parameter) {
       print_report = doc_display["print_report"];
       if (doc_display["enable_ap"])
       {
-        obj["enable_ap"] = !(obj["enable_ap"]);
+        //obj["enable_ap"] = !(obj["enable_ap"]);
         //saveConfig = true;
       }
 

@@ -61,8 +61,8 @@ void init_clock()
       //Serial.println("RTC is NOT running, let's set factory the time!");
       rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
-      Serial.println("RTC is NOT running, rebooting ...");
-      delay(1000);
+      //Serial.println("RTC is NOT running, rebooting ...");
+      //delay(1000);
       //ESP.restart();  // Reiniciar el ESP32
 
     }

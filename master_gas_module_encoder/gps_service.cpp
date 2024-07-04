@@ -7,10 +7,13 @@ TaskHandle_t gpsTaskHandle = NULL;
 void gpsTask(void * parameter) {
   for (;;) {
     // Actualizar y guardar los datos del GPS
-    read_clock();
-    gps_update();
-    save_gps_log();
-    send_gps = true;
+    if (!on_service)
+    {
+      read_clock();
+      gps_update();
+      save_gps_log();
+      send_gps = true;
+    }
     // Esperar 1 minuto antes de la ejecución
     vTaskDelay(60000 / portTICK_PERIOD_MS);
   }

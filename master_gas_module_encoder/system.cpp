@@ -397,6 +397,13 @@ void system_init()
   //esp_task_wdt_init(WDT_TIMEOUT, true);  //enable panic so ESP32 restarts
   //esp_task_wdt_add(NULL);
 
+  // Crear el mutex para sincronizar el uso del Wi-Fi
+  wifiMutex = xSemaphoreCreateMutex();
+  if (wifiMutex == NULL) {
+  Serial.println("Error creando el mutex de Wi-Fi");
+  ////while (true); // Quedarse aquí si falla la creación del mutex
+  }
+
   // WatchDog Timer
   encoder_init();
 
@@ -684,18 +691,17 @@ void loadConfig()
   if (!obj["uprice"].isNull())
     uprice = obj["uprice"];
 
+  if (obj["enable_mqtt"])
+    mqtt_init();
+
 
   if ((obj["enable_wifi"]) && (on_service == false))
   {
-    
-    //wifi_init();
-    //enableWiFi();
-    
-    if (obj["enable_mqtt"])
-      mqtt_init();
+
+    enableWiFi();
 
     // Crear una tarea FreeRTOS para las operaciones de WiFi solo si no está corriendo
-    if (wifiTaskHandle == NULL) {
+    /*if (wifiTaskHandle == NULL) {
       xTaskCreatePinnedToCore(
         wifiTask,            // Función de la tarea
         "WiFiTask",          // Nombre de la tarea
@@ -705,27 +711,27 @@ void loadConfig()
         &wifiTaskHandle,     // Manejar de la tarea
         1                    // Núcleo en el que se ejecutará la tarea
       );
-    }
-  } 
-  else 
+    }*/
+  }
+  else
   {
-    
-    //disableWiFi();
-    // Detener la tarea WiFi si está corriendo
-    // Desconectar del Wi-Fi, si estaba conectado
-    WiFi.disconnect(true);
-    delay(1000); // Esperar un segundo para asegurar la desconexión
 
-    // Apagar el modo Wi-Fi
-    WiFi.mode(WIFI_OFF);
+    disableWiFi();
+    /*if (wifiTaskHandle != NULL)
+    {
+      // Detener la tarea WiFi si está corriendo
+      // Desconectar del Wi-Fi, si estaba conectado
+      WiFi.disconnect(true);
+      //delay(1000); // Esperar un segundo para asegurar la desconexión
 
-    // Desinicializar el Wi-Fi para liberar recursos
-    esp_wifi_deinit();
+      // Apagar el modo Wi-Fi
+      WiFi.mode(WIFI_OFF);
 
-    if (wifiTaskHandle != NULL) {
+      // Desinicializar el Wi-Fi para liberar recursos
+      esp_wifi_deinit();
       vTaskDelete(wifiTaskHandle);
       wifiTaskHandle = NULL;
-    }
+    }*/
   }
 
   // Verificar y crear la tarea de monitor serie si no está corriendo
@@ -795,8 +801,8 @@ void Serial_CMD()
 // ----------------------------------- Serial Monitor
 void serialMonitorTask(void * parameter) {
   for (;;) {
-    // Esperar 1 segundo antes de la ejecución
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // Esperar 1 segundo antes de la ejecución (1000)
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     // Tareas del monitor serie
     if (obj["test"]) {
@@ -804,13 +810,16 @@ void serialMonitorTask(void * parameter) {
       serializeJson(doc_display, Serial);
       Serial.println();
 
-      //Serial.print("Encoder: ");
-      //serializeJson(doc_encoder, Serial);
-      //Serial.println();
-
-      Serial.print("MAIN: ");
-      serializeJson(status_doc, Serial);
+      Serial.print("Encoder: ");
+      Serial.print(litros);
+      Serial.print("\t");
+      Serial.println(current);
+      //serializeJson(current, Serial);
       Serial.println();
+
+      //Serial.print("MAIN: ");
+      //serializeJson(status_doc, Serial);
+      //Serial.println();
     }
   }
 }
