@@ -23,12 +23,12 @@ void disableWiFi()
 
     WiFi.mode(WIFI_OFF);
 
-    esp_err_t err = esp_wifi_deinit();
-    if (err == ESP_OK) {
-      Serial.println("Wi-Fi deshabilitado completamente.");
-    } else {
-      Serial.printf("Error deshabilitando el Wi-Fi: %d\n", err);
-    }
+    //esp_err_t err = esp_wifi_deinit();
+    //if (err == ESP_OK) {
+      //Serial.println("Wi-Fi deshabilitado completamente.");
+    //} else {
+      //Serial.printf("Error deshabilitando el Wi-Fi: %d\n", err);
+    //}
 
     if (wifiTaskHandle != NULL) {
       vTaskDelete(wifiTaskHandle);
