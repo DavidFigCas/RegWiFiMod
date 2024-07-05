@@ -18,15 +18,15 @@
 #define ENVIAR    2
 #define ESPERA    3
 
-#define MIN_TESLA   200     //abajo de ese valor de la suma de x y, se considera que no hay iman
+#define MIN_TESLA   0     //abajo de ese valor de la suma de x y, se considera que no hay iman
 
 unsigned int STATE = 0;
 uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  3600; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  600;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600*4; //  3600 TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  3600;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
