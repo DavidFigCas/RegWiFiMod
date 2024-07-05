@@ -25,8 +25,8 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  3600*4; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  3600;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600*4; //  3600*4 (4 horas) TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  3600;   //  3600 (1 hora)  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
