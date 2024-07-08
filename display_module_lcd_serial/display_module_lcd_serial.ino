@@ -1,3 +1,4 @@
+#include "Arduino.h"
 #include "hardware/watchdog.h"
 #include "pico/stdlib.h"
 #include <Adafruit_GFX.h>
@@ -7,10 +8,16 @@
 #include <ArduinoJson.h>
 #include <cmath>
 #include <Keypad.h>
+#include "hardware/uart.h"
+
+//#define SHARP_SCK  2
+//#define SHARP_MOSI 3
+//#define SHARP_SS   1
+//#define RESTART_PIN 15
 
 #define SHARP_SCK  2
 #define SHARP_MOSI 3
-#define SHARP_SS   1
+#define SHARP_SS   4
 #define RESTART_PIN 15
 
 #define BLACK 0
@@ -40,6 +47,8 @@ char teclas[FILAS][COLUMNAS] = {
   {'*', '0', '#', 'D'}
 };
 
+//UART Serial2(8,9,NC,NC);
+
 Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
 
 Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
@@ -48,9 +57,9 @@ UnixTime stamp(0);
 
 bool flag_print = true;
 
-static char buffx[200];
-StaticJsonDocument<200> doc;
-StaticJsonDocument<200> doc_aux;
+static char buffx[2000];
+StaticJsonDocument<2000> doc;
+StaticJsonDocument<2000> doc_aux;
 String jsonStr;
 const char* aux_char;
 
@@ -80,21 +89,25 @@ bool close_valve = false;
 bool valve_state = false;
 bool print_report = false;
 bool enable_ap = false;
+int64_t current;
 
 // Imagen en formato de matriz de bits
 const uint8_t myBitmap[] PROGMEM = {
   // Aquí va la matriz de bits de tu imagen
   // Ejemplo de 128x64 píxeles (1024 bytes)
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   // ...continúa con los datos de la imagen
 };
 
+//UART Serial2(8,9);
 // --------------------------------------------------------------------- SETUP
 void setup()
 {
   delay(2000);
   Serial.begin(115200);
+  //Serial1.setTX(4);  // Establecer el pin TX para Serial1
+  //Serial1.setRX(5);  // Establecer el pin RX para Serial1
   Serial1.begin(115200); // Inicializar segundo puerto serie
 
   Serial.println("Init Display");
@@ -108,21 +121,15 @@ void setup()
   setup1();
 
   // Mostrar la imagen al inicio
-  displayImage(myBitmap);
+  //displayImage(myBitmap);
 }
 
 // --------------------------------------------------------------------- LOOP
 void loop() {
   tecla = teclado.getKey();
   if (tecla) {
-    //Serial.print("Tecla presionada: ");
-    //Serial.println(tecla);
-    //Serial1.print("Tecla presionada: ");
-    //Serial1.println(tecla);
-
     // Crear JSON con la tecla presionada
     StaticJsonDocument<200> jsonDoc;
-    //jsonDoc["jsonrpc"] = "2.0";
     jsonDoc["method"] = "key_press";
     jsonDoc["params"]["key"] = String(tecla);
     String jsonStr;
@@ -131,49 +138,27 @@ void loop() {
     Serial1.println(jsonStr);
   }
 
-  // Leer y procesar datos del puerto serie principal
+  // Leer y procesar datos del puerto serie principal PC
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
-    //Serial.print("Mensaje recibido: ");
-    //Serial.println(input);
-    //Serial1.print("Mensaje recibido: ");
-    //Serial1.println(input);
-
-    // Deserializar JSON
-    DeserializationError error = deserializeJson(doc, input);
-    if (!error) {
-      const char* method = doc["method"];
-      if (strcmp(method, "print_message") == 0) {
-        const char* message = doc["params"]["msg.payload"];
-        displayMessage(message);
-      }
-    } else {
-      Serial.print("Error de parseo JSON: ");
-      Serial.println(error.c_str());
-      Serial1.print("Error de parseo JSON: ");
-      Serial1.println(error.c_str());
-    }
-  }
-
-  // Leer y procesar datos del segundo puerto serie
-  if (Serial1.available() > 0) {
-    String input = Serial1.readStringUntil('\n');
-    Serial.print("Mensaje recibido en Serial1: ");
+    Serial.print("PC: ");
     Serial.println(input);
 
     // Deserializar JSON
     DeserializationError error = deserializeJson(doc, input);
     if (!error) {
       const char* method = doc["method"];
-      if (strcmp(method, "print_message") == 0) {
-        const char* message = doc["params"]["msg.payload"];
+      if (strcmp(method, "msg") == 0) {
+        const char* message = doc["params"]["payload"];
         displayMessage(message);
       }
     } else {
-      Serial.print("Error de parseo JSON: ");
+      //Serial.print("Error de parseo JSON: ");
       Serial.println(error.c_str());
     }
   }
+
+
 }
 
 // ----------------------------------------------------------------- SETUP1
@@ -198,12 +183,53 @@ void setup1()
   digitalWrite(25, LOW);
 }
 
+void loop1()
+{
+  // Leer y procesar datos del segundo puerto serie ENCODER
+  while (Serial1.available() > 0) 
+  {
+    String input = Serial1.readStringUntil('\n');
+    Serial.print("E: ");
+    Serial.println(input);
+
+    // Deserializar JSON
+    DeserializationError error = deserializeJson(doc, input);
+    if (!error) {
+      const char* method = doc["method"];
+      
+      if (strcmp(method, "msg") == 0) {
+        if (!doc["params"]["payload"].isNull())
+        {
+          current = doc["params"]["payload"];
+          displayCurrent(current);
+        }
+      }
+    } else {
+      //Serial.print("Error de parseo JSON: ");
+      Serial.println(error.c_str());
+    }
+  }
+  
+  //while (!Serial1.available()) 
+  //{}
+}
+
 // Función para mostrar un mensaje en el display
 void displayMessage(const char* message)
 {
   display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
   u8g2_for_adafruit_gfx.setCursor(0, 30); // Ajustar posición según sea necesario
   u8g2_for_adafruit_gfx.print(message);
+  display.refresh();
+}
+
+// Función para mostrar el valor de current en el display
+void displayCurrent(int64_t current)
+{
+  display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
+  u8g2_for_adafruit_gfx.setCursor(0, 30); // Ajustar posición según sea necesario
+  u8g2_for_adafruit_gfx.print("Current: ");
+  u8g2_for_adafruit_gfx.print(current);
   display.refresh();
 }
 
