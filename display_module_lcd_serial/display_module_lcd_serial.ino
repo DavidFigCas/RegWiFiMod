@@ -56,7 +56,10 @@ UnixTime stamp(0);
 
 bool flag_img = true;
 bool flag_msg = true;
+bool flag_med = true;
 const char* txt;
+const char* txt_med_1;
+const char* txt_med_2;
 static int txt_size = 0;
 static int txt_x;
 static int txt_y;
@@ -168,6 +171,12 @@ void loop() {
     displayMessage(txt);
     flag_msg = false;
   }
+  
+  if (flag_med)
+  {
+    displayMedidor(txt_med_1,txt_med_2);
+    flag_msg = false;
+  }
 
 
 }
@@ -230,6 +239,31 @@ void loop1()
           txt_y = doc["params"]["txt_y"];
         }
       }
+      else if (strcmp(method, "med") == 0)
+      {
+        flag_med = true;
+        if (!doc["params"]["1"].isNull())
+        {
+          txt_med_1  = doc["params"]["1"];
+        }
+        if (!doc["params"]["2"].isNull())
+        {
+          txt_med_2 = doc["params"]["2"];
+        }
+        if (!doc["params"]["size"].isNull())
+        {
+          txt_size = doc["params"]["size"];
+        }
+        if (!doc["params"]["txt_x"].isNull())
+        {
+          txt_x = doc["params"]["txt_x"];
+        }
+        if (!doc["params"]["txt_y"].isNull())
+        {
+          txt_y = doc["params"]["txt_y"];
+        }
+      }
+
     } else {
       //Serial.print("Error de parseo JSON: ");
       Serial.println(error.c_str());
@@ -237,7 +271,7 @@ void loop1()
   }
 
 
-  while (!Serial1.available()) ;
+  while (!Serial1.available());
 }
 
 // Función para mostrar un mensaje en el display
@@ -256,12 +290,14 @@ void displayMessage(const char* message)
 }
 
 // Función para mostrar el valor de current en el display
-void displayCurrent(int64_t current)
+void displayMedidor(const char* message1,const char* message2)
 {
   display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
-  u8g2_for_adafruit_gfx.setCursor(0, 90); // Ajustar posición según sea necesario
-  //u8g2_for_adafruit_gfx.print("Current: ");
-  u8g2_for_adafruit_gfx.print(current);
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+  u8g2_for_adafruit_gfx.setCursor(0, 100); // Ajustar posición según sea necesario
+  u8g2_for_adafruit_gfx.print(message1);
+  u8g2_for_adafruit_gfx.setCursor(0, 200); // Ajustar posición según sea necesario
+  u8g2_for_adafruit_gfx.print(message2);
   display.refresh();
 }
 
