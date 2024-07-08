@@ -157,7 +157,7 @@ void loop() {
       Serial.println(error.c_str());
     }
   }
-
+displayCurrent(current);
 
 }
 
@@ -202,7 +202,7 @@ void loop1()
         if (!doc["params"]["1"].isNull())
         {
           current = doc["params"]["1"];
-          displayCurrent(current);
+          
         }
       }
     } else {
@@ -212,7 +212,7 @@ void loop1()
   }
 
   
-  //while (!Serial1.available()) ;
+  while (!Serial1.available()) ;
 }
 
 // Función para mostrar un mensaje en el display
