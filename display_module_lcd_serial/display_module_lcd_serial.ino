@@ -108,7 +108,7 @@ void setup()
   Serial.begin(115200);
   //Serial1.setTX(4);  // Establecer el pin TX para Serial1
   //Serial1.setRX(5);  // Establecer el pin RX para Serial1
-  Serial1.begin(115200); // Inicializar segundo puerto serie
+  
 
   Serial.println("Init Display");
 
@@ -165,6 +165,7 @@ void loop() {
 void setup1()
 {
   delay(2000);
+  Serial1.begin(115200); // Inicializar segundo puerto serie
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
 
@@ -189,7 +190,7 @@ void loop1()
   while (Serial1.available() > 0) 
   {
     String input = Serial1.readStringUntil('\n');
-    Serial.print("E: ");
+    //Serial.print("E: ");
     Serial.println(input);
 
     // Deserializar JSON
@@ -198,9 +199,9 @@ void loop1()
       const char* method = doc["method"];
       
       if (strcmp(method, "msg") == 0) {
-        if (!doc["params"]["payload"].isNull())
+        if (!doc["params"]["1"].isNull())
         {
-          current = doc["params"]["payload"];
+          current = doc["params"]["1"];
           displayCurrent(current);
         }
       }
@@ -209,9 +210,9 @@ void loop1()
       Serial.println(error.c_str());
     }
   }
+
   
-  //while (!Serial1.available()) 
-  //{}
+  //while (!Serial1.available()) ;
 }
 
 // Función para mostrar un mensaje en el display
