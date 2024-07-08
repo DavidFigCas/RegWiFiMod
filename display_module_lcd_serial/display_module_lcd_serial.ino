@@ -57,7 +57,9 @@ UnixTime stamp(0);
 bool flag_img = true;
 bool flag_msg = true;
 const char* txt;
-static int txt_size;
+static int txt_size = 0;
+static int txt_x;
+static int txt_y;
 
 static char buffx[2000];
 StaticJsonDocument<2000> doc;
@@ -110,7 +112,7 @@ void setup()
   Serial.begin(115200);
   //Serial1.setTX(4);  // Establecer el pin TX para Serial1
   //Serial1.setRX(5);  // Establecer el pin RX para Serial1
-  
+
 
   Serial.println("Init Display");
 
@@ -160,12 +162,12 @@ void loop() {
     }
   }
 
-  
-if(flag_msg)
-{
-  displayMessage(txt);
-  flag_msg = false;
-}
+
+  if (flag_msg)
+  {
+    displayMessage(txt);
+    flag_msg = false;
+  }
 
 
 }
@@ -186,7 +188,7 @@ void setup1()
   u8g2_for_adafruit_gfx.setBackgroundColor(WHITE); // apply Adafruit GFX color
   //u8g2_for_adafruit_gfx.setFont(u8g2_font_lubB19_tr); // extended font
   u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
-  u8g2_for_adafruit_gfx.setCursor(5, 19 + 10); // start writing at this position
+  u8g2_for_adafruit_gfx.setCursor(0, 90); // start writing at this position
   u8g2_for_adafruit_gfx.print("Hola");
 
   display.refresh();
@@ -197,7 +199,7 @@ void setup1()
 void loop1()
 {
   // Leer y procesar datos del segundo puerto serie ENCODER
-  while (Serial1.available() > 0) 
+  while (Serial1.available() > 0)
   {
     String input = Serial1.readStringUntil('\n');
     //Serial.print("E: ");
@@ -207,8 +209,8 @@ void loop1()
     DeserializationError error = deserializeJson(doc, input);
     if (!error) {
       const char* method = doc["method"];
-      
-      if (strcmp(method, "msg") == 0) 
+
+      if (strcmp(method, "msg") == 0)
       {
         flag_msg = true;
         if (!doc["params"]["txt"].isNull())
@@ -219,6 +221,14 @@ void loop1()
         {
           txt_size = doc["params"]["size"];
         }
+        if (!doc["params"]["txt_x"].isNull())
+        {
+          txt_x = doc["params"]["txt_x"];
+        }
+        if (!doc["params"]["txt_y"].isNull())
+        {
+          txt_y = doc["params"]["txt_y"];
+        }
       }
     } else {
       //Serial.print("Error de parseo JSON: ");
@@ -226,7 +236,7 @@ void loop1()
     }
   }
 
-  
+
   while (!Serial1.available()) ;
 }
 
@@ -234,7 +244,13 @@ void loop1()
 void displayMessage(const char* message)
 {
   display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
-  u8g2_for_adafruit_gfx.setCursor(0, 90); // Ajustar posición según sea necesario
+
+  if (txt_size == 0)
+    u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
+  else
+    u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+
+  u8g2_for_adafruit_gfx.setCursor(txt_x, txt_y); // Ajustar posición según sea necesario
   u8g2_for_adafruit_gfx.print(message);
   display.refresh();
 }
