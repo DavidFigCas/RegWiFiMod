@@ -47,7 +47,6 @@ char teclas[FILAS][COLUMNAS] = {
   {'*', '0', '#', 'D'}
 };
 
-//UART Serial2(8,9,NC,NC);
 
 Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
 
@@ -55,7 +54,10 @@ Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
 U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
 UnixTime stamp(0);
 
-bool flag_print = true;
+bool flag_img = true;
+bool flag_msg = true;
+const char* txt;
+static int txt_size;
 
 static char buffx[2000];
 StaticJsonDocument<2000> doc;
@@ -157,7 +159,14 @@ void loop() {
       Serial.println(error.c_str());
     }
   }
-displayCurrent(current);
+
+  
+if(flag_msg)
+{
+  displayMessage(txt);
+  flag_msg = false;
+}
+
 
 }
 
@@ -175,7 +184,8 @@ void setup1()
 
   u8g2_for_adafruit_gfx.setForegroundColor(BLACK); // apply Adafruit GFX color
   u8g2_for_adafruit_gfx.setBackgroundColor(WHITE); // apply Adafruit GFX color
-  u8g2_for_adafruit_gfx.setFont(u8g2_font_lubB19_tr); // extended font
+  //u8g2_for_adafruit_gfx.setFont(u8g2_font_lubB19_tr); // extended font
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
   u8g2_for_adafruit_gfx.setCursor(5, 19 + 10); // start writing at this position
   u8g2_for_adafruit_gfx.print("Hola");
 
@@ -198,11 +208,16 @@ void loop1()
     if (!error) {
       const char* method = doc["method"];
       
-      if (strcmp(method, "msg") == 0) {
-        if (!doc["params"]["1"].isNull())
+      if (strcmp(method, "msg") == 0) 
+      {
+        flag_msg = true;
+        if (!doc["params"]["txt"].isNull())
         {
-          current = doc["params"]["1"];
-          
+          txt  = doc["params"]["txt"];
+        }
+        if (!doc["params"]["size"].isNull())
+        {
+          txt_size = doc["params"]["size"];
         }
       }
     } else {
@@ -219,7 +234,7 @@ void loop1()
 void displayMessage(const char* message)
 {
   display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
-  u8g2_for_adafruit_gfx.setCursor(0, 30); // Ajustar posición según sea necesario
+  u8g2_for_adafruit_gfx.setCursor(0, 90); // Ajustar posición según sea necesario
   u8g2_for_adafruit_gfx.print(message);
   display.refresh();
 }
@@ -228,8 +243,8 @@ void displayMessage(const char* message)
 void displayCurrent(int64_t current)
 {
   display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
-  u8g2_for_adafruit_gfx.setCursor(0, 30); // Ajustar posición según sea necesario
-  u8g2_for_adafruit_gfx.print("Current: ");
+  u8g2_for_adafruit_gfx.setCursor(0, 90); // Ajustar posición según sea necesario
+  //u8g2_for_adafruit_gfx.print("Current: ");
   u8g2_for_adafruit_gfx.print(current);
   display.refresh();
 }
