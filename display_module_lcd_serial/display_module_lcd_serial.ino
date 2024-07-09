@@ -9,11 +9,7 @@
 #include <cmath>
 #include <Keypad.h>
 #include "hardware/uart.h"
-
-//#define SHARP_SCK  2
-//#define SHARP_MOSI 3
-//#define SHARP_SS   1
-//#define RESTART_PIN 15
+#include "icons.h"
 
 #define SHARP_SCK  2
 #define SHARP_MOSI 3
@@ -47,7 +43,6 @@ char teclas[FILAS][COLUMNAS] = {
   {'*', '0', '#', 'D'}
 };
 
-
 Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, FILAS, COLUMNAS);
 
 Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
@@ -55,68 +50,33 @@ U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
 UnixTime stamp(0);
 
 bool flag_img = true;
-bool flag_msg = true;
-bool flag_med = true;
-const char* txt;
-const char* txt_med_1;
-const char* txt_med_2;
-static int txt_size = 0;
-static int txt_x;
-static int txt_y;
+bool flag_msg = false;
+bool flag_med = false;
+bool flag_time = true;
+char txt[200];
+char txt_med_1[100];
+char txt_med_2[100];
+char txt_med_u1[50];
+char txt_med_u2[50];
+char txt_hour[6] = "04:20";
+char txt_day[12] = "05/Sep/1988";
+char txt_folio[20] = "01";
+unsigned long lastTimeCheck = 0; // Variable para guardar el último tiempo de verificación
+bool show_colon = true; // Variable para alternar el parpadeo
 
-static char buffx[2000];
+int txt_size = 0;
+int txt_x = 0;
+int txt_y = 15;
+
+char buffx[2000];
 StaticJsonDocument<2000> doc;
-StaticJsonDocument<2000> doc_aux;
-String jsonStr;
+//String jsonStr;
 const char* aux_char;
 
-const unsigned long intervalo = 1000;
-unsigned long tiempoAnterior = 0;
-unsigned long tiempoActual;
-
-const unsigned long intervalo2 = 250;
-unsigned long tiempoAnterior2 = 0;
-unsigned long tiempoActual2;
-
-volatile uint32_t litros, print_litros, print_pesos, pesos, litros_target;
-
-uint8_t STATE = 0;
-
-volatile boolean  shown = 0;
-volatile uint32_t number = 0;
-uint32_t unixtime, client;
-uint32_t prevTime;
-unsigned int desconex_count;
-bool buttonState;
-bool prevButtonState;
-String cadenaNumeros = "";
-String cadenaLetras = "";
-bool open_valve = false;
-bool close_valve = false;
-bool valve_state = false;
-bool print_report = false;
-bool enable_ap = false;
-int64_t current;
-
-// Imagen en formato de matriz de bits
-const uint8_t myBitmap[] PROGMEM = {
-  // Aquí va la matriz de bits de tu imagen
-  // Ejemplo de 128x64 píxeles (1024 bytes)
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-  // ...continúa con los datos de la imagen
-};
-
-//UART Serial2(8,9);
-// --------------------------------------------------------------------- SETUP
-void setup()
-{
+// --------------------------------------------------------------------- SETUP TECLADO
+void setup() {
   delay(2000);
   Serial.begin(115200);
-  //Serial1.setTX(4);  // Establecer el pin TX para Serial1
-  //Serial1.setRX(5);  // Establecer el pin RX para Serial1
-
-
   Serial.println("Init Display");
 
   pinMode(28, OUTPUT);
@@ -126,12 +86,9 @@ void setup()
   teclado.setDebounceTime(10);
 
   setup1();
-
-  // Mostrar la imagen al inicio
-  //displayImage(myBitmap);
 }
 
-// --------------------------------------------------------------------- LOOP
+// --------------------------------------------------------------------- LOOP TECLADO Y DISPLAY
 void loop() {
   tecla = teclado.getKey();
   if (tecla) {
@@ -152,6 +109,7 @@ void loop() {
     Serial.println(input);
 
     // Deserializar JSON
+    doc.clear();
     DeserializationError error = deserializeJson(doc, input);
     if (!error) {
       const char* method = doc["method"];
@@ -160,30 +118,37 @@ void loop() {
         displayMessage(message);
       }
     } else {
-      //Serial.print("Error de parseo JSON: ");
       Serial.println(error.c_str());
     }
   }
 
+  if (flag_med) {
+    displayMedidor(txt_med_1,txt_med_2);
+    flag_med = false;
+  }
 
-  if (flag_msg)
-  {
+  if (flag_msg) {
     displayMessage(txt);
     flag_msg = false;
   }
-  
-  if (flag_med)
-  {
-    displayMedidor(txt_med_1,txt_med_2);
-    flag_msg = false;
+
+  if (flag_time) {
+    displayTime();
+    flag_time = false;
   }
-
-
+  if (flag_img) {
+    displayImage();
+    flag_img = false;
+  }
+  // Llamar a displayTime cada segundo
+  if (millis() - lastTimeCheck >= 1000) {
+    displayTime();
+    lastTimeCheck = millis();
+  }
 }
 
-// ----------------------------------------------------------------- SETUP1
-void setup1()
-{
+// ----------------------------------------------------------------- SETUP1 DISPLAY
+void setup1() {
   delay(2000);
   Serial1.begin(115200); // Inicializar segundo puerto serie
   pinMode(25, OUTPUT);
@@ -195,116 +160,173 @@ void setup1()
 
   u8g2_for_adafruit_gfx.setForegroundColor(BLACK); // apply Adafruit GFX color
   u8g2_for_adafruit_gfx.setBackgroundColor(WHITE); // apply Adafruit GFX color
-  //u8g2_for_adafruit_gfx.setFont(u8g2_font_lubB19_tr); // extended font
-  u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+
+  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
+  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
   u8g2_for_adafruit_gfx.setCursor(0, 90); // start writing at this position
-  u8g2_for_adafruit_gfx.print("Hola");
+  u8g2_for_adafruit_gfx.print("MED1");
 
   display.refresh();
 
   digitalWrite(25, LOW);
 }
 
-void loop1()
-{
+// ----------------------------------------------------- LOOP1  SERIAL DISPLAY
+void loop1() {
   // Leer y procesar datos del segundo puerto serie ENCODER
-  while (Serial1.available() > 0)
-  {
-    String input = Serial1.readStringUntil('\n');
-    //Serial.print("E: ");
+  String input = "";
+  while (Serial1.available() > 0) {
+    input = Serial1.readStringUntil('\n');
     Serial.println(input);
 
     // Deserializar JSON
+    doc.clear();
     DeserializationError error = deserializeJson(doc, input);
     if (!error) {
       const char* method = doc["method"];
 
-      if (strcmp(method, "msg") == 0)
-      {
+      if (strcmp(method, "msg") == 0) {
         flag_msg = true;
-        if (!doc["params"]["txt"].isNull())
-        {
-          txt  = doc["params"]["txt"];
+        if (!doc["params"]["txt"].isNull()) {
+          strncpy(txt, doc["params"]["txt"], sizeof(txt) - 1);
+          txt[sizeof(txt) - 1] = '\0';
         }
-        if (!doc["params"]["size"].isNull())
-        {
+        if (!doc["params"]["size"].isNull()) {
           txt_size = doc["params"]["size"];
         }
-        if (!doc["params"]["txt_x"].isNull())
-        {
+        if (!doc["params"]["txt_x"].isNull()) {
           txt_x = doc["params"]["txt_x"];
         }
-        if (!doc["params"]["txt_y"].isNull())
-        {
+        if (!doc["params"]["txt_y"].isNull()) {
           txt_y = doc["params"]["txt_y"];
         }
-      }
-      else if (strcmp(method, "med") == 0)
-      {
+      } else if (strcmp(method, "med") == 0) {
         flag_med = true;
-        if (!doc["params"]["1"].isNull())
-        {
-          txt_med_1  = doc["params"]["1"];
-        }
-        if (!doc["params"]["2"].isNull())
-        {
-          txt_med_2 = doc["params"]["2"];
-        }
-        if (!doc["params"]["size"].isNull())
-        {
-          txt_size = doc["params"]["size"];
-        }
-        if (!doc["params"]["txt_x"].isNull())
-        {
-          txt_x = doc["params"]["txt_x"];
-        }
-        if (!doc["params"]["txt_y"].isNull())
-        {
-          txt_y = doc["params"]["txt_y"];
+
+        JsonObject params = doc["params"];
+        int count = 1;
+        for (JsonPair kv : params) {
+          if (count == 1) {
+            strncpy(txt_med_1, kv.value().as<const char*>(), sizeof(txt_med_1) - 1);
+            txt_med_1[sizeof(txt_med_1) - 1] = '\0';
+            strncpy(txt_med_u1, kv.key().c_str(), sizeof(txt_med_u1) - 1);
+            txt_med_u1[sizeof(txt_med_u1) - 1] = '\0';
+          } else if (count == 2) {
+            strncpy(txt_med_2, kv.value().as<const char*>(), sizeof(txt_med_2) - 1);
+            txt_med_2[sizeof(txt_med_2) - 1] = '\0';
+            strncpy(txt_med_u2, kv.key().c_str(), sizeof(txt_med_u2) - 1);
+            txt_med_u2[sizeof(txt_med_u2) - 1] = '\0';
+          }
+          count++;
         }
       }
 
+      if (strcmp(method, "time") == 0) {
+        flag_time = true;
+        if (!doc["params"]["hour"].isNull()) {
+          strncpy(txt_hour, doc["params"]["hour"], sizeof(txt_hour) - 1);
+          txt_hour[sizeof(txt_hour) - 1] = '\0'; // Asegurar que esté terminada en nulo
+        }
+        if (!doc["params"]["day"].isNull()) {
+          strncpy(txt_day, doc["params"]["day"], sizeof(txt_day) - 1);
+          txt_day[sizeof(txt_day) - 1] = '\0';
+        }
+        if (!doc["params"]["folio"].isNull()) {
+          strncpy(txt_folio, doc["params"]["folio"], sizeof(txt_folio) - 1);
+          txt_folio[sizeof(txt_folio) - 1] = '\0';
+        }
+      }
     } else {
-      //Serial.print("Error de parseo JSON: ");
       Serial.println(error.c_str());
     }
   }
-
-
-  while (!Serial1.available());
 }
 
-// Función para mostrar un mensaje en el display
-void displayMessage(const char* message)
-{
-  display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
+// ----------------------------------------------------- MESSAGE
+void displayMessage(const char* message) {
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
 
-  if (txt_size == 0)
-    u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
-  else
-    u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
+  uint16_t w = u8g2_for_adafruit_gfx.getUTF8Width(message);
+  uint16_t h = u8g2_for_adafruit_gfx.getFontAscent() - u8g2_for_adafruit_gfx.getFontDescent();
 
-  u8g2_for_adafruit_gfx.setCursor(txt_x, txt_y); // Ajustar posición según sea necesario
+  display.fillRect(txt_x, txt_y - h, w, h, WHITE);
+
+  u8g2_for_adafruit_gfx.setCursor(txt_x, txt_y);
   u8g2_for_adafruit_gfx.print(message);
   display.refresh();
 }
 
-// Función para mostrar el valor de current en el display
-void displayMedidor(const char* message1,const char* message2)
-{
-  display.fillRect(0, 0, 320, 240, WHITE); // Llenar la pantalla de blanco
+// ---------------------------------------------------- MEDIDOR
+void displayMedidor(const char* message1, const char* message2) {
+  int screenWidth = 340; // Ancho de la pantalla
+  int cursorX1, cursorX2;
+
+  display.fillRect(0, 22, screenWidth, 180, WHITE);
   u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
-  u8g2_for_adafruit_gfx.setCursor(0, 100); // Ajustar posición según sea necesario
+
+  int widthMessage1 = u8g2_for_adafruit_gfx.getUTF8Width(message1);
+  int widthMessage2 = u8g2_for_adafruit_gfx.getUTF8Width(message2);
+
+  cursorX1 = screenWidth - widthMessage1 - 35; // 5 es un margen arbitrario
+  cursorX2 = screenWidth - widthMessage2 - 35; // 5 es un margen arbitrario
+
+  u8g2_for_adafruit_gfx.setCursor(cursorX1, 78 + 30);
   u8g2_for_adafruit_gfx.print(message1);
-  u8g2_for_adafruit_gfx.setCursor(0, 200); // Ajustar posición según sea necesario
+
+  u8g2_for_adafruit_gfx.setCursor(cursorX2, (78 * 2) + 40);
   u8g2_for_adafruit_gfx.print(message2);
+
+  display.refresh();
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
+}
+
+// ----------------------------------------------------- TIME
+void displayTime() {
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
+
+  uint16_t w = u8g2_for_adafruit_gfx.getUTF8Width(txt_hour);
+  uint16_t h = u8g2_for_adafruit_gfx.getFontAscent() - u8g2_for_adafruit_gfx.getFontDescent();
+
+  // Limpiar el área que ocupa txt_hour
+  display.fillRect(txt_x, txt_y - h, w, h, WHITE);
+
+  if (show_colon) {
+    txt_hour[2] = ':'; // Mostrar dos puntos
+  } else {
+    txt_hour[2] = ' '; // Ocultar dos puntos
+  }
+  show_colon = !show_colon; // Alternar el estado del parpadeo
+
+  // Dibujar txt_hour
+  u8g2_for_adafruit_gfx.setCursor(txt_x, txt_y);  //0,15
+  u8g2_for_adafruit_gfx.print(txt_hour);
+
+  int txt_x2 = txt_x + w + 15; // 15 es un margen
+
+  w = u8g2_for_adafruit_gfx.getUTF8Width(txt_day);
+
+  // Limpiar el área que ocupa txt_day
+  display.fillRect(txt_x2, txt_y - h, w, h + 4, WHITE);
+  u8g2_for_adafruit_gfx.setCursor(txt_x2, txt_y);
+  u8g2_for_adafruit_gfx.print(txt_day);
+
+  int txt_x3 = txt_x2 + w + 45; // 15 es un margen
+
+  w = u8g2_for_adafruit_gfx.getUTF8Width(txt_folio);
+
+  // Limpiar el área que ocupa txt_folio
+  display.fillRect(txt_x3, txt_y - h, w, h + 4, WHITE);
+  u8g2_for_adafruit_gfx.setCursor(txt_x3, txt_y);
+  u8g2_for_adafruit_gfx.print(txt_folio);
+
   display.refresh();
 }
 
-// Función para mostrar una imagen en el display
-void displayImage(const uint8_t* bitmap)
-{
+
+// ----------------------------------------------------- IMAGE
+void displayImage() {
   //display.clearDisplay();
-  //u8g2_for_adafruit_gfx.drawBitmap(0, 0, 128, 64, bitmap);
+  display.drawBitmap(0, 240 - 32, wifi_on_small, 32, 32, WHITE, BLACK);
   //display.refresh();
 }
