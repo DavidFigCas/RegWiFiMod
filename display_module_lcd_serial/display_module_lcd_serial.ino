@@ -56,10 +56,10 @@ Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
 U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
 UnixTime stamp(0);
 
-bool flag_img = true;
-bool flag_msg = false;
-bool flag_med = false;
-bool flag_time = true;
+static bool flag_img = true;
+static bool flag_msg = false;
+static bool flag_med = false;
+static bool flag_time = true;
 char txt[200];
 char txt_med_1[100];
 char txt_med_2[100];
@@ -69,8 +69,12 @@ char txt_hour[6] = "04:20";
 char txt_day[12] = "05/Sep/1988";
 char txt_folio[20] = "";
 int img_pos_x = 0;
-int img_pos_y = 240 - 32;
+int img_pos_y = 208;
+int img_size_x = 32;
+int img_size_y = 32;
 int light_state = 1;
+static int back = WHITE;
+static int front = BLACK;
 
 char txt_name[100] = "valve.raw";
 unsigned long lastTimeCheck = 0; // Variable para guardar el último tiempo de verificación
@@ -79,12 +83,10 @@ bool show_colon = true; // Variable para alternar el parpadeo
 int txt_size = 0;
 int txt_x = 0;
 int txt_y = 15;
-int pos_x, pos_y, back, front;
-int size_x, size_y = 32;
 
 char buffx[2000];
 StaticJsonDocument<2000> doc;
-//String jsonStr;
+String input;
 const char* aux_char;
 
 // --------------------------------------------------------------------- SETUP TECLADO
@@ -96,67 +98,6 @@ void setup() {
   digitalWrite(LED_2, light_state);
   Serial.begin(115200);
   Serial.println("Init Display");
-
-  if (!LittleFS.begin()) {
-    Serial.println("An error has occurred while mounting LittleFS");
-    return;
-  }
-  Serial.println("LittleFS mounted successfully");
-  teclado.setDebounceTime(10);
-
-  setup1();
-}
-
-// --------------------------------------------------------------------- LOOP TECLADO Y DISPLAY
-void loop() {
-  tecla = teclado.getKey();
-  if (tecla) {
-    // Crear JSON con la tecla presionada
-    StaticJsonDocument<200> jsonDoc;
-    jsonDoc["method"] = "key_press";
-    jsonDoc["params"]["key"] = String(tecla);
-    String jsonStr;
-    serializeJson(jsonDoc, jsonStr);
-    Serial.println(jsonStr);
-    Serial1.println(jsonStr);
-  }
-
-  // Leer y procesar datos del puerto serie principal PC
-  if (Serial.available() > 0) {
-    String input = Serial.readStringUntil('\n');
-    Serial.print("PC: ");
-    Serial.println(input);
-    get_cmd(input);
-  }
-
-  if (flag_med) {
-    displayMedidor(txt_med_1, txt_med_2);
-    flag_med = false;
-  }
-
-  if (flag_msg) {
-    displayMessage(txt);
-    flag_msg = false;
-  }
-
-  if (flag_time) {
-    displayTime();
-    flag_time = false;
-  }
-  if (flag_img) {
-    displayImage(img_pos_x, img_pos_y, txt_name, 32, 32, WHITE, BLACK); // Llama a la imagen desde LittleFS
-    flag_img = false;
-  }
-  // Llamar a displayTime cada segundo
-  if (millis() - lastTimeCheck >= 1000) {
-    displayTime();
-    lastTimeCheck = millis();
-  }
-}
-
-// ----------------------------------------------------------------- SETUP1 DISPLAY
-void setup1() {
-  delay(2000);
   Serial1.begin(115200); // Inicializar segundo puerto serie
   display.begin();
   display.clearDisplay();
@@ -173,18 +114,101 @@ void setup1() {
 
   display.refresh();
 
-  digitalWrite(25, LOW);
+  if (!LittleFS.begin()) {
+    Serial.println("An error has occurred while mounting LittleFS");
+    return;
+  }
+  Serial.println("LittleFS mounted successfully");
+
+
+}
+
+// --------------------------------------------------------------------- LOOP TECLADO Y DISPLAY
+void loop() {
+
+  // Leer y procesar datos del segundo puerto serie ENCODER
+  tecla = teclado.getKey();
+  if (tecla) {
+    // Crear JSON con la tecla presionada
+    StaticJsonDocument<200> jsonDoc;
+    jsonDoc["method"] = "key_press";
+    jsonDoc["params"]["key"] = String(tecla);
+    String jsonStr;
+    serializeJson(jsonDoc, jsonStr);
+    Serial.println(jsonStr);
+    Serial1.println(jsonStr);
+  }
+  if (Serial.available() > 0) {
+    input = Serial.readStringUntil('\n');
+    Serial.println(input);
+    get_cmd(input);
+  }
+
+  //String input = "";
+  if (flag_med) {
+    displayMedidor(txt_med_1, txt_med_2);
+    flag_med = false;
+  }
+
+  if (flag_msg) {
+    displayMessage(txt);
+    flag_msg = false;
+  }
+
+  if (flag_time) {
+    displayTime();
+    flag_time = false;
+  }
+  if (flag_img) {
+    displayImage(img_pos_x, img_pos_y, txt_name, img_size_x, img_size_y, back, front); // Llama a la imagen desde LittleFS
+    flag_img = false;
+  }
+  // Llamar a displayTime cada segundo
+  if (millis() - lastTimeCheck >= 1000) {
+    displayTime();
+    lastTimeCheck = millis();
+  }
+}
+
+// ----------------------------------------------------------------- SETUP1 DISPLAY
+void setup1() {
+  pinMode(LED_1, OUTPUT);
+  pinMode(LED_2, OUTPUT);
+  digitalWrite(LED_1, light_state);
+  digitalWrite(LED_2, light_state);
+  Serial.begin(115200);
+  Serial.println("Init Display");
+  Serial1.begin(115200); // Inicializar segundo puerto serie
+  display.begin();
+  display.clearDisplay();
+  u8g2_for_adafruit_gfx.begin(display);
+
+  u8g2_for_adafruit_gfx.setForegroundColor(BLACK); // apply Adafruit GFX color
+  u8g2_for_adafruit_gfx.setBackgroundColor(WHITE); // apply Adafruit GFX color
+
+  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
+  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
+  u8g2_for_adafruit_gfx.setFont(u8g2_font_profont22_tf);  // 14 pixels
+  u8g2_for_adafruit_gfx.setCursor(0, 90); // start writing at this position
+  u8g2_for_adafruit_gfx.print("MED1");
+
+  display.refresh();
+
+
+  teclado.setDebounceTime(10);
+
+  //setup1();
 }
 
 // ----------------------------------------------------- LOOP1  SERIAL DISPLAY
 void loop1() {
-  // Leer y procesar datos del segundo puerto serie ENCODER
-  String input = "";
-  while (Serial1.available() > 0) {
+
+  if (Serial1.available() > 0) {
     input = Serial1.readStringUntil('\n');
     Serial.println(input);
     get_cmd(input);
   }
+
 }
 
 // ----------------------------------------------------- MESSAGE
@@ -280,11 +304,18 @@ void displayImage(int pos_x, int pos_y, const char* filename, int size_x, int si
   file.read(image, sizeof(image));
   file.close();
 
-  //dispdisplay.clearDisplay();
+  //display.clearDisplay();
+  //display.refresh();
+  //display.drawBitmap(pos_x, pos_y, image, size_x, size_y, back, front);
+  //u8g2_for_adafruit_gfx.setForegroundColor(front); // apply Adafruit GFX color
+  //u8g2_for_adafruit_gfx.setBackgroundColor(back); // apply Adafruit GFX color
   display.drawBitmap(pos_x, pos_y, image, size_x, size_y, back, front);
+  delay(10);
   display.refresh();
+  //display.drawBitmap(pos_x, pos_y, image, size_x, size_y, back, front);
+
   Serial.println(filename);
-  Serial.println("IAMGEN DISPLAY");
+  Serial.println("DISPLAY");
 }
 
 
@@ -297,8 +328,8 @@ void get_cmd(String input)
   if (!error) {
     const char* method = doc["method"];
 
-    if (strcmp(method, "msg") == 0) {
-      flag_msg = true;
+    if (strcmp(method, "msg") == 0) 
+    {
       if (!doc["params"]["txt"].isNull()) {
         strncpy(txt, doc["params"]["txt"], sizeof(txt) - 1);
         txt[sizeof(txt) - 1] = '\0';
@@ -312,9 +343,11 @@ void get_cmd(String input)
       if (!doc["params"]["txt_y"].isNull()) {
         txt_y = doc["params"]["txt_y"];
       }
-    } else if (strcmp(method, "med") == 0) {
-      flag_med = true;
-
+      flag_msg = true;
+    } 
+    
+    if (strcmp(method, "med") == 0) 
+    {
       JsonObject params = doc["params"];
       int count = 1;
       for (JsonPair kv : params) {
@@ -331,10 +364,11 @@ void get_cmd(String input)
         }
         count++;
       }
+      flag_med = true;
     }
 
-    if (strcmp(method, "time") == 0) {
-      flag_time = true;
+    if (strcmp(method, "time") == 0) 
+    {
       if (!doc["params"]["hour"].isNull()) {
         strncpy(txt_hour, doc["params"]["hour"], sizeof(txt_hour) - 1);
         txt_hour[sizeof(txt_hour) - 1] = '\0'; // Asegurar que esté terminada en nulo
@@ -347,10 +381,12 @@ void get_cmd(String input)
         strncpy(txt_folio, doc["params"]["folio"], sizeof(txt_folio) - 1);
         txt_folio[sizeof(txt_folio) - 1] = '\0';
       }
+      flag_time = true;
     }
-    if (strcmp(method, "img") == 0) {
-      Serial.println("IAMGEN");
-      flag_img = true;
+    
+    if (strcmp(method, "img") == 0) 
+    {
+      serializeJson(doc,Serial);
       if (!doc["params"]["name"].isNull()) {
         strncpy(txt_name, doc["params"]["name"], sizeof(txt_name) - 1);
         txt_name[sizeof(txt_name) - 1] = '\0'; // Asegurar que esté terminada en nulo
@@ -361,8 +397,22 @@ void get_cmd(String input)
       if (!doc["params"]["pos_y"].isNull()) {
         img_pos_y = doc["params"]["pos_y"];
       }
+      if (!doc["params"]["size_x"].isNull()) {
+        img_size_x = doc["params"]["size_x"];
+      }
+      if (!doc["params"]["size_y"].isNull()) {
+        img_size_y = doc["params"]["size_y"];
+      }
+      if (!doc["params"]["back"].isNull()) {
+        back = doc["params"]["back"];
+      }
+      if (!doc["params"]["front"].isNull()) {
+        front = doc["params"]["front"];
+      }
+      flag_img = true;
     }
-    if (strcmp(method, "light") == 0) {
+    if (strcmp(method, "light") == 0) 
+    {
       if (!doc["params"]["state"].isNull()) {
         light_state = doc["params"]["state"];
         digitalWrite(LED_1, light_state);
