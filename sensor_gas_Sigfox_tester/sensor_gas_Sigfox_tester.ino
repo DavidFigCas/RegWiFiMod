@@ -18,22 +18,21 @@
 #define ENVIAR    2
 #define ESPERA    3
 
-#define MIN_TESLA   150     //abajo de ese valor de la suma de x y, se considera que no hay iman
+#define MIN_TESLA   0     //abajo de ese valor de la suma de x y, se considera que no hay iman
 
 unsigned int STATE = 0;
 uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  10; //  3600 TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  1;   //  600  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  1; //  3600*4 (4 horas) TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  1;   //  3600 (1 hora)  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
 int angulo, angulo_anterior;
 byte tipo_cambio;
 bool on_send = false;
-float x, y, z;
 
 Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 
@@ -45,7 +44,7 @@ void setup()
   RTC_init();
   resetRadio();
   initRadio();
-  initSensor();
+  //initSensor();
   //delay(100);
 
 
@@ -101,9 +100,9 @@ void loop()
 
     //----------------------------------------------------------- Envia los datos
     case ENVIAR:
-      resetRadio();
-      SendHEXdata();
-      sleepRadio();
+      //resetRadio();
+      //SendHEXdata();
+      //sleepRadio();
       STATE = ESPERA;
       break;
 
@@ -130,31 +129,26 @@ void SendHEXdata()
     on_send = true;
     tipo_cambio = 3;
   }
-  //Serial1.print("AT$RC\n");
-  //delay(50);
+  Serial1.print("AT$RC\n");
+  delay(50);
   //while (!Serial1.available());
-  //while (Serial1.available())
-  //{ // Verificar si hay datos disponibles en Serial1
-    //char data = Serial1.read(); // Leer un byte desde Serial1
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
     //mySerial.write(data); // Enviar ese byte a mySerial
     //response = true;
-  //}
-  //uint8_t txData[8];
+  }
+  uint8_t txData[8];
 
-  //int aux_angulo = angulo + (tipo_cambio * 4096);
+  int aux_angulo = angulo + (tipo_cambio * 4096);
 
   // x = (int16_t)posture[1] << 8 | posture[2];
   // y = (int16_t)posture[3] << 8 | posture[4];
 
-  //txData[0] = (aux_angulo >> 8) & 0xFF;
-  //txData[1] = aux_angulo & 0xFF;
-  //txData[2] = (bat >> 8) & 0xFF;
-  //txData[3] = bat  & 0xFF;
-  
-  //txData[4] = (x >> 8) & 0xFF;
-  //txData[5] = x & 0xFF;
-  //txData[6] = (y >> 8) & 0xFF;
-  //txData[7] = y & 0xFF;
+  txData[0] = (aux_angulo >> 8) & 0xFF;
+  txData[1] = aux_angulo & 0xFF;
+  txData[2] = (bat >> 8) & 0xFF;
+  txData[3] = bat  & 0xFF;
 
   /*int x_int = static_cast<int>(x);
     int y_int = static_cast<int>(y);
@@ -170,26 +164,15 @@ void SendHEXdata()
 
 
 
-  /*Serial1.print ("AT$SF=");
-    if (txData[0] < 0x10) Serial1.print("0");
-    Serial1.print(txData[0], HEX);
-    if (txData[1] < 0x10) Serial1.print("0");
-    Serial1.print(txData[1], HEX);
-    if (txData[2] < 0x10) Serial1.print("0");
-    Serial1.print(txData[2], HEX);
-    if (txData[3] < 0x10) Serial1.print("0");
-    Serial1.print(txData[3], HEX);
-    Serial1.print("\r");
-    delay(50);
-    //while (!Serial1.available());
-    while (Serial1.available())
-    { // Verificar si hay datos disponibles en Serial1
-    char data = Serial1.read(); // Leer un byte desde Serial1
-    //mySerial.write(data); // Enviar ese byte a mySerial
-    //response = true;
-    }
-  */
-
+  Serial1.print ("AT$SF=");
+  if (txData[0] < 0x10) Serial1.print("0");
+  Serial1.print(txData[0], HEX);
+  if (txData[1] < 0x10) Serial1.print("0");
+  Serial1.print(txData[1], HEX);
+  if (txData[2] < 0x10) Serial1.print("0");
+  Serial1.print(txData[2], HEX);
+  if (txData[3] < 0x10) Serial1.print("0");
+  Serial1.print(txData[3], HEX);
   //if (txData[4] < 0x10) Serial1.print("0");
   //Serial1.print(txData[4], HEX);
   //if (txData[5] < 0x10) Serial1.print("0");
@@ -198,9 +181,17 @@ void SendHEXdata()
   //Serial1.print(txData[6], HEX);
   //if (txData[7] < 0x10) Serial1.print("0");
   //Serial1.print(txData[7], HEX);
+  Serial1.print("\r");
 
-
-
+  delay(50);
+  //while (!Serial1.available());
+  while (Serial1.available())
+  { // Verificar si hay datos disponibles en Serial1
+    char data = Serial1.read(); // Leer un byte desde Serial1
+    //mySerial.write(data); // Enviar ese byte a mySerial
+    //response = true;
+  }
+  //mySerial.println();
 
 }
 
@@ -238,8 +229,7 @@ void espera_larga()
 void resetRadio()
 {
   Serial1.begin(9600 );
-  
-  /*bool response = false;
+  bool response = false;
   pinMode(RESET_RADIO, OUTPUT);
   digitalWrite(RESET_RADIO, HIGH);    // Reset Radio;
   delay(50);
@@ -265,14 +255,14 @@ void resetRadio()
 
   //return response;
   delay(50);
-  //initRadio();*/
+  //initRadio();
 }
 
 
 //-------------------------------------- sleepRadio
 void sleepRadio()
 {
-  /*//delay(120000);
+  //delay(120000);
   //mySerial.println("Radio Deep Sleep");
 
   // Radio a bajo consumo
@@ -287,13 +277,13 @@ void sleepRadio()
   //}
 
   //espera_larga();
-  //sleep_enable();*/
+  //sleep_enable();
 }
 
 //------------------------------------------ initRadio
 void initRadio()
 {
-  /*//Serial1.begin(9600 ); // para depurar
+  //Serial1.begin(9600 ); // para depurar
   //mySerial.print("ID:");
   Serial1.print("AT$I=10\r");
   delay(50);
@@ -313,7 +303,7 @@ void initRadio()
   //char data = Serial1.read(); // Leer un byte desde Serial1
   //mySerial.write(data); // Enviar ese byte a mySerial
   //}
-  //mySerial.println();*/
+  //mySerial.println();
 }
 
 
@@ -397,7 +387,7 @@ void configMLX()
 // ----------------------------------------------------------- leerSensor
 void leerSensor()
 {
-
+  float x, y, z;
 
   if (sensor.readData(&x, &y, &z))
   {
@@ -422,19 +412,33 @@ void leerSensor()
     angulo -= 360;
   }
 
-  if ((abs(x) + abs(y) + abs(z)) < MIN_TESLA)
+  if ((abs(x) + abs(y)) < MIN_TESLA)
   {
-  angulo = 0;
+    angulo = 0;
   }
 
+  /*char buffer[10];
+
+    itoa(x, buffer, 10);
+    Serial1.write("\n");
+    Serial1.write(buffer);
+    Serial1.write("\t");
+    itoa(y, buffer, 10);
+    Serial1.write("\t");
+    Serial1.write(buffer);
+    Serial1.write("\t");
+    itoa(angulo, buffer, 10);
+    Serial1.write("\t");
+    Serial1.write(buffer);
+    Serial1.write("\n");*/
+
+  //angulo = prom / 10;
   //Serial1.print("{\"x\":");
     Serial1.print(x, 4);
-    Serial1.print("\t");
     //Serial1.print(",\"y\":");
     Serial1.print(y, 4);
-    Serial1.print("\t");
     //Serial1.print(",\"z\":");
-    Serial1.print(z, 4);
+    //Serial1.print(z, 4);
     //Serial1.print(",\"r\":");
     //Serial1.print(rad, 4);
     //Serial1.print(",\"a\":");
@@ -442,7 +446,8 @@ void leerSensor()
     Serial1.println(angulo);
     //Serial1.print(",\"v\":");
     //Serial1.print(bat);
-    //Serial1.println("}");
+    //Serial1.print("}");
+    //Serial1.println();
   //delay(100); // Espera un segundo para la próxima lectura
 
 }
@@ -451,7 +456,7 @@ void leerSensor()
 // --------------------------------- enterSleep
 void enterSleep()
 {
-  power_all_disable();
+power_all_disable();
 
   //Serial1.end();
   //Wire.end();
