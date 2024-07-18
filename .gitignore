@@ -1,0 +1,43 @@
+# Global ignore rules
+
+# Ignore build artifacts and temporary files
+*.temp
+*.tmp
+*.swp
+*~
+*.log
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+.vscode/
+
+# Ignore node_modules for any Node.js related work
+node_modules/
+
+# Ignore Python virtual environments
+venv/
+__pycache__/
+
+# Ignore configuration files that might contain sensitive information
+*.env
+secrets.yml
+credentials.json
+
+# Ignore compiled files
+*.o
+*.a
+*.out
+*.hex
+*.bin
+*.elf
+
+# Ignore certificates and keys
+*.crt
+*.pem
+*.key
+
