@@ -57,9 +57,10 @@ Adafruit_SharpMem display(SHARP_SCK, SHARP_MOSI, SHARP_SS, 320, 240);
 U8G2_FOR_ADAFRUIT_GFX u8g2_for_adafruit_gfx;
 UnixTime stamp(0);
 
+static bool flag_clear = false;
 static bool flag_img = true;
 static bool flag_msg = false;
-static bool flag_med = false;
+static int flag_med = 0;
 static bool flag_time = true;
 char txt[200];
 char txt_med_1[100];
@@ -164,9 +165,9 @@ void loop() {
   }
 
   //String input = "";
-  if (flag_med) {
+  if (flag_med > 0) {
     displayMedidor(txt_med_1, txt_med_2);
-    flag_med = false;
+    flag_med--;
   }
 
   if (flag_msg) {
@@ -174,17 +175,24 @@ void loop() {
     flag_msg = false;
   }
 
-  if (flag_time) {
+  else if (flag_time) {
     displayTime();
     flag_time = false;
   }
-  if (flag_img) {
+  else if (flag_img) {
     displayImage(img_pos_x, img_pos_y, txt_name, img_size_x, img_size_y, back, front); // Llama a la imagen desde LittleFS
     flag_img = false;
   }
+  else if (flag_clear) {
+    display.clearDisplay();
+    display.refresh();
+    //watchdog_reboot(0, 0, 0); // Reinicia inmediatamente
+    flag_clear = false;
+  }
   // Llamar a displayTime cada segundo
   if (millis() - lastTimeCheck >= 1000) {
-    displayTime();
+    //displayTime();
+    flag_time = true;
     lastTimeCheck = millis();
   }
 }
@@ -250,6 +258,8 @@ void displayMedidor(const char* message1, const char* message2) {
   int cursorX1, cursorX2;
 
   display.fillRect(0, 22, screenWidth, 180, WHITE);
+  display.drawLine(0, 20, 320, 20, BLACK);  // Dibuja la línea horizontal
+  display.drawLine(0, 204, 320, 204, BLACK);  // Dibuja la línea horizontal
   u8g2_for_adafruit_gfx.setFont(u8g2_font_logisoso78_tn);
 
   int widthMessage1 = u8g2_for_adafruit_gfx.getUTF8Width(message1);
@@ -329,12 +339,12 @@ void displayImage(int pos_x, int pos_y, const char* filename, int size_x, int si
   //u8g2_for_adafruit_gfx.setForegroundColor(front); // apply Adafruit GFX color
   //u8g2_for_adafruit_gfx.setBackgroundColor(back); // apply Adafruit GFX color
   display.drawBitmap(pos_x, pos_y, image, size_x, size_y, back, front);
-  delay(10);
+  //delay(10);
   display.refresh();
   //display.drawBitmap(pos_x, pos_y, image, size_x, size_y, back, front);
 
   Serial.println(filename);
-  Serial.println("DISPLAY");
+  //Serial.println("DISPLAY");
 }
 
 
@@ -383,7 +393,7 @@ void get_cmd(String input)
         }
         count++;
       }
-      flag_med = true;
+      flag_med++;
     }
 
     if (strcmp(method, "time") == 0) 
@@ -436,6 +446,12 @@ void get_cmd(String input)
         light_state = doc["params"]["state"];
         digitalWrite(LED_1, light_state);
         digitalWrite(LED_2, light_state);
+      }
+    }
+    if (strcmp(method, "clear_screen") == 0) 
+    {
+      if (!doc["params"]["clear"].isNull()) {
+        flag_clear = doc["params"]["clear"];
       }
     }
   } else {
