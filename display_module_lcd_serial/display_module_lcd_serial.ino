@@ -23,6 +23,7 @@
 #define SHARP_SS    4
 #define LED_1       25
 #define LED_2       5
+#define RESET_SIG   6
 uint8_t pinesFilas[FILAS] = {11, 12, 13, 14};
 uint8_t pinesColumnas[COLUMNAS] = {18, 19, 20, 21};
 
@@ -91,14 +92,23 @@ const char* aux_char;
 
 // --------------------------------------------------------------------- SETUP TECLADO
 void setup() {
+  pinMode(RESET_SIG, OUTPUT);
+  digitalWrite(RESET_SIG, LOW);
+ 
   delay(2000);
+
+  digitalWrite(RESET_SIG, HIGH);
   pinMode(LED_1, OUTPUT);
   pinMode(LED_2, OUTPUT);
+  
   digitalWrite(LED_1, light_state);
   digitalWrite(LED_2, light_state);
   Serial.begin(115200);
   Serial.println("Init Display");
   Serial1.begin(115200); // Inicializar segundo puerto serie
+  while (!Serial1) {
+    ; // esperar a que el puerto serie se conecte
+  }
   display.begin();
   display.clearDisplay();
   u8g2_for_adafruit_gfx.begin(display);
@@ -119,6 +129,15 @@ void setup() {
     return;
   }
   Serial.println("LittleFS mounted successfully");
+
+  //Crear JSON con la tecla presionada
+    StaticJsonDocument<200> jsonDoc;
+    jsonDoc["method"] = "key_press";
+    jsonDoc["params"]["key"] = String('Z');
+    String jsonStr;
+    serializeJson(jsonDoc, jsonStr);
+    Serial.println(jsonStr);
+    Serial1.println(jsonStr);
 
 
 }
