@@ -172,7 +172,6 @@ void loop() {
   }
   // Llamar a displayTime cada segundo
   if (millis() - lastTimeCheck >= 1000) {
-    //displayTime();
     flag_time = true;
     lastTimeCheck = millis();
   }
@@ -202,7 +201,27 @@ void setup1() {
 
   display.refresh();
 
-
+  // {11, 12, 13, 14};
+  /*pinMode(11, INPUT_PULLUP);
+  pinMode(12, INPUT_PULLUP);
+  pinMode(13, INPUT_PULLUP);
+  pinMode(14, INPUT_PULLUP);
+  gpio_init(11);
+  gpio_set_dir(11, GPIO_IN);
+  // Habilitar la resistencia pull-up en el pin
+  gpio_pull_up(11);
+  gpio_init(12);
+  gpio_set_dir(12, GPIO_IN);
+  // Habilitar la resistencia pull-up en el pin
+  gpio_pull_up(12);
+  gpio_init(13);
+  gpio_set_dir(13, GPIO_IN);
+  // Habilitar la resistencia pull-up en el pin
+  gpio_pull_up(13);
+  gpio_init(14);
+  gpio_set_dir(14, GPIO_IN);
+  // Habilitar la resistencia pull-up en el pin
+  gpio_pull_up(14);*/
   teclado.setDebounceTime(10);
 
   //setup1();
