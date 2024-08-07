@@ -25,8 +25,8 @@ uint16_t bat; //voltaje de la batería (Vdd)
 volatile uint32_t countRTC_CLK = 0;
 volatile uint32_t count_DELTA = 0;
 
-volatile uint32_t sleepTime  =  1; //  3600*4 (4 horas) TIEMPO DORMIDO
-volatile uint32_t deltaTime  =  1;   //  3600 (1 hora)  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
+volatile uint32_t sleepTime  =  3600*4; //  3600*4 (4 horas) TIEMPO DORMIDO
+volatile uint32_t deltaTime  =  3600;   //  3600 (1 hora)  TIEMPO PARA LEER Y ENVIAR SI HAY CAMBIO BRUSCO
 int delta = 15;                         // GRADOS DE CAMBIO PARA QUE SEA BRUSCO
 
 const byte MLX90393_ADDRESS = 0x0F;
@@ -41,7 +41,7 @@ Adafruit_MLX90393 sensor = Adafruit_MLX90393();
 void setup()
 {
   //initExtras();
-  RTC_init();
+  //RTC_init();
   resetRadio();
   initRadio();
   //initSensor();
@@ -58,61 +58,10 @@ void setup()
 void loop()
 {
 
-  //espera_larga();
-
-  switch (STATE)
-  {
-    //----------------------------------------------------------- Leer sensores
-    case INICIO:
-      tipo_cambio = 0;
-      initSensor();
-
-      //bat = readSupplyVoltage() - 60; //error de 60 mV aprox.
-      //bat = analogRead(PIN_PB4);
-
-      configMLX();
-      leerSensor();
-
-
-      STATE = PROCESO;
-      break;
-
-
-    //----------------------------------------------------------- Procesa
-    case PROCESO:
-      if (((angulo - angulo_anterior) > delta))
-      {
-        tipo_cambio = 2;
-        STATE = ENVIAR;
-      }
-      else if ((angulo_anterior - angulo) > delta)
-      {
-        tipo_cambio = 1;
-        STATE = ENVIAR;
-      }
-      else if ((countRTC_CLK == 0) || (on_send == false))
-        STATE = ENVIAR;
-      else
-        STATE = ESPERA;
-
-      angulo_anterior = angulo;
-      break;
-
-    //----------------------------------------------------------- Envia los datos
-    case ENVIAR:
-      //resetRadio();
-      //SendHEXdata();
-      //sleepRadio();
-      STATE = ESPERA;
-      break;
-
-    //----------------------------------------------------------- Espera
-    case ESPERA:
-      espera_larga();
-      initExtras();
-      STATE = INICIO;
-      break;
-  }
+  initSensor();
+  configMLX();
+  leerSensor();
+  delay(1000);
 
 }
 
@@ -412,12 +361,12 @@ void leerSensor()
     angulo -= 360;
   }
 
-  if ((abs(x) + abs(y)) < MIN_TESLA)
-  {
-    angulo = 0;
-  }
+ // if ((abs(x) + abs(y)) < MIN_TESLA)
+ // {
+   // angulo = 0;
+  //}
 
-  /*char buffer[10];
+  char buffer[10];
 
     itoa(x, buffer, 10);
     Serial1.write("\n");
@@ -427,27 +376,30 @@ void leerSensor()
     Serial1.write("\t");
     Serial1.write(buffer);
     Serial1.write("\t");
+    itoa(z, buffer, 10);
+    Serial1.write("\t");
+    Serial1.write(buffer);
+    Serial1.write("\t");  
     itoa(angulo, buffer, 10);
     Serial1.write("\t");
     Serial1.write(buffer);
-    Serial1.write("\n");*/
+    Serial1.write("\n");
 
   //angulo = prom / 10;
-  //Serial1.print("{\"x\":");
+  /*Serial1.print("{\"x\":");
     Serial1.print(x, 4);
-    //Serial1.print(",\"y\":");
+    Serial1.print(",\"y\":");
     Serial1.print(y, 4);
-    //Serial1.print(",\"z\":");
-    //Serial1.print(z, 4);
+    Serial1.print(",\"z\":");
+    Serial1.print(z, 4);
     //Serial1.print(",\"r\":");
     //Serial1.print(rad, 4);
-    //Serial1.print(",\"a\":");
-    Serial1.print("\t");
-    Serial1.println(angulo);
+    Serial1.print(",\"a\":");
+    Serial1.print(angulo);
     //Serial1.print(",\"v\":");
     //Serial1.print(bat);
-    //Serial1.print("}");
-    //Serial1.println();
+    Serial1.print("}");
+    Serial1.println();*/
   //delay(100); // Espera un segundo para la próxima lectura
 
 }
